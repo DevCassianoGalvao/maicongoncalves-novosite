@@ -616,13 +616,16 @@ a[aria-label="Facebook"] .ic{transform:scale(1.14)}
   .steps{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:860px){
-  .hero{padding-top:104px}
+  .hero{padding-top:92px}
   .hero-in,.ph-hero--split .ph-hero-in{grid-template-columns:minmax(0,1fr)}
-  .hero-tx,.ph-hero-in>.stackv{justify-items:center;text-align:center}
+  .hero-tx,.ph-hero-in>.stackv{justify-items:center;text-align:center;gap:14px}
   .hero-tx>*,.ph-hero-in>.stackv>*{justify-self:center}
   .hero .lead,.ph-hero-in>.stackv .lead{margin-inline:auto}
-  .hero-cta,.ph-hero-in>.stackv .row{justify-content:center}
-  .stage{justify-self:center;width:min(86%,400px);margin-top:10px}
+  .hero-cta,.ph-hero-in>.stackv .row{justify-content:center;flex-wrap:nowrap;width:100%}
+  .hero-cta .btn,.ph-hero-in>.stackv .row .btn{flex:1 1 0;min-width:0;padding:6px 6px 6px 14px;font-size:13px;gap:6px}
+  .hero-cta .btn span:first-child,.ph-hero-in>.stackv .row .btn span:first-child{overflow:hidden;text-overflow:ellipsis}
+  .hero-cta .btn .btn-i,.ph-hero-in>.stackv .row .btn .btn-i{width:28px;height:28px;flex:none}
+  .stage{justify-self:center;width:min(80%,360px);margin-top:4px}
   .stk-2{left:-12%}
   .pauta,.pauta:nth-child(n){grid-column:1/-1}
   .progs{grid-template-columns:minmax(0,1fr)}
@@ -646,6 +649,7 @@ a[aria-label="Facebook"] .ic{transform:scale(1.14)}
 }
 @media (max-width:620px){
   body{font-size:15.5px}
+  .hero{padding-top:80px}
   .card,.news-list .card{grid-column:1/-1}
   .ft-grid{grid-template-columns:1fr}
   .ph img{box-shadow:0 26px 44px -22px rgba(2,11,31,.8),0 0 0 4px rgba(255,255,255,.96)}

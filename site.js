@@ -49,16 +49,11 @@
     doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && mm.classList.contains('is-open')) menu(false); });
   }
 
-  /* cabeçalho: some ao descer, volta ao subir */
-  var hd = $('#hd'), lastY = 0;
+  /* cabeçalho: fixo sempre, só muda o fundo ao descer */
+  var hd = $('#hd');
   addEventListener('scroll', function () {
     var y = scrollY;
-    if (hd) {
-      hd.classList.toggle('is-solid', y > 40);
-      hd.classList.toggle('is-hidden', y > 500 && y > lastY + 4);
-      if (y < lastY - 4) hd.classList.remove('is-hidden');
-    }
-    lastY = y;
+    if (hd) hd.classList.toggle('is-solid', y > 40);
     var p = $('#progress');
     if (p) { var h = html.scrollHeight - innerHeight; p.style.transform = 'scaleX(' + (h > 0 ? Math.min(1, y / h) : 0) + ')'; }
   }, { passive: true });
@@ -140,18 +135,6 @@
 
     if (!anim) return;
 
-    /* entradas no scroll */
-    $$('[data-split]').forEach(function (el) {
-      if (el.closest('.hero,.ph-hero,.art-hd')) return;
-      G.from(el.__words, { yPercent: 115, duration: 1, ease: 'expo.out', stagger: .05, scrollTrigger: { trigger: el, start: 'top 88%', once: true } });
-    });
-    $$('[data-r]').forEach(function (el) {
-      G.from(el, { y: 36, autoAlpha: 0, duration: .9, ease: 'power3.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true } });
-    });
-    $$('[data-rs]').forEach(function (g) {
-      G.from(g.children, { y: 34, autoAlpha: 0, scale: .97, duration: 1, ease: 'power3.out', stagger: .09, scrollTrigger: { trigger: g, start: 'top 84%', once: true }, clearProps: 'transform,opacity,visibility' });
-    });
-
     if (ST) {
       /* fotos do hero se afastam ao rolar */
       var stage = $('#stage');
@@ -175,8 +158,6 @@
         var end = +el.getAttribute('data-count'), pre = el.getAttribute('data-prefix') || '', o = { v: 0 };
         G.to(o, { v: end, duration: 1.6, ease: 'power2.out', scrollTrigger: { trigger: el, start: 'top 90%', once: true }, onUpdate: function () { el.textContent = pre + Math.round(o.v); } });
       });
-      var hub = $('.hub');
-      if (hub) G.from('.hub-n', { scale: 0, autoAlpha: 0, duration: .8, ease: 'back.out(2)', stagger: .15, scrollTrigger: { trigger: hub, start: 'top 80%', once: true } });
       addEventListener('load', function () { ST.refresh(); });
     }
 
