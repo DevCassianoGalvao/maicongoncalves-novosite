@@ -16,14 +16,14 @@ $share = rawurlencode($post['abs_url']);
 <?php if ($post['excerpt']): ?>
     <p class="art-sub" data-h><?= e($post['excerpt']) ?></p>
 <?php endif; ?>
-    <div class="art-meta" data-h><span>{{i:calendar-blank}}<time datetime="<?= e($post['iso']) ?>"><?= e(date_long($post['published_at'])) ?></time></span></div>
+    <div class="art-meta" data-h><span>{{i:user-circle}}<a href="/minha-historia/" rel="author">Vereador Maicon Gonçalves</a></span><span>{{i:calendar-blank}}<time datetime="<?= e(date('c', strtotime($post['published_at']))) ?>"><?= e(date_long($post['published_at'])) ?></time></span></div>
   </div></div></header>
 <?php if ($post['cover_url']): ?>
-<div class="art-cover"><div class="wrap"><figure data-h><img src="<?= e($post['cover_url']) ?>" alt="<?= e($post['cover_alt']) ?>"<?= $post['cover_w'] ? ' width="' . (int) $post['cover_w'] . '" height="' . (int) $post['cover_h'] . '"' : '' ?>></figure></div></div>
+<div class="art-cover"><div class="wrap"><figure data-h><img src="<?= e($post['cover_url']) ?>" alt="<?= e($post['cover_alt'] ?: $post['title']) ?>"<?= $post['cover_w'] ? ' width="' . (int) $post['cover_w'] . '" height="' . (int) $post['cover_h'] . '"' : '' ?>></figure></div></div>
 <?php endif; ?>
 <div class="wrap art-body<?= $post['cover_url'] ? '' : ' art-body--nocover' ?>">
   <article class="prose">
-<?= $post['content'] ?>
+<?= html_sanitize($post['content']) ?>
 
 <?php if ($post['gallery']): $n = count($post['gallery']); ?>
 <div class="gal"><?php foreach ($post['gallery'] as $k => $g): $src = url('/' . ltrim($g['src'], '/')); ?><button type="button" data-full="<?= e($src) ?>" aria-label="Ampliar foto <?= $k + 1 ?>"><img src="<?= e($src) ?>" alt="Foto <?= $k + 1 ?> de <?= $n ?>: <?= e($post['title']) ?>"<?= !empty($g['w']) ? ' width="' . (int) $g['w'] . '" height="' . (int) $g['h'] . '"' : '' ?> loading="lazy"></button><?php endforeach; ?></div>

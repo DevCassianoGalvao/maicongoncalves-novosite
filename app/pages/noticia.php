@@ -1,6 +1,6 @@
 <?php
 defined('APP') or exit;
-$meta = ($meta ?? []) + ['title' => 'Vereador Maicon Gonçalves', 'description' => ''];
+$meta = ($meta ?? []) + ['title' => 'Vereador Maicon Gonçalves', 'description' => '', 'page' => ''];
 ?><!doctype html>
 <html lang="pt-BR" data-base="<?= e(B) ?>">
 <head>
@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Vereador Maicon Gonçalves', 'description' 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=04a4f94e">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=3b757298">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -82,14 +82,14 @@ $share = rawurlencode($post['abs_url']);
 <?php if ($post['excerpt']): ?>
     <p class="art-sub" data-h><?= e($post['excerpt']) ?></p>
 <?php endif; ?>
-    <div class="art-meta" data-h><span><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"/></svg><time datetime="<?= e($post['iso']) ?>"><?= e(date_long($post['published_at'])) ?></time></span></div>
+    <div class="art-meta" data-h><span><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24ZM74.08,197.5a64,64,0,0,1,107.84,0,87.83,87.83,0,0,1-107.84,0ZM96,120a32,32,0,1,1,32,32A32,32,0,0,1,96,120Zm97.76,66.41a79.66,79.66,0,0,0-36.06-28.75,48,48,0,1,0-59.4,0,79.66,79.66,0,0,0-36.06,28.75,88,88,0,1,1,131.52,0Z"/></svg><a href="<?= B ?>/minha-historia/" rel="author">Vereador Maicon Gonçalves</a></span><span><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"/></svg><time datetime="<?= e(date('c', strtotime($post['published_at']))) ?>"><?= e(date_long($post['published_at'])) ?></time></span></div>
   </div></div></header>
 <?php if ($post['cover_url']): ?>
-<div class="art-cover"><div class="wrap"><figure data-h><img src="<?= e($post['cover_url']) ?>" alt="<?= e($post['cover_alt']) ?>"<?= $post['cover_w'] ? ' width="' . (int) $post['cover_w'] . '" height="' . (int) $post['cover_h'] . '"' : '' ?>></figure></div></div>
+<div class="art-cover"><div class="wrap"><figure data-h><img src="<?= e($post['cover_url']) ?>" alt="<?= e($post['cover_alt'] ?: $post['title']) ?>"<?= $post['cover_w'] ? ' width="' . (int) $post['cover_w'] . '" height="' . (int) $post['cover_h'] . '"' : '' ?>></figure></div></div>
 <?php endif; ?>
 <div class="wrap art-body<?= $post['cover_url'] ? '' : ' art-body--nocover' ?>">
   <article class="prose">
-<?= $post['content'] ?>
+<?= html_sanitize($post['content']) ?>
 
 <?php if ($post['gallery']): $n = count($post['gallery']); ?>
 <div class="gal"><?php foreach ($post['gallery'] as $k => $g): $src = url('/' . ltrim($g['src'], '/')); ?><button type="button" data-full="<?= e($src) ?>" aria-label="Ampliar foto <?= $k + 1 ?>"><img src="<?= e($src) ?>" alt="Foto <?= $k + 1 ?> de <?= $n ?>: <?= e($post['title']) ?>"<?= !empty($g['w']) ? ' width="' . (int) $g['w'] . '" height="' . (int) $g['h'] . '"' : '' ?> loading="lazy"></button><?php endforeach; ?></div>

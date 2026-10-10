@@ -62,13 +62,13 @@ HEAD, HEADER, FOOTER = read('_head.html'), read('_header.html'), read('_footer.h
 NAV = ('home', 'hist', 'fl', 'pen', 'news', 'cont')
 
 
-def page(name, title, desc, body, nav='', intro='false', ft_top=''):
+def page(name, title, desc, body, nav='', intro='false', ft_top='', kind=''):
     head = render(HEAD, intro=intro)
     header = render(HEADER, **{'on_' + k: ('is-on' if nav == k else '') for k in NAV})
     footer = render(FOOTER, ft_top=ft_top)
     doc = f'''<?php
 defined('APP') or exit;
-$meta = ($meta ?? []) + ['title' => {phps(title)}, 'description' => {phps(desc)}];
+$meta = ($meta ?? []) + ['title' => {phps(title)}, 'description' => {phps(desc)}, 'page' => {phps(kind)}];
 ?><!doctype html>
 <html lang="pt-BR" data-base="<?= e(B) ?>">
 <head>
@@ -92,14 +92,14 @@ for f in glob.glob(os.path.join(PAGES, '*.php')): os.remove(f)
 bairros = read('_bairros.txt').split('\n')
 bopts = '<option value="">' + e(bairros[0]) + '</option>' + ''.join(f'<option>{e(b)}</option>' for b in bairros[1:] if b.strip())
 T = 'Vereador Maicon Gonçalves'
-page('home', T, 'Ações, projetos e atividades do mandato do vereador Maicon Gonçalves em Nova Friburgo, RJ.', read('index.html'), nav='home', intro='true')
-page('historia', 'Minha história – ' + T, 'A caminhada que me trouxe até aqui.', read('minha-historia.html'), nav='hist', ft_top='on-white')
-page('fl360', 'FL360 – ' + T, 'Formação cidadã e compreensão da gestão pública.', read('fl360.html'), nav='fl', ft_top='on-white')
-page('peneira', 'Descobrindo talentos – ' + T, 'O maior movimento de captação do futebol de base da Serra Fluminense.', read('peneira.html'), nav='pen', ft_top='on-white')
-page('contato', 'Contato – ' + T, 'O mandato é construído com você.', read('contato.html').replace('{{bairros}}', bopts), nav='cont')
-page('noticias', 'Notícias – ' + T, 'Acompanhe as ações, projetos e conquistas do mandato.', read('noticias.html'), nav='news')
+page('home', 'Vereador Maicon Gonçalves | Nova Friburgo – RJ', 'Site oficial do vereador Maicon Gonçalves, de Nova Friburgo (RJ): ações do mandato, projetos de lei, programas FL360 e Peneira Descobrindo Talentos, notícias e contato direto com o gabinete.', read('index.html'), nav='home', intro='true', kind='home')
+page('historia', 'Minha história – Vereador Maicon Gonçalves | Nova Friburgo', 'Da escola pública à Câmara Municipal: a trajetória de Maicon Gonçalves, professor de Educação Física e vereador de Nova Friburgo (RJ) eleito em 2024.', read('minha-historia.html'), nav='hist', ft_top='on-white', kind='historia')
+page('fl360', 'FL360 – Friburgo Líder 360 | Vereador Maicon Gonçalves', 'FL360, programa de formação cidadã do vereador Maicon Gonçalves em Nova Friburgo: compreensão da gestão pública, das estruturas e dos serviços da cidade.', read('fl360.html'), nav='fl', ft_top='on-white', kind='fl360')
+page('peneira', 'Peneira Descobrindo Talentos – futebol de base em Nova Friburgo | Vereador Maicon Gonçalves', 'Peneira Descobrindo Talentos: o maior movimento de captação do futebol de base da Serra Fluminense, com avaliação de jovens atletas de Nova Friburgo e região.', read('peneira.html'), nav='pen', ft_top='on-white', kind='peneira')
+page('contato', 'Contato – fale com o Vereador Maicon Gonçalves | Nova Friburgo', 'Envie demandas do seu bairro, pedidos de fiscalização, sugestões e denúncias ao gabinete do vereador Maicon Gonçalves na Câmara Municipal de Nova Friburgo.', read('contato.html').replace('{{bairros}}', bopts), nav='cont', kind='contato')
+page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'Notícias do mandato do vereador Maicon Gonçalves: projetos, leis, fiscalização e ações na Câmara Municipal de Nova Friburgo (RJ).', read('noticias.html'), nav='news', kind='noticias')
 page('noticia', T, '', read('noticia.html'), nav='news')
-page('404', 'Página não encontrada – ' + T, '', read('404.html'))
+page('404', 'Página não encontrada – ' + T, '', read('404.html'), kind='404')
 
 for f in ('site.css', 'site.js'): shutil.copy(os.path.join(SRC, f), os.path.join(REPO, f))
 

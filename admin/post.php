@@ -48,7 +48,7 @@ if (is_post()) {
     $post['slug'] = slugify(in('slug') !== '' ? in('slug') : $post['title']);
     $post['excerpt'] = in('excerpt');
     $post['meta_description'] = in('meta_description');
-    $post['content'] = (string) ($_POST['content'] ?? '');
+    $post['content'] = html_sanitize((string) ($_POST['content'] ?? ''));
     $post['cover_alt'] = in('cover_alt');
     $post['category_id'] = (int) in('category_id') ?: null;
     $when = in('published_at');

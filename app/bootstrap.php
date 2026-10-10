@@ -123,5 +123,23 @@ function icon(string $name, string $weight = 'regular'): string
     return $map[$name . ($weight === 'regular' ? '' : '-' . $weight)] ?? '';
 }
 
+/* ---------- cabeçalhos de segurança (todas as respostas PHP) ---------- */
+if (PHP_SAPI !== 'cli' && !headers_sent()) {
+    header_remove('X-Powered-By');
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; " .
+        "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com data:; " .
+        "img-src 'self' data: blob: https:; connect-src 'self'; media-src 'self' https:; " .
+        "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.instagram.com https://www.facebook.com https://www.google.com; " .
+        "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'");
+    header('X-Content-Type-Options: nosniff');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(self), camera=(), microphone=(), payment=()');
+    if ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https')) {
+        header('Strict-Transport-Security: max-age=15552000');
+    }
+}
+
+require __DIR__ . '/sanitize.php';
 require __DIR__ . '/db.php';
 require __DIR__ . '/content.php';
+require __DIR__ . '/seo.php';

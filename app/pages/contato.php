@@ -1,6 +1,6 @@
 <?php
 defined('APP') or exit;
-$meta = ($meta ?? []) + ['title' => 'Contato – Vereador Maicon Gonçalves', 'description' => 'O mandato é construído com você.'];
+$meta = ($meta ?? []) + ['title' => 'Contato – fale com o Vereador Maicon Gonçalves | Nova Friburgo', 'description' => 'Envie demandas do seu bairro, pedidos de fiscalização, sugestões e denúncias ao gabinete do vereador Maicon Gonçalves na Câmara Municipal de Nova Friburgo.', 'page' => 'contato'];
 ?><!doctype html>
 <html lang="pt-BR" data-base="<?= e(B) ?>">
 <head>
@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Contato – Vereador Maicon Gonçalves', 'd
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=04a4f94e">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=3b757298">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>

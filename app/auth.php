@@ -9,6 +9,8 @@ function is_https(): bool
 function session_boot(): void
 {
     if (session_status() === PHP_SESSION_ACTIVE) return;
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.use_only_cookies', '1');
     session_name('mg_admin');
     session_set_cookie_params(['lifetime' => 0, 'path' => (B ?: '') . '/', 'httponly' => true, 'samesite' => 'Lax', 'secure' => is_https()]);
     session_start();
@@ -49,7 +51,8 @@ function login_blocked(): bool
 function attempt_login(string $email, string $password): bool
 {
     $row = q('SELECT id, password_hash FROM users WHERE email = ?', [mb_strtolower(trim($email))])->fetch();
-    if ($row && password_verify($password, $row['password_hash'])) {
+    $hash = $row['password_hash'] ?? '$2y$10$usesomesillystringfore7hnbRJHxXVLeakoG8K30oukPsA.ztMG'; // evita descobrir e-mails pelo tempo de resposta
+    if (password_verify($password, $hash) && $row) {
         session_boot();
         session_regenerate_id(true);
         $_SESSION = ['uid' => (int) $row['id'], 'seen' => time(), 'csrf' => bin2hex(random_bytes(32))];

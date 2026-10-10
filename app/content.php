@@ -121,7 +121,7 @@ function card_html(array $p, bool $big = false, bool $lazy = true): string
 function render_404(): void
 {
     http_response_code(404);
-    $meta = ['title' => 'Página não encontrada – Vereador Maicon Gonçalves', 'description' => 'A página que você procurou não existe ou mudou de endereço.', 'robots' => 'noindex'];
+    $meta = ['title' => 'Página não encontrada – Vereador Maicon Gonçalves', 'description' => 'A página que você procurou não existe ou mudou de endereço.', 'robots' => 'noindex', 'page' => '404'];
     include ROOT . '/app/pages/404.php';
     exit;
 }

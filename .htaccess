@@ -22,12 +22,24 @@ DirectoryIndex index.php index.html
   RewriteRule ^(app|storage|site|tools|content)(/|$) - [F,L]
   RewriteRule (^|/)\.(?!well-known/) - [F,L]
   RewriteRule ^(README\.md|vercel\.json|package(-lock)?\.json|composer\.(json|lock))$ - [F,L]
+  RewriteRule ^install/(schema\.sql|seed\.json)$ - [F,L]
 
   # Todo o resto que não for arquivo ou pasta real vai para o roteador (index.php)
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^ index.php [L]
 </IfModule>
+
+# Logs, backups e arquivos de configuração soltos nunca são servidos
+<FilesMatch "(^error_log$|\.(sql|log|bak|old|orig|swp|yml|yaml|ini|sh|md)$)">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
 
 <FilesMatch "^\.(env|git)">
   <IfModule mod_authz_core.c>

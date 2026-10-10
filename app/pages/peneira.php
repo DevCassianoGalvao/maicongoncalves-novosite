@@ -1,6 +1,6 @@
 <?php
 defined('APP') or exit;
-$meta = ($meta ?? []) + ['title' => 'Descobrindo talentos – Vereador Maicon Gonçalves', 'description' => 'O maior movimento de captação do futebol de base da Serra Fluminense.'];
+$meta = ($meta ?? []) + ['title' => 'Peneira Descobrindo Talentos – futebol de base em Nova Friburgo | Vereador Maicon Gonçalves', 'description' => 'Peneira Descobrindo Talentos: o maior movimento de captação do futebol de base da Serra Fluminense, com avaliação de jovens atletas de Nova Friburgo e região.', 'page' => 'peneira'];
 ?><!doctype html>
 <html lang="pt-BR" data-base="<?= e(B) ?>">
 <head>
@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Descobrindo talentos – Vereador Maicon Go
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=04a4f94e">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=3b757298">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>

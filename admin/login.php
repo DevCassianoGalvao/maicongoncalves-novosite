@@ -4,7 +4,7 @@ require ROOT . '/app/admin_ui.php';
 if (!is_file(ROOT . '/storage/installed.lock')) redirect(url('/install/'));
 
 $next = (string) ($_GET['next'] ?? '');
-if ($next === '' || strpos($next, '/') !== 0 || strpos($next, '//') === 0) $next = url('/admin/');
+if ($next === '' || $next[0] !== '/' || strpos($next, '//') === 0 || strpbrk($next, "\\\r\n") !== false) $next = url('/admin/');
 if (auth_user()) redirect($next);
 
 $error = '';

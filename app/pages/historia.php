@@ -1,6 +1,6 @@
 <?php
 defined('APP') or exit;
-$meta = ($meta ?? []) + ['title' => 'Minha história – Vereador Maicon Gonçalves', 'description' => 'A caminhada que me trouxe até aqui.'];
+$meta = ($meta ?? []) + ['title' => 'Minha história – Vereador Maicon Gonçalves | Nova Friburgo', 'description' => 'Da escola pública à Câmara Municipal: a trajetória de Maicon Gonçalves, professor de Educação Física e vereador de Nova Friburgo (RJ) eleito em 2024.', 'page' => 'historia'];
 ?><!doctype html>
 <html lang="pt-BR" data-base="<?= e(B) ?>">
 <head>
@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Minha história – Vereador Maicon Gonçal
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=04a4f94e">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=3b757298">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
