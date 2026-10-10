@@ -86,7 +86,8 @@ ul,ol{padding:0;list-style:none}
 .hd-soc{display:flex;gap:2px}
 .hd-soc a{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--on-dark-muted);transition:color .2s,background .2s,transform .3s var(--ease-out)}
 .hd-soc a:hover{color:#fff;background:rgba(255,255,255,.1);transform:translateY(-2px)}
-a[aria-label="Facebook"] .ic{transform:scale(1.14)}
+.hd-soc .ic{width:18px;height:18px}
+.mm-soc .ic{width:20px;height:20px}
 .hd-burger{display:none;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);place-items:center}
 .hd-burger .ic{width:20px;height:20px}
 .mm{position:fixed;inset:0;z-index:95;background:var(--grad-blue);color:#fff;display:grid;align-content:center;gap:26px;padding:90px var(--gut) 40px;
