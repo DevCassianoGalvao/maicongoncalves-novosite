@@ -123,7 +123,7 @@ $html = '<!doctype html><html><body style="margin:0;background:#F1F4F9;font-fami
   <div style="background:#fff;border-radius:0 0 16px 16px;padding:12px 22px 18px;color:#8A96B0;font-size:12px">Enviado pelo formulário de contato do site em ' . date('d/m/Y \à\s H:i') . '.</div>
 </div></body></html>';
 
-$subject = 'Novo contato vindo do site: ' . $d['assunto'] . ' – ' . $d['nome'];
+$subject = (string) env('MAIL_SUBJECT', 'Novo contato vindo do site do Vereador Maicon Gonçalves');
 [$sent, $info] = brevo_send($subject, $html, $text, $attachments);
 
 $logLine = sprintf('%s | %s | %s | %s | %s | fotos=%d | geo=%s', $sent ? 'ENVIADO ' . $info : 'FALHOU ' . $info, $d['nome'], $d['whatsapp'], $d['bairro'], $d['assunto'], count($attachments), $hasGeo ? $ll : '-');
