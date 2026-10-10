@@ -100,7 +100,7 @@ page('peneira', 'Peneira Descobrindo Talentos – futebol de base em Nova Fribur
 page('contato', 'Contato – fale com o Vereador Maicon Gonçalves | Nova Friburgo', 'Envie demandas do seu bairro, pedidos de fiscalização, sugestões e denúncias ao gabinete do vereador Maicon Gonçalves na Câmara Municipal de Nova Friburgo.', read('contato.html').replace('{{bairros}}', bopts), nav='cont', kind='contato')
 page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'Notícias do mandato do vereador Maicon Gonçalves: projetos, leis, fiscalização e ações na Câmara Municipal de Nova Friburgo (RJ).', read('noticias.html'), nav='news', kind='noticias')
 page('noticia', T, '', read('noticia.html'), nav='news')
-page('radar', 'Radar Friburgo – Vereador Maicon Gonçalves', '', read('radar.html').replace('{{bairros}}', bopts), nav='radar', kind='radar')
+page('radar', 'Radar Friburgo – Vereador Maicon Gonçalves', '', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top='on-white', kind='radar')
 page('404', 'Página não encontrada – ' + T, '', read('404.html'), kind='404')
 
 for f in ('site.css', 'site.js', 'radar.js'): shutil.copy(os.path.join(SRC, f), os.path.join(REPO, f))

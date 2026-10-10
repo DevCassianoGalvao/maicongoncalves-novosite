@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Radar Friburgo – Vereador Maicon Gonçalv
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=3251f69d">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=2696f7c1">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -80,11 +80,9 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <section class="ph-hero ph-hero--c rd-hero">
   <div class="hero-bg" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span></div>
   <div class="wrap ph-hero-in">
-<?php if (S('radar_public') !== '1'): ?>
-    <span class="chip" data-h><i></i>Prévia · só quem tem o link vê esta página</span>
-<?php endif; ?>
+    <span class="chip" data-h><i></i>Fiscalização cidadã em Nova Friburgo</span>
     <h1 class="h1" data-split><span class="scr"><?= e(S('radar_name')) ?><svg viewBox="0 0 300 26" preserveAspectRatio="none" aria-hidden="true"><path d="M4 15C62 4 124 6 182 10s86 0 114 3"/><path d="M34 22c58-6 132-6 214-2"/></svg><svg class="spark" viewBox="0 0 40 40" aria-hidden="true"><path d="M8 30L4 12"/><path d="M20 28l8-22"/><path d="M30 34l8-6"/></svg></span></h1>
-    <p class="lead" data-h>Viu um problema na sua rua? Tire uma foto e marque no mapa. O gabinete do vereador Maicon Gonçalves confere, leva à Prefeitura e acompanha aqui, à vista de todos, quanto tempo leva para ser resolvido.</p>
+    <p class="lead" data-h>Viu um problema na sua rua? Tire uma foto e marque no mapa. O&nbsp;gabinete do vereador Maicon Gonçalves confere, leva à Prefeitura e acompanha aqui, à vista de todos, quanto tempo leva para ser&nbsp;resolvido.</p>
     <div class="rd-stats" data-h>
       <div><b><?= count($waiting) ?></b><span>aguardando a Prefeitura</span></div>
       <div><b><?= count($solved) ?></b><span>resolvidos</span></div>
@@ -181,7 +179,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <script>window.RD_ITEMS = <?= json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
 <script src="<?= B ?>/radar.js?v=52d235e3" defer></script>
 
-<div class="ft-top " aria-hidden="true">
+<div class="ft-top on-white" aria-hidden="true">
   <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice">
     <circle class="mt-sun" cx="1080" cy="78" r="38" fill="url(#g-or)"/>
     <path d="M0 200V120l120-50 90 30 120-80 90 60 100-35 120 65 120-100 90 60 110-40 120 70 120-50 120 50 120-40v140z" fill="url(#g-m1)"/>
