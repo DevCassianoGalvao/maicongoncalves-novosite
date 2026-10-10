@@ -1,0 +1,67 @@
+<main>
+<section class="ph-hero ph-hero--split">
+  <div class="hero-bg" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span></div>
+  <div class="wrap ph-hero-in">
+    <div class="stackv">
+      <h1 class="h1" data-split><span class="scr">Contato{{scr}}</span></h1>
+      <p class="h3" data-h>O mandato é construído com você</p>
+      <p class="lead" data-h>A sua participação é essencial para melhorar Nova Friburgo. Se você tem uma solicitação, denúncia, sugestão ou quer acompanhar mais de perto o meu trabalho, me envie uma mensagem.</p>
+    </div>
+    <div class="hub hub--dark" aria-hidden="true" data-h style="width:min(100%,330px)">
+      <svg viewBox="0 0 100 100"><path class="hub-flow" vector-effect="non-scaling-stroke" d="M22 16Q42 26 50 50"/><path class="hub-flow" vector-effect="non-scaling-stroke" d="M84 32Q64 34 50 50"/><path class="hub-flow" vector-effect="non-scaling-stroke" d="M30 88Q36 66 50 50"/></svg>
+      <span class="hub-c">{{if:bank}}</span>
+      <span class="hub-n hub-n1">{{ib:lightbulb}}Sugestão</span>
+      <span class="hub-n hub-n2">{{ib:map-pin}}Demanda</span>
+      <span class="hub-n hub-n3">{{ib:megaphone}}Denúncia</span>
+    </div>
+  </div>
+</section>
+
+<section class="sec sec--mist">
+  <div class="wrap split split--top split--form">
+    <div class="help">
+      <div class="stackv">
+        <h2 class="h2" data-split>Como podemos ajudar?</h2>
+        <p class="lead" data-r>Estamos prontos para atender situações como:</p>
+      </div>
+      <ul class="ilist" data-rs>
+        <li>{{ib:house-line}}<span>Demandas do seu bairro</span></li>
+        <li>{{ib:magnifying-glass}}<span>Pedidos de fiscalização</span></li>
+        <li>{{ib:lightbulb}}<span>Sugestões de melhorias</span></li>
+        <li>{{ib:hand-heart}}<span>Apoio a projetos sociais</span></li>
+        <li>{{ib:chat-circle-dots}}<span>Dúvidas sobre ações do mandato</span></li>
+      </ul>
+      <p class="sub-h" data-r>Sua mensagem faz a diferença.</p>
+      <div class="wa-card" data-r>
+        <h3 class="h3">Atendimento mais rápido?</h3>
+        <p>Se preferir, fale direto com o meu time pelo WhatsApp.</p>
+        <a class="btn btn--wa" href="https://wa.me/5522998012278?text=Ol%C3%A1%20Vereador%20Maicon%20Gon%C3%A7alves!%20Gostaria%20de%20falar%20com%20voc%C3%AA" target="_blank" rel="noopener" data-mag><span>Fale conosco</span><span class="btn-i">{{i:whatsapp-logo}}{{i:whatsapp-logo}}</span></a>
+      </div>
+      <ul class="addr" data-r>
+        <li>{{ib:map-pin}}<span>R. Farinha Filho, 50 - Centro Nova Friburgo - RJ, 28610-280</span></li>
+        <li>{{ib:door-open}}<span>Gabinete 20 - Câmara Municipal</span></li>
+        <li>{{ib:envelope-simple}}<span><span class="sel">vereadormaicongoncalves@gmail.com</span> <button class="copy" data-copy="vereadormaicongoncalves@gmail.com" aria-label="Copiar e-mail">{{i:copy}}</button></span></li>
+      </ul>
+    </div>
+
+    <form class="form" id="form-contato" novalidate data-r>
+      <h2 class="h3">Envie sua mensagem</h2>
+      <div class="fd fd--full"><label for="f-nome">Nome</label><input id="f-nome" name="nome" type="text" placeholder="Digite seu nome" autocomplete="name" required></div>
+      <div class="fd"><label for="f-nasc">Data de nascimento</label><input id="f-nasc" name="nascimento" type="text" inputmode="numeric" placeholder="Digite aqui" autocomplete="bday"></div>
+      <div class="fd"><label for="f-num">Número</label><input id="f-num" name="whatsapp" type="tel" placeholder="Telefone/WhatsApp" autocomplete="tel" required></div>
+      <div class="fd"><label for="f-bairro">Bairro / Localidade</label><select id="f-bairro" name="bairro" required>{{bairros}}</select></div>
+      <div class="fd"><label for="f-rua">Rua</label><input id="f-rua" name="endereco" type="text" placeholder="Endereço completo" autocomplete="street-address">
+        <button type="button" class="geo" id="geo">{{ib:navigation-arrow}}Usar minha localização atual</button></div>
+      <div class="fd fd--full"><label for="f-assunto">Assunto</label><select id="f-assunto" name="assunto" required>
+        <option value="">Selecione o assunto</option><option>Demanda do bairro</option><option>Pedido de fiscalização</option><option>Sugestão de melhoria</option><option>Apoio a projeto social</option><option>Dúvida sobre o mandato</option><option>Outro assunto</option></select></div>
+      <div class="fd fd--full"><label for="f-fotos">Envie fotos do local</label><input id="f-fotos" name="fotos" type="file" accept="image/*" multiple></div>
+      <div class="fd fd--full"><label for="f-msg">Sua mensagem</label><textarea id="f-msg" name="mensagem" placeholder="Digite aqui" required></textarea></div>
+      <p class="form-msg" id="form-msg" role="status" hidden></p>
+      <div class="form-ft">
+        <button class="btn btn--orange" type="submit" data-mag><span>ENVIAR</span><span class="btn-i">{{ib:paper-plane-tilt}}{{ib:paper-plane-tilt}}</span></button>
+        <p>Meu time vai analisar sua demanda e retornar o mais breve possível.</p>
+      </div>
+    </form>
+  </div>
+</section>
+</main>
