@@ -41,7 +41,7 @@ admin_head('Atendimentos', 'tickets');
 ?>
 <div class="top">
   <div><h1>Atendimentos</h1><p>Demandas do <?= e(S('radar_name')) ?> e mensagens do formulário de contato.</p></div>
-  <a class="btn btn--ghost" href="<?= e(url('/demandas/')) ?>" target="_blank" rel="noopener"><?= icon('map-trifold') ?>Ver o mapa</a>
+  <a class="btn btn--ghost" href="<?= e(url('/radarfriburgo/')) ?>" target="_blank" rel="noopener"><?= icon('map-trifold') ?>Ver o mapa</a>
 </div>
 <nav class="tabs" aria-label="Situação">
 <?php foreach ($tabs as $k => [$label, $n]): ?>

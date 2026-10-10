@@ -62,7 +62,7 @@ admin_head('Configurações', 'settings');
     <h2>Mapa de demandas</h2>
     <div class="grid g2">
       <div class="fd"><label for="radar_name">Nome da ferramenta</label><input type="text" id="radar_name" name="radar_name" value="<?= e($v['radar_name']) ?>" maxlength="40"></div>
-      <div class="fd"><span class="lbl">Endereço</span><p style="margin:10px 0 0"><a href="<?= e(url('/demandas/')) ?>" target="_blank" rel="noopener"><?= e(abs_url('/demandas/')) ?></a></p></div>
+      <div class="fd"><span class="lbl">Endereço</span><p style="margin:10px 0 0"><a href="<?= e(url('/radarfriburgo/')) ?>" target="_blank" rel="noopener"><?= e(abs_url('/radarfriburgo/')) ?></a></p></div>
     </div>
     <label class="check"><input type="checkbox" name="radar_public" value="1"<?= $v['radar_public'] === '1' ? ' checked' : '' ?>> Publicar: mostrar no menu do site e liberar para o Google</label>
     <p class="hint muted small" style="margin:6px 0 0">Desmarcado, a página funciona só para quem tem o link (bom para aprovar antes).</p>

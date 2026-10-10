@@ -26,13 +26,13 @@ $pages = [
     'descobrindo-talentos' => 'peneira',
     'contato'              => 'contato',
     'noticias'             => 'noticias',
-    'demandas'             => 'radar',
+    'radarfriburgo'        => 'radar',
 ];
 $legacy = [ // endereços antigos ou alternativos -> endereço oficial
     'index.html' => '/', 'index.php' => '/', 'home' => '/',
     'minha-historia.html' => '/minha-historia/', 'fl360.html' => '/fl360/',
     'peneira' => '/descobrindo-talentos/', 'peneira.html' => '/descobrindo-talentos/',
-    'contato.html' => '/contato/', 'noticias.html' => '/noticias/', 'blog' => '/noticias/', 'feed' => '/noticias/',
+    'contato.html' => '/contato/', 'demandas' => '/radarfriburgo/', 'radar' => '/radarfriburgo/', 'noticias.html' => '/noticias/', 'blog' => '/noticias/', 'feed' => '/noticias/',
 ];
 
 if (isset($legacy[$slug])) redirect(url($legacy[$slug]) . $qs, 301);
@@ -46,7 +46,7 @@ if ($slug === 'llms.txt') { require ROOT . '/app/llms.php'; exit; }
 if ($slug !== '' && substr($path, -1) !== '/' && strpos($slug, '.') === false) redirect(url('/' . $slug . '/') . $qs, 301);
 
 $meta = [];
-if ($slug === 'demandas') {
+if ($slug === 'radarfriburgo') {
     require ROOT . '/app/tickets.php';
     $meta = [
         'title' => S('radar_name') . ' – registre problemas da cidade | Vereador Maicon Gonçalves',
