@@ -304,7 +304,7 @@ a[aria-label="Facebook"] .ic{transform:scale(1.14)}
 /* ---------- rodapé ---------- */
 .ft-top{background:var(--mist);line-height:0;position:relative;margin-bottom:-1px}
 .ft-top.on-white{background:#fff}
-.ft-top svg{display:block;width:100%;height:clamp(90px,12vw,170px);margin-bottom:-2px}
+.ft-top svg{display:block;width:100%;height:auto;aspect-ratio:1440/200;min-height:84px;margin-bottom:-2px}
 .ft{background:linear-gradient(180deg,#041C4B 0%,#031436 55%,#020B1F 100%);color:#fff;padding-block:clamp(26px,3.6vw,48px) 22px;position:relative;overflow:hidden}
 .ft::before{content:"";position:absolute;inset:0;background:radial-gradient(46% 60% at 88% 100%,rgba(1,68,201,.4),transparent 70%),radial-gradient(40% 50% at 0% 100%,rgba(1,68,201,.25),transparent 70%);pointer-events:none}
 .ft .wrap{position:relative}
