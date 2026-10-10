@@ -1,0 +1,8 @@
+---
+# Usado pelo cPanel > Git Version Control > "Deploy HEAD Commit".
+# Copia o site para public_html SEM apagar nada que já esteja lá
+# (plataformafl360, uploads, .env etc. ficam intactos).
+deployment:
+  tasks:
+    - export DEPLOYPATH=$HOME/public_html/
+    - /bin/rsync -a --exclude=.git --exclude=.cpanel.yml --exclude=.env ./ $DEPLOYPATH
