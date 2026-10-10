@@ -618,6 +618,10 @@ a[aria-label="Facebook"] .ic{transform:scale(1.14)}
 @media (max-width:860px){
   .hero{padding-top:104px}
   .hero-in,.ph-hero--split .ph-hero-in{grid-template-columns:minmax(0,1fr)}
+  .hero-tx,.ph-hero-in>.stackv{justify-items:center;text-align:center}
+  .hero-tx>*,.ph-hero-in>.stackv>*{justify-self:center}
+  .hero .lead,.ph-hero-in>.stackv .lead{margin-inline:auto}
+  .hero-cta,.ph-hero-in>.stackv .row{justify-content:center}
   .stage{justify-self:center;width:min(86%,400px);margin-top:10px}
   .stk-2{left:-12%}
   .pauta,.pauta:nth-child(n){grid-column:1/-1}
