@@ -2,7 +2,9 @@
 # cPanel > Git Version Control > "Deploy HEAD Commit".
 # Copia o site para a pasta do domínio SEM apagar nada que já esteja lá
 # (plataformafl360, backups, biosite, uploads, .env etc. ficam intactos).
+# Permissões fixas (pastas 755, arquivos 644) para o servidor web conseguir ler.
 deployment:
   tasks:
     - export DEPLOYPATH=$HOME/maicongoncalves.com.br/
-    - /bin/rsync -a --exclude=.git --exclude=.cpanel.yml --exclude=.env ./ $DEPLOYPATH
+    - /bin/rsync -rlt --chmod=D755,F644 --exclude=.git --exclude=.cpanel.yml --exclude=.env ./ $DEPLOYPATH
+    - /bin/chmod 755 $DEPLOYPATH
