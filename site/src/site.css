@@ -627,6 +627,11 @@ a[aria-label="Facebook"] .ic{transform:scale(1.14)}
   .hero-cta .btn span:first-child{overflow:hidden;text-overflow:ellipsis}
   .hero-cta .btn .btn-i{width:28px;height:28px;flex:none}
   .ph-hero-in>.stackv .row .btn,.ph-hero-in>.stackv .row .soon{flex:1 1 100%;justify-content:center}
+  .sec-hd .h2,.join .h2{max-width:none}
+  .cta-bar{justify-content:center;text-align:center;padding:16px}
+  .cta-bar p{flex:1 1 100%}
+  .search{flex:1 1 100%;max-width:none}
+  .filters{justify-content:center;width:100%}
   .stage{justify-self:center;width:min(80%,360px);margin-top:4px}
   .stk-2{left:-12%;top:-2%}
   .pauta,.pauta:nth-child(n){grid-column:1/-1}
