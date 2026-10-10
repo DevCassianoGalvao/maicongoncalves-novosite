@@ -56,9 +56,13 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
     <div class="side-ft">Conectado como<b><?= e($u['name'] ?? '') ?></b></div>
   </aside>
   <main class="main">
-<?php foreach (flashes() as [$type, $msg]): ?>
-    <div class="alert alert--<?= e($type) ?>"><?= icon($type === 'ok' ? 'check-circle' : 'warning-circle') ?><span><?= e($msg) ?></span></div>
-<?php endforeach;
+<?php $fl = flashes(); if ($fl): ?>
+    <div class="toasts" role="status" aria-live="polite">
+<?php foreach ($fl as [$type, $msg]): ?>
+      <div class="toast toast--<?= e($type) ?>"><?= icon($type === 'ok' ? 'check-circle' : 'warning-circle') ?><span><?= e($msg) ?></span><button type="button" aria-label="Fechar">&times;</button></div>
+<?php endforeach; ?>
+    </div>
+<?php endif;
 }
 
 function admin_foot(string $extra = ''): void
@@ -72,7 +76,24 @@ function admin_foot(string $extra = ''): void
   if (m) m.addEventListener('click', function (ev) { ev.stopPropagation(); s.classList.toggle('open'); });
   document.addEventListener('click', function (ev) { if (s.classList.contains('open') && !s.contains(ev.target)) s.classList.remove('open'); });
   document.querySelectorAll('[data-confirm]').forEach(function (f) {
-    f.addEventListener('submit', function (ev) { if (!confirm(f.getAttribute('data-confirm'))) ev.preventDefault(); });
+    f.addEventListener('submit', function (ev) { if (!confirm(f.getAttribute('data-confirm'))) { ev.preventDefault(); ev.stopImmediatePropagation(); } });
+  });
+  // avisos somem sozinhos (erros ficam até fechar)
+  document.querySelectorAll('.toast').forEach(function (t) {
+    var close = function () { t.classList.add('out'); setTimeout(function () { t.remove(); }, 300); };
+    t.querySelector('button').addEventListener('click', close);
+    if (t.classList.contains('toast--ok')) setTimeout(close, 5000);
+  });
+  // botão mostra "Salvando…" enquanto envia
+  document.querySelectorAll('form[method="post"]').forEach(function (f) {
+    f.addEventListener('submit', function (ev) {
+      if (ev.defaultPrevented) return;
+      var b = ev.submitter || f.querySelector('button[type="submit"], button:not([type])');
+      if (!b || b.classList.contains('link-btn')) return;
+      b.classList.add('is-saving'); // não usa "disabled" para o valor do botão continuar indo no envio
+      var label = b.lastChild && b.lastChild.nodeType === 3 ? b.lastChild : null;
+      if (label) label.textContent = /exclu/i.test(label.textContent) ? 'Excluindo…' : /public|atualiz/i.test(label.textContent) ? 'Publicando…' : 'Salvando…';
+    });
   });
 })();
 </script>
