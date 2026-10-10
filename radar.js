@@ -46,6 +46,8 @@
     }) : L.layerGroup();
     map.addLayer(cluster);
     var markers = [], active = null, st = '', cat = '';
+    var canHover = matchMedia('(hover: hover) and (pointer: fine)').matches;
+    var mobile = function () { return matchMedia('(max-width: 860px)').matches; };
 
     var renderCard = function (t) {
       var ph = t.photos || [];
@@ -67,26 +69,31 @@
           (t.after ? '<div class="rd-after"><small>Como ficou</small><button type="button" data-zoom="' + esc(t.after.url) + '"><img src="' + esc(t.after.url) + '" alt="Foto depois da solução"></button></div>' : '') +
         '</div>';
       card.hidden = false;
+      doc.documentElement.classList.toggle('rd-sheet-open', mobile());
       card.classList.toggle('is-ok', t.status === 'resolvido');
       card.scrollTop = 0;
     };
-    var closeCard = function () { card.hidden = true; if (active) active.getElement() && active.getElement().classList.remove('is-on'); active = null; };
+    var closeCard = function () { card.hidden = true; doc.documentElement.classList.remove('rd-sheet-open'); if (active) active.getElement() && active.getElement().classList.remove('is-on'); active = null; };
     card.addEventListener('click', function (e) {
       var z = e.target.closest('[data-zoom]'); if (z) { zoom(z.getAttribute('data-zoom')); return; }
       if (e.target.closest('.rd-card-x')) closeCard();
     });
     doc.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !card.hidden) closeCard(); });
+    map.on('click', function () { if (!card.hidden) closeCard(); });
+    // no celular o card é uma gaveta fixa: fecha quando o mapa sai da tela
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { if (!es[0].isIntersecting && mobile() && !card.hidden) closeCard(); }, { threshold: 0.05 }).observe(mapEl);
 
     ITEMS.forEach(function (t) {
-      var m = L.marker([t.lat, t.lng], { icon: pinIcon(t.status), title: t.catLabel + (t.place ? ' – ' + t.place : ''), keyboard: true });
+      var m = L.marker([t.lat, t.lng], { icon: pinIcon(t.status), keyboard: true, alt: t.catLabel + (t.place ? ' – ' + t.place : '') });
       m.item = t;
       var thumb = t.photos && t.photos[0] ? '<img src="' + esc(t.photos[0].url) + '" alt="">' : '';
-      m.bindTooltip('<div class="rd-tip">' + thumb + '<div><b>' + esc(t.catLabel) + '</b><span>' + (t.status === 'resolvido' ? 'Resolvido em ' + t.days + (t.days === 1 ? ' dia' : ' dias') : 'Aguardando há <i data-since="' + esc(t.publishedAt) + '">' + span(t.publishedAt) + '</i>') + '</span></div></div>', { direction: 'top', opacity: 1, className: 'rd-tipbox' });
+      if (canHover) m.bindTooltip('<div class="rd-tip">' + thumb + '<div><b>' + esc(t.catLabel) + '</b><span>' + (t.status === 'resolvido' ? 'Resolvido em ' + t.days + (t.days === 1 ? ' dia' : ' dias') : 'Aguardando há <em data-since="' + esc(t.publishedAt) + '">' + span(t.publishedAt) + '</em>') + '</span></div></div>', { direction: 'top', opacity: 1, className: 'rd-tipbox' });
       m.on('click', function () {
+        m.closeTooltip && m.closeTooltip();
         if (active && active.getElement()) active.getElement().classList.remove('is-on');
         active = m; if (m.getElement()) m.getElement().classList.add('is-on');
         renderCard(t);
-        if (matchMedia('(max-width: 860px)').matches) map.panTo([t.lat, t.lng]);
+        if (mobile()) map.panTo([t.lat, t.lng]);
       });
       markers.push(m);
     });

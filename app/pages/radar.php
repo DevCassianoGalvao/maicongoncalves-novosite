@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Radar Friburgo – Vereador Maicon Gonçalv
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=157dd52b">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=3251f69d">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -179,7 +179,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>window.RD_ITEMS = <?= json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
-<script src="<?= B ?>/radar.js?v=4de11cc3" defer></script>
+<script src="<?= B ?>/radar.js?v=52d235e3" defer></script>
 
 <div class="ft-top " aria-hidden="true">
   <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice">
