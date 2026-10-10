@@ -68,14 +68,52 @@ $d['photos'] = $photos;
 $id = ticket_create($d);
 ticket_note($id, 'Demanda registrada pelo site (' . S('radar_name') . ').');
 
-// aviso rápido para o gabinete (sem dados sensíveis no assunto)
+// e-mail para o gabinete: "Novo atendimento no Radar Friburgo", com as fotos em anexo
 $cat = TICKET_CATS[$d['category']];
+$code = ticket_code($id);
 $link = abs_url('/admin/atendimento.php?id=' . $id);
-[$sent] = brevo_send(
-    'Nova demanda no ' . S('radar_name') . ': ' . $cat . ($d['neighborhood'] ? ' – ' . $d['neighborhood'] : ''),
-    '<div style="font-family:Arial,sans-serif;font-size:15px;color:#0F1B3A"><p><b>Nova demanda ' . ticket_code($id) . '</b> — ' . e($cat) . '</p><p>' . e($d['address'] ?: $d['geo_address']) . ' ' . e($d['neighborhood']) . '</p><p>' . nl2br(e($d['description'])) . '</p><p><a href="' . e($link) . '" style="display:inline-block;padding:10px 16px;border-radius:999px;background:#FE6500;color:#fff;text-decoration:none;font-weight:700">Abrir no painel</a></p></div>',
-    "Nova demanda " . ticket_code($id) . " — $cat\n" . $d['description'] . "\nAbrir no painel: $link"
-);
-app_log('demandas', ticket_code($id) . ' | ' . $cat . ' | aviso por e-mail ' . ($sent ? 'enviado' : 'falhou'));
+$ll = sprintf('%.6f,%.6f', $d['lat'], $d['lng']);
+$gmaps = 'https://www.google.com/maps/search/?api=1&query=' . $ll;
+$waNum = strlen($digits) <= 11 ? '55' . $digits : $digits;
+$attach = [];
+foreach ($files['tmp_name'] ?? [] as $i => $tmp) {
+    if (count($attach) >= 3 || ($files['error'][$i] ?? 1) !== UPLOAD_ERR_OK) continue;
+    try { $attach[] = ['name' => sprintf('foto-%d-%s.jpg', count($attach) + 1, ltrim($code, '#')), 'content' => img_to_jpeg($tmp)]; } catch (Throwable $ex) {}
+}
+$place = trim($d['address'] . ($d['neighborhood'] ? ($d['address'] ? ' – ' : '') . $d['neighborhood'] : ''));
+$rows = [
+    ['Protocolo', $code],
+    ['Tipo', e($cat)],
+    ['Nome', e($d['name'] ?: 'Não informado') . ($anon ? ' <span style="color:#9A5B00">(não quer o nome no mapa)</span>' : '')],
+    ['WhatsApp', e($d['phone']) . ' &nbsp;<a href="https://wa.me/' . $waNum . '" style="color:#0144C9">abrir conversa</a>'],
+    ['Local', ($place !== '' ? e($place) . '<br>' : '') . ($d['geo_address'] !== '' ? '<span style="color:#5B6884">' . e($d['geo_address']) . '</span><br>' : '') .
+        '<a href="' . e($gmaps) . '" style="color:#0144C9">Ver no Google Maps</a>'],
+    ['Fotos', count($attach) . ' em anexo'],
+];
+$tr = '';
+foreach ($rows as [$k, $v]) {
+    $tr .= '<tr><td style="padding:10px 14px;border-bottom:1px solid #E3EAF4;color:#5B6884;font-size:13px;font-weight:700;white-space:nowrap;vertical-align:top">' . $k .
+           '</td><td style="padding:10px 14px;border-bottom:1px solid #E3EAF4;color:#0F1B3A;font-size:15px">' . $v . '</td></tr>';
+}
+$html = '<!doctype html><html><body style="margin:0;background:#F1F4F9;font-family:Arial,Helvetica,sans-serif">
+<div style="max-width:640px;margin:0 auto;padding:24px 14px">
+  <div style="background:#031436;color:#fff;border-radius:16px 16px 0 0;padding:20px 22px">
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#FF8A3D;font-weight:700">Novo atendimento no ' . e(S('radar_name')) . '</div>
+    <div style="font-size:20px;font-weight:700;margin-top:6px">' . e($cat) . ($d['neighborhood'] ? ' — ' . e($d['neighborhood']) : '') . '</div>
+  </div>
+  <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%;background:#fff;border-collapse:collapse">' . $tr . '</table>
+  <div style="background:#fff;padding:18px 22px;border-top:4px solid #FE6500">
+    <div style="font-size:13px;font-weight:700;color:#5B6884;margin-bottom:6px">O que está acontecendo</div>
+    <div style="font-size:15px;line-height:1.6;color:#0F1B3A">' . nl2br(e($d['description'])) . '</div>
+  </div>
+  <div style="background:#fff;border-radius:0 0 16px 16px;padding:6px 22px 22px">
+    <a href="' . e($link) . '" style="display:inline-block;padding:12px 20px;border-radius:999px;background:#FE6500;color:#fff;text-decoration:none;font-weight:700">Abrir no painel</a>
+    <p style="color:#8A96B0;font-size:12px;margin:14px 0 0">Registrado em ' . date('d/m/Y \à\s H:i') . '. Só aparece no mapa depois que o gabinete aprovar.</p>
+  </div>
+</div></body></html>';
+$text = "NOVO ATENDIMENTO NO " . mb_strtoupper(S('radar_name')) . "\n\nProtocolo: $code\nTipo: $cat\nNome: " . ($d['name'] ?: 'Não informado') . ($anon ? ' (não quer o nome no mapa)' : '') .
+    "\nWhatsApp: {$d['phone']}\nLocal: $place " . $d['geo_address'] . "\nMapa: $gmaps\n\n{$d['description']}\n\nAbrir no painel: $link\n";
+[$sent, $info] = brevo_send('Novo atendimento no ' . S('radar_name') . ': ' . $cat . ($d['neighborhood'] ? ' – ' . $d['neighborhood'] : ''), $html, $text, $attach);
+app_log('demandas', $code . ' | ' . $cat . ' | e-mail ' . ($sent ? 'enviado ' . $info : 'falhou: ' . $info));
 
 json_out(['ok' => true, 'code' => ticket_code($id)]);
