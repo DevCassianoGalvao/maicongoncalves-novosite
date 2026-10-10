@@ -117,7 +117,8 @@
   }
 
   function boot() {
-    $$('[data-split]').forEach(function (el) { el.__words = split(el); });
+    /* só os títulos da primeira seção são divididos (animação de abertura) */
+    $$('[data-split]').forEach(function (el) { if (el.closest('.hero,.ph-hero,.art-hd')) el.__words = split(el); });
     ribbon();
 
     /* abertura com o logotipo */

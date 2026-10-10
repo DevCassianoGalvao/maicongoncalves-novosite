@@ -621,10 +621,12 @@ a[aria-label="Facebook"] .ic{transform:scale(1.14)}
   .hero-tx,.ph-hero-in>.stackv{justify-items:center;text-align:center;gap:14px}
   .hero-tx>*,.ph-hero-in>.stackv>*{justify-self:center}
   .hero .lead,.ph-hero-in>.stackv .lead{margin-inline:auto}
-  .hero-cta,.ph-hero-in>.stackv .row{justify-content:center;flex-wrap:nowrap;width:100%}
-  .hero-cta .btn,.ph-hero-in>.stackv .row .btn{flex:1 1 0;min-width:0;padding:6px 6px 6px 14px;font-size:13px;gap:6px}
-  .hero-cta .btn span:first-child,.ph-hero-in>.stackv .row .btn span:first-child{overflow:hidden;text-overflow:ellipsis}
-  .hero-cta .btn .btn-i,.ph-hero-in>.stackv .row .btn .btn-i{width:28px;height:28px;flex:none}
+  .hero-cta,.ph-hero-in>.stackv .row{justify-content:center;width:100%}
+  .hero-cta{flex-wrap:nowrap}
+  .hero-cta .btn{flex:1 1 0;min-width:0;padding:6px 6px 6px 14px;font-size:13px;gap:8px;justify-content:center}
+  .hero-cta .btn span:first-child{overflow:hidden;text-overflow:ellipsis}
+  .hero-cta .btn .btn-i{width:28px;height:28px;flex:none}
+  .ph-hero-in>.stackv .row .btn,.ph-hero-in>.stackv .row .soon{flex:1 1 100%;justify-content:center}
   .stage{justify-self:center;width:min(80%,360px);margin-top:4px}
   .stk-2{left:-12%}
   .pauta,.pauta:nth-child(n){grid-column:1/-1}
