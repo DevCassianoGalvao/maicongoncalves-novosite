@@ -45,7 +45,7 @@ admin_head('Artigos', 'posts');
 ?>
 <div class="top">
   <div><h1>Artigos</h1><p><?= $total ?> <?= $total === 1 ? 'artigo' : 'artigos' ?><?= $where ? ' encontrados' : '' ?></p></div>
-  <a class="btn btn--or" href="<?= e(url('/admin/post.php')) ?>"><?= icon('plus', 'bold') ?>Novo artigo</a>
+  <div class="row"><a class="btn btn--ghost" href="<?= e(url('/admin/importar.php')) ?>">Importar do WordPress</a><a class="btn btn--or" href="<?= e(url('/admin/post.php')) ?>"><?= icon('plus', 'bold') ?>Novo artigo</a></div>
 </div>
 <div class="card">
   <form class="filters" method="get">
