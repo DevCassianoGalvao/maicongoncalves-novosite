@@ -6,6 +6,8 @@ $user = admin_guard();
 $pub = (int) q("SELECT COUNT(*) FROM posts WHERE status = 'published'")->fetchColumn();
 $draft = (int) q("SELECT COUNT(*) FROM posts WHERE status <> 'published'")->fetchColumn();
 $cats = (int) q('SELECT COUNT(*) FROM categories')->fetchColumn();
+$tkNew = (int) q("SELECT COUNT(*) FROM tickets WHERE status IN ('novo','analise')")->fetchColumn();
+$tkMap = (int) q("SELECT COUNT(*) FROM tickets WHERE status = 'publicado'")->fetchColumn();
 $last = q('SELECT p.id, p.title, p.slug, p.status, p.published_at, p.updated_at, c.name AS category FROM posts p LEFT JOIN categories c ON c.id = p.category_id ORDER BY p.updated_at DESC LIMIT 6')->fetchAll();
 $mailReady = env('BREVO_API_KEY', '') !== '' && env('MAIL_FROM_EMAIL', '') !== '';
 $first = explode(' ', trim($user['name']))[0];
@@ -19,7 +21,8 @@ admin_head('Painel', 'dash');
 <?php if (!$mailReady): ?>
 <div class="alert alert--warn"><?= icon('warning-circle') ?><span>O formulário de contato ainda não envia e-mails: preencha <code>BREVO_API_KEY</code> e <code>MAIL_FROM_EMAIL</code> no arquivo .env.</span></div>
 <?php endif; ?>
-<div class="grid g3">
+<div class="grid g4">
+  <a class="card stat" href="<?= e(url('/admin/atendimentos.php')) ?>" style="text-decoration:none;color:inherit"><?= icon('tray') ?><div><b><?= $tkNew ?></b><span>atendimentos abertos<?= $tkMap ? ' · ' . $tkMap . ' na Prefeitura' : '' ?></span></div></a>
   <a class="card stat" href="<?= e(url('/admin/posts.php?status=published')) ?>" style="text-decoration:none;color:inherit"><?= icon('newspaper') ?><div><b><?= $pub ?></b><span>publicados</span></div></a>
   <a class="card stat" href="<?= e(url('/admin/posts.php?status=draft')) ?>" style="text-decoration:none;color:inherit"><?= icon('note-pencil') ?><div><b><?= $draft ?></b><span>rascunhos</span></div></a>
   <a class="card stat" href="<?= e(url('/admin/categorias.php')) ?>" style="text-decoration:none;color:inherit"><?= icon('tag') ?><div><b><?= $cats ?></b><span>categorias</span></div></a>

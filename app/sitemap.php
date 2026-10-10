@@ -9,6 +9,7 @@ $urls = [
     ['/minha-historia/', $mod('historia'), []], ['/fl360/', $mod('fl360'), []], ['/descobrindo-talentos/', $mod('peneira'), []],
     ['/noticias/', $latest, []], ['/contato/', $mod('contato'), []],
 ];
+if (S('radar_public') === '1') $urls[] = ['/demandas/', date('Y-m-d'), []];
 foreach ($posts as $p) {
     $imgs = $p['cover'] ? [abs_url('/' . ltrim($p['cover'], '/'))] : [];
     foreach ($p['gallery'] as $g) $imgs[] = abs_url('/' . ltrim($g['src'], '/'));

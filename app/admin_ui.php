@@ -1,12 +1,15 @@
 <?php
 defined('APP') or exit;
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . '/tickets.php';
 
 /** Garante instalação feita e usuário logado. */
 function admin_guard(): array
 {
     if (!is_file(ROOT . '/storage/installed.lock')) redirect(url('/install/'));
-    return require_login();
+    $u = require_login();
+    db_migrate();
+    return $u;
 }
 
 function admin_css(): string
@@ -22,12 +25,15 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
     $u = auth_user();
     $items = [
         'dash' => ['/admin/', 'squares-four', 'Painel'],
+        'tickets' => ['/admin/atendimentos.php', 'tray', 'Atendimentos'],
         'posts' => ['/admin/posts.php', 'newspaper', 'Artigos'],
         'new' => ['/admin/post.php', 'plus-circle', 'Novo artigo'],
         'cats' => ['/admin/categorias.php', 'tag', 'Categorias'],
         'settings' => ['/admin/configuracoes.php', 'gear-six', 'Configurações'],
         'account' => ['/admin/conta.php', 'user-circle', 'Minha conta'],
     ];
+    $newTickets = 0;
+    try { $newTickets = (int) q("SELECT COUNT(*) FROM tickets WHERE status = 'novo'")->fetchColumn(); } catch (Throwable $ex) {}
     header('X-Robots-Tag: noindex, nofollow');
     header('Cache-Control: no-store');
     ?><!doctype html>
@@ -47,7 +53,7 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
     <a class="side-logo" href="<?= e(url('/admin/')) ?>"><img src="<?= e(url('/img/logo.webp')) ?>" alt="Vereador Maicon Gonçalves"></a>
     <nav class="nav" aria-label="Painel">
 <?php foreach ($items as $key => [$href, $ic, $label]): ?>
-      <a href="<?= e(url($href)) ?>"<?= $key === $active ? ' class="on" aria-current="page"' : '' ?>><?= icon($ic) ?><?= $label ?></a>
+      <a href="<?= e(url($href)) ?>"<?= $key === $active ? ' class="on" aria-current="page"' : '' ?>><?= icon($ic) ?><?= $label ?><?= $key === 'tickets' && $newTickets ? '<span class="nav-n" title="Novos">' . $newTickets . '</span>' : '' ?></a>
 <?php endforeach; ?>
       <div class="nav-sep"></div>
       <a href="<?= e(url('/')) ?>" target="_blank" rel="noopener"><?= icon('arrow-square-out') ?>Ver o site</a>
@@ -150,4 +156,10 @@ function delete_upload(?string $rel): void
     if (!$rel || strpos($rel, 'uploads/') !== 0 || strpos($rel, '..') !== false) return;
     $f = ROOT . '/' . $rel;
     if (is_file($f)) @unlink($f);
+}
+
+function ticket_badge(array $t): string
+{
+    $cls = ['novo' => 'badge--new', 'analise' => 'badge--draft', 'publicado' => 'badge--sched', 'resolvido' => 'badge--pub', 'arquivado' => ''][$t['status']] ?? '';
+    return '<span class="badge ' . $cls . '">' . e(TICKET_STATUS[$t['status']] ?? $t['status']) . '</span>';
 }

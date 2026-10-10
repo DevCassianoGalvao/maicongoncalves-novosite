@@ -55,11 +55,12 @@ def paths(t):
     t = re.sub(r'((?:src|data-full)=")img/', r'\1<?= B ?>/img/', t)
     t = t.replace('href="site.css"', f'href="<?= B ?>/site.css?v={version("site.css")}"')
     t = t.replace('src="site.js"', f'src="<?= B ?>/site.js?v={version("site.js")}"')
+    t = t.replace('src="radar.js"', f'src="<?= B ?>/radar.js?v={version("radar.js")}"')
     return t
 
 
 HEAD, HEADER, FOOTER = read('_head.html'), read('_header.html'), read('_footer.html')
-NAV = ('home', 'hist', 'fl', 'pen', 'news', 'cont')
+NAV = ('home', 'hist', 'fl', 'pen', 'news', 'cont', 'radar')
 
 
 def page(name, title, desc, body, nav='', intro='false', ft_top='', kind=''):
@@ -99,14 +100,15 @@ page('peneira', 'Peneira Descobrindo Talentos – futebol de base em Nova Fribur
 page('contato', 'Contato – fale com o Vereador Maicon Gonçalves | Nova Friburgo', 'Envie demandas do seu bairro, pedidos de fiscalização, sugestões e denúncias ao gabinete do vereador Maicon Gonçalves na Câmara Municipal de Nova Friburgo.', read('contato.html').replace('{{bairros}}', bopts), nav='cont', kind='contato')
 page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'Notícias do mandato do vereador Maicon Gonçalves: projetos, leis, fiscalização e ações na Câmara Municipal de Nova Friburgo (RJ).', read('noticias.html'), nav='news', kind='noticias')
 page('noticia', T, '', read('noticia.html'), nav='news')
+page('radar', 'Radar Friburgo – Vereador Maicon Gonçalves', '', read('radar.html').replace('{{bairros}}', bopts), nav='radar', kind='radar')
 page('404', 'Página não encontrada – ' + T, '', read('404.html'), kind='404')
 
-for f in ('site.css', 'site.js'): shutil.copy(os.path.join(SRC, f), os.path.join(REPO, f))
+for f in ('site.css', 'site.js', 'radar.js'): shutil.copy(os.path.join(SRC, f), os.path.join(REPO, f))
 
 # ícones pedidos pelo PHP: icon('nome') ou icon('nome', 'bold'|'fill')
 need = {(n, 'i') for n in ('facebook-logo', 'instagram-logo', 'tiktok-logo', 'youtube-logo',  # redes (content.php)
                            'squares-four', 'newspaper', 'plus-circle', 'tag', 'gear-six', 'user-circle',  # menu do painel
-                           'check-circle', 'warning-circle')}
+                           'check-circle', 'warning-circle', 'tray')}
 for f in glob.glob(os.path.join(REPO, '**', '*.php'), recursive=True):
     if '/vendor/' in f or '/app/pages/' in f: continue
     for name, w in re.findall(r"icon\('([a-z0-9-]+)'(?:,\s*'(bold|fill)')?\)", open(f, encoding='utf-8').read()):

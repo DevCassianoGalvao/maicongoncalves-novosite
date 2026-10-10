@@ -6,6 +6,7 @@
 require dirname(__DIR__) . '/app/bootstrap.php';
 require ROOT . '/app/images.php';
 require ROOT . '/app/mail.php';
+require ROOT . '/app/tickets.php';
 
 if (!is_post()) json_out(['ok' => false, 'error' => 'Método não permitido.'], 405);
 
@@ -123,12 +124,29 @@ $html = '<!doctype html><html><body style="margin:0;background:#F1F4F9;font-fami
   <div style="background:#fff;border-radius:0 0 16px 16px;padding:12px 22px 18px;color:#8A96B0;font-size:12px">Enviado pelo formulário de contato do site em ' . date('d/m/Y \à\s H:i') . '.</div>
 </div></body></html>';
 
+// guarda no painel (Atendimentos) antes de enviar o e-mail, assim nada se perde
+$ticketId = 0;
+try {
+    $stored = [];
+    foreach ($attachments as $a) if ($p = ticket_photo_store_bytes($a['content'])) $stored[] = $p;
+    $ticketId = ticket_create([
+        'source' => 'contato', 'subject' => $d['assunto'], 'name' => $d['nome'], 'phone' => $d['whatsapp'], 'birth' => $d['nascimento'],
+        'description' => $d['mensagem'], 'address' => $d['endereco'], 'neighborhood' => $d['bairro'], 'geo_address' => $geoAddr,
+        'lat' => $hasGeo ? round($lat, 7) : null, 'lng' => $hasGeo ? round($lng, 7) : null, 'accuracy' => $acc ?: null, 'geo_manual' => $geoManual,
+        'photos' => $stored, 'consent' => true,
+    ]);
+    ticket_note($ticketId, 'Mensagem recebida pelo formulário de contato.');
+} catch (Throwable $ex) {
+    app_log('contato', 'não salvou no painel: ' . $ex->getMessage());
+}
+if ($ticketId) $html = str_replace('Enviado pelo formulário de contato do site', 'Atendimento ' . ticket_code($ticketId) . ' (<a href="' . e(abs_url('/admin/atendimento.php?id=' . $ticketId)) . '" style="color:#0144C9">abrir no painel</a>) · Enviado pelo formulário de contato do site', $html);
+
 $subject = (string) env('MAIL_SUBJECT', 'Novo contato vindo do site do Vereador Maicon Gonçalves');
 [$sent, $info] = brevo_send($subject, $html, $text, $attachments);
 
 $logLine = sprintf('%s | %s | %s | %s | %s | fotos=%d | geo=%s', $sent ? 'ENVIADO ' . $info : 'FALHOU ' . $info, $d['nome'], $d['whatsapp'], $d['bairro'], $d['assunto'], count($attachments), $hasGeo ? $ll : '-');
 app_log('contato', $logLine . ($sent ? '' : "\n" . $text));
 
-if (!$sent) json_out(['ok' => false, 'error' => 'Não conseguimos enviar agora. Tente de novo em instantes ou fale pelo WhatsApp.'], 502);
+if (!$sent && !$ticketId) json_out(['ok' => false, 'error' => 'Não conseguimos enviar agora. Tente de novo em instantes ou fale pelo WhatsApp.'], 502);
 if ($skipped) $ok['message'] .= ' Algumas fotos não foram anexadas: ' . implode('; ', $skipped) . '.';
 json_out($ok);

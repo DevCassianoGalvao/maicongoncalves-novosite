@@ -8,6 +8,8 @@ $v = settings_all(true);
 if (is_post()) {
     csrf_check();
     $v = array_merge($v, array_map('trim', array_intersect_key($_POST, SETTINGS_DEFAULTS)));
+    $v['radar_public'] = !empty($_POST['radar_public']) ? '1' : '0';
+    if ($v['radar_name'] === '') $v['radar_name'] = SETTINGS_DEFAULTS['radar_name'];
     $digits = preg_replace('/\D+/', '', $v['whatsapp']);
     if ($digits !== '' && strlen($digits) <= 11) $digits = '55' . $digits;
     if ($digits !== '' && (strlen($digits) < 12 || strlen($digits) > 13)) $errors[] = 'WhatsApp: informe DDD + número, ex.: (22) 99801-2278.';
@@ -55,6 +57,15 @@ admin_head('Configurações', 'settings');
       <div class="fd"><label for="<?= $k ?>"><?= $label ?></label><input type="text" inputmode="url" id="<?= $k ?>" name="<?= $k ?>" value="<?= e($v[$k]) ?>" placeholder="https://"></div>
 <?php endforeach; ?>
     </div>
+  </div>
+  <div class="card" style="margin-top:18px">
+    <h2>Mapa de demandas</h2>
+    <div class="grid g2">
+      <div class="fd"><label for="radar_name">Nome da ferramenta</label><input type="text" id="radar_name" name="radar_name" value="<?= e($v['radar_name']) ?>" maxlength="40"></div>
+      <div class="fd"><span class="lbl">Endereço</span><p style="margin:10px 0 0"><a href="<?= e(url('/demandas/')) ?>" target="_blank" rel="noopener"><?= e(abs_url('/demandas/')) ?></a></p></div>
+    </div>
+    <label class="check"><input type="checkbox" name="radar_public" value="1"<?= $v['radar_public'] === '1' ? ' checked' : '' ?>> Publicar: mostrar no menu do site e liberar para o Google</label>
+    <p class="hint muted small" style="margin:6px 0 0">Desmarcado, a página funciona só para quem tem o link (bom para aprovar antes).</p>
   </div>
   <div class="row" style="margin-top:18px"><button class="btn btn--or" type="submit"><?= icon('check', 'bold') ?>Salvar configurações</button></div>
 </form>

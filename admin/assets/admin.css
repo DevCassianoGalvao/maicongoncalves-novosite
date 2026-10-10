@@ -184,3 +184,36 @@ code{font-size:13px;background:var(--mist);padding:2px 6px;border-radius:6px}
 .btn.is-saving .ic{display:none}
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (max-width:860px){.toasts{top:66px;right:50%;transform:translateX(50%)}}
+
+/* atendimentos */
+.nav-n{margin-left:auto;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:var(--orange);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.tabs a{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#fff;color:var(--navy);font-weight:700;font-size:14px;box-shadow:inset 0 0 0 1.5px var(--line)}
+.tabs a:hover{text-decoration:none;box-shadow:inset 0 0 0 1.5px #B9C6DE}
+.tabs a span{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--mist);font-size:12px;display:grid;place-items:center}
+.tabs a.on{background:var(--navy);color:#fff;box-shadow:none}
+.tabs a.on span{background:rgba(255,255,255,.18)}
+.badge--new{background:#FFF1E6;color:#B54700}
+.badge--src{background:#EEF2FA;color:var(--navy)}
+.tbl tr.is-new td:first-child{box-shadow:inset 3px 0 0 var(--orange)}
+.thumb--ic{display:grid;place-items:center;color:var(--muted)}
+.tk-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.tk-photos a{display:block;border-radius:12px;overflow:hidden;aspect-ratio:4/3;background:var(--mist)}
+.tk-photos img{width:100%;height:100%;object-fit:cover}
+.tk-text{margin:0;font-size:15.5px;line-height:1.6;white-space:normal}
+.tk-map{height:260px;border-radius:12px;overflow:hidden;z-index:0}
+.tk-note{display:grid;gap:8px;margin-bottom:16px}
+.tk-note .btn{justify-self:start}
+.tk-log{list-style:none;margin:0;padding:0;display:grid;gap:12px}
+.tk-log li{padding-left:14px;border-left:2px solid var(--line)}
+.tk-log p{margin:2px 0 0}
+.tk-timer{display:flex;gap:12px;align-items:center;padding:14px;border-radius:12px;background:#FFF1E6;color:#7A2E00;margin-bottom:14px}
+.tk-timer .ic{width:30px;height:30px;color:var(--orange)}
+.tk-timer small{display:block;font-size:12.5px;font-weight:700}
+.tk-timer b{display:block;font-size:22px;font-weight:800;color:var(--navy);line-height:1.15}
+.tk-timer--ok{background:var(--ok-bg);color:var(--ok)}
+.tk-timer--ok .ic{color:#16A34A}
+.tk-after{border-radius:12px;margin-bottom:14px;max-height:200px;width:100%;object-fit:cover}
+.tk-acts{display:grid;gap:10px}
+.tk-acts form{margin:0}
+.tk-resolve{display:grid;gap:8px}

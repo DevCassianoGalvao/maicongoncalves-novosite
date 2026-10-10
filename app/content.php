@@ -14,6 +14,8 @@ const SETTINGS_DEFAULTS = [
     'instagram'    => 'https://www.instagram.com/maicongoncalvesnf/',
     'tiktok'       => 'https://www.tiktok.com/@maicongoncalvesnf',
     'youtube'      => '',
+    'radar_name'   => 'Radar Friburgo',   // ferramenta de demandas no mapa
+    'radar_public' => '0',                // 1 = aparece no menu e no Google
 ];
 
 function settings_all(bool $fresh = false): array

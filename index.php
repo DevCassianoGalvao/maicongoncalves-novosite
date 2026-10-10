@@ -26,6 +26,7 @@ $pages = [
     'descobrindo-talentos' => 'peneira',
     'contato'              => 'contato',
     'noticias'             => 'noticias',
+    'demandas'             => 'radar',
 ];
 $legacy = [ // endereços antigos ou alternativos -> endereço oficial
     'index.html' => '/', 'index.php' => '/', 'home' => '/',
@@ -45,6 +46,14 @@ if ($slug === 'llms.txt') { require ROOT . '/app/llms.php'; exit; }
 if ($slug !== '' && substr($path, -1) !== '/' && strpos($slug, '.') === false) redirect(url('/' . $slug . '/') . $qs, 301);
 
 $meta = [];
+if ($slug === 'demandas') {
+    require ROOT . '/app/tickets.php';
+    $meta = [
+        'title' => S('radar_name') . ' – registre problemas da cidade | Vereador Maicon Gonçalves',
+        'description' => 'Fotografe um problema da sua rua em Nova Friburgo e acompanhe no mapa quanto tempo a Prefeitura leva para resolver. Ferramenta do gabinete do vereador Maicon Gonçalves.',
+        'robots' => S('radar_public') === '1' ? '' : 'noindex, nofollow',
+    ];
+}
 if (isset($pages[$slug])) {
     include ROOT . '/app/pages/' . $pages[$slug] . '.php';
     exit;
