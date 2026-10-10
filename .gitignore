@@ -1,2 +1,10 @@
 node_modules/
 *.zip
+.env
+/storage/*
+!/storage/.htaccess
+!/storage/.gitkeep
+/uploads/*
+!/uploads/.htaccess
+!/uploads/.gitkeep
+/site/dist/

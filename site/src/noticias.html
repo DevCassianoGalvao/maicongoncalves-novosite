@@ -1,0 +1,24 @@
+<?php
+$all = posts_published();
+$cats = [];
+foreach ($all as $p) if ($p['category'] !== '' && !isset($cats[$p['category_slug']])) $cats[$p['category_slug']] = $p['category'];
+$sel = isset($_GET['cat'], $cats[$_GET['cat']]) ? $cats[$_GET['cat']] : '';
+?>
+<main>
+<section class="ph-hero ph-hero--c"><div class="hero-bg" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span></div>
+  <div class="wrap ph-hero-in"><h1 class="h1" data-split><span class="scr">Notícias{{scr}}</span></h1><p class="lead" data-h>Acompanhe as ações, projetos e conquistas do mandato</p></div></section>
+<section class="sec news"><div class="wrap">
+  <div class="tools"><div class="filters" role="group" aria-label="Filtrar por categoria">
+    <button class="fl" aria-pressed="<?= $sel === '' ? 'true' : 'false' ?>" data-cat="">Todas</button>
+<?php foreach ($cats as $name): ?>
+    <button class="fl" aria-pressed="<?= $sel === $name ? 'true' : 'false' ?>" data-cat="<?= e($name) ?>"><?= e($name) ?></button>
+<?php endforeach; ?>
+  </div>
+    <label class="search"><span class="sr">Pesquisar</span>{{i:magnifying-glass}}<input id="busca" type="search" placeholder="Pesquisar" autocomplete="off"></label></div>
+  <div class="news-grid news-list" id="lista" data-per="9">
+<?php foreach ($all as $k => $p) echo card_html($p, false, $k > 2), "\n"; ?>
+    <p class="empty" id="vazio"<?= $all ? ' hidden' : '' ?>>Nenhuma notícia encontrada. Tente outro termo ou escolha outra categoria.</p>
+  </div>
+  <nav class="pager" id="pager" aria-label="Paginação"></nav>
+</div></section>
+</main>

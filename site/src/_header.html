@@ -16,19 +16,17 @@
 <div class="intro" id="intro" aria-hidden="true"><div class="intro-in"><img class="intro-logo" src="img/logo.webp" alt="" width="640" height="293"><span class="intro-bar"><i></i></span></div></div>
 <header class="hd" id="hd">
   <div class="hd-bar">
-    <a class="hd-logo" href="index.html" aria-label="Vereador Maicon Gonçalves, início"><img src="img/logo.webp" alt="Vereador Maicon Gonçalves" width="640" height="293"></a>
+    <a class="hd-logo" href="/" aria-label="Vereador Maicon Gonçalves, início"><img src="img/logo.webp" alt="Vereador Maicon Gonçalves" width="640" height="293"></a>
     <nav class="hd-nav" aria-label="Principal">
-      <a href="index.html" class="{{on_home}}">{{i:house}}Início</a>
-      <a href="minha-historia.html" class="{{on_hist}}">{{i:book-open-text}}Minha história</a>
-      <a href="fl360.html" class="{{on_fl}}">{{i:users-three}}FL360</a>
-      <a href="peneira.html" class="{{on_pen}}">{{i:soccer-ball}}Peneira</a>
-      <a href="noticias.html" class="{{on_news}}">{{i:newspaper}}Notícias</a>
-      <a href="contato.html" class="{{on_cont}}">{{i:chat-circle-dots}}Contato</a>
+      <a href="/" class="{{on_home}}">{{i:house}}Início</a>
+      <a href="/minha-historia/" class="{{on_hist}}">{{i:book-open-text}}Minha história</a>
+      <a href="/fl360/" class="{{on_fl}}">{{i:users-three}}FL360</a>
+      <a href="/descobrindo-talentos/" class="{{on_pen}}">{{i:soccer-ball}}Peneira</a>
+      <a href="/noticias/" class="{{on_news}}">{{i:newspaper}}Notícias</a>
+      <a href="/contato/" class="{{on_cont}}">{{i:chat-circle-dots}}Contato</a>
     </nav>
     <div class="hd-soc">
-      <a href="https://www.facebook.com/share/1KTDkCFLzc/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="Facebook">{{i:facebook-logo}}</a>
-      <a href="https://www.instagram.com/maicongoncalvesnf/" target="_blank" rel="noopener" aria-label="Instagram">{{i:instagram-logo}}</a>
-      <a href="https://www.tiktok.com/@maicongoncalvesnf" target="_blank" rel="noopener" aria-label="TikTok">{{i:tiktok-logo}}</a>
+      <?= social_links() ?>
     </div>
     <button class="hd-burger" id="burger" aria-label="Abrir menu" aria-expanded="false" aria-controls="mm">{{i:list}}</button>
   </div>
@@ -36,16 +34,14 @@
 <div class="mm" id="mm" aria-hidden="true">
   <button class="mm-x" id="mmx" aria-label="Fechar menu">{{i:x}}</button>
   <nav aria-label="Menu">
-    <a href="index.html">{{i:house}}Início</a>
-    <a href="minha-historia.html">{{i:book-open-text}}Minha história</a>
-    <a href="fl360.html">{{i:users-three}}FL360</a>
-    <a href="peneira.html">{{i:soccer-ball}}Peneira</a>
-    <a href="noticias.html">{{i:newspaper}}Notícias</a>
-    <a href="contato.html">{{i:chat-circle-dots}}Contato</a>
+    <a href="/">{{i:house}}Início</a>
+    <a href="/minha-historia/">{{i:book-open-text}}Minha história</a>
+    <a href="/fl360/">{{i:users-three}}FL360</a>
+    <a href="/descobrindo-talentos/">{{i:soccer-ball}}Peneira</a>
+    <a href="/noticias/">{{i:newspaper}}Notícias</a>
+    <a href="/contato/">{{i:chat-circle-dots}}Contato</a>
   </nav>
   <div class="mm-soc">
-    <a href="https://www.facebook.com/share/1KTDkCFLzc/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="Facebook">{{i:facebook-logo}}</a>
-    <a href="https://www.instagram.com/maicongoncalvesnf/" target="_blank" rel="noopener" aria-label="Instagram">{{i:instagram-logo}}</a>
-    <a href="https://www.tiktok.com/@maicongoncalvesnf" target="_blank" rel="noopener" aria-label="TikTok">{{i:tiktok-logo}}</a>
+      <?= social_links() ?>
   </div>
 </div>

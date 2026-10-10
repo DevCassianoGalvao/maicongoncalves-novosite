@@ -14,8 +14,8 @@
       <h1 class="h1" data-split>Nova Friburgo merece <span class="scr">muito mais<svg viewBox="0 0 300 26" preserveAspectRatio="none" aria-hidden="true"><path d="M4 15C62 4 124 6 182 10s86 0 114 3"/><path d="M34 22c58-6 132-6 214-2"/></svg><svg class="spark" viewBox="0 0 40 40" aria-hidden="true"><path d="M8 30L4 12"/><path d="M20 28l8-22"/><path d="M30 34l8-6"/></svg></span></h1>
       <p class="lead" data-h>Aqui você encontra informações sobre ações, projetos e atividades desenvolvidas pelo meu mandato.</p>
       <div class="hero-cta" data-h>
-        <a class="btn btn--orange" href="minha-historia.html" data-mag><span>Minha história</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
-        <a class="btn btn--ghost" href="contato.html" data-mag><span>Entrar em contato</span><span class="btn-i">{{ib:chat-circle-dots}}{{ib:chat-circle-dots}}</span></a>
+        <a class="btn btn--orange" href="/minha-historia/" data-mag><span>Minha história</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
+        <a class="btn btn--ghost" href="/contato/" data-mag><span>Entrar em contato</span><span class="btn-i">{{ib:chat-circle-dots}}{{ib:chat-circle-dots}}</span></a>
       </div>
     </div>
     <div class="stage" id="stage">
@@ -115,7 +115,7 @@
         <div class="pcard-tx">
           <h3 class="h3">FL360 – Friburgo Líder 360</h3>
           <p>Um programa de formação política e comunitária que prepara novas lideranças e conecta a população ao funcionamento da Câmara.</p>
-          <a class="btn btn--orange" href="fl360.html" data-mag><span>Conhecer o FL360</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
+          <a class="btn btn--orange" href="/fl360/" data-mag><span>Conhecer o FL360</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
         </div>
       </article>
       <article class="pcard">
@@ -123,7 +123,7 @@
         <div class="pcard-tx">
           <h3 class="h3">Peneira de Futebol - Descobrindo Talentos</h3>
           <p>Projeto de avaliação esportiva com participação de jovens atletas da cidade e região.</p>
-          <a class="btn btn--orange" href="peneira.html" data-mag><span>Conhecer a Peneira</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
+          <a class="btn btn--orange" href="/descobrindo-talentos/" data-mag><span>Conhecer a Peneira</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
         </div>
       </article>
     </div>
@@ -135,7 +135,7 @@
     <div class="join-tx">
       <h2 class="h2" data-split>Participe do mandato</h2>
       <p class="lead" data-r>Seu contato é fundamental para que possamos agir com eficiência. Envie sua sugestão, demanda ou denúncia. Estamos prontos para ouvir você, entender o problema e buscar soluções junto aos órgãos responsáveis.</p>
-      <a class="btn btn--navy" href="contato.html" data-mag data-r><span>Entrar em contato</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
+      <a class="btn btn--navy" href="/contato/" data-mag data-r><span>Entrar em contato</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
     </div>
     <div class="hub" aria-hidden="true" data-r>
       <svg viewBox="0 0 100 100"><path class="hub-flow" vector-effect="non-scaling-stroke" d="M22 16Q42 26 50 50"/><path class="hub-flow" vector-effect="non-scaling-stroke" d="M84 32Q64 34 50 50"/><path class="hub-flow" vector-effect="non-scaling-stroke" d="M30 88Q36 66 50 50"/></svg>
@@ -147,12 +147,14 @@
   </div>
 </section>
 
+<?php $news = posts_published(6); if ($news): ?>
 <section class="sec news" id="noticias">
   <div class="wrap">
-    <div class="sec-hd"><h2 class="h2" data-split>Últimas notícias</h2><a class="btn btn--line btn--sm" href="noticias.html" data-r><span>Ver mais</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a></div>
+    <div class="sec-hd"><h2 class="h2" data-split>Últimas notícias</h2><a class="btn btn--line btn--sm" href="/noticias/" data-r><span>Ver mais</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a></div>
     <div class="news-grid" data-rs>
-{{news_home}}
+<?php foreach ($news as $k => $p) echo card_html($p, $k < 2), "\n"; ?>
     </div>
   </div>
 </section>
+<?php endif; ?>
 </main>

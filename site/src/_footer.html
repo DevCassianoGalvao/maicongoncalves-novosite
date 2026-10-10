@@ -16,30 +16,28 @@
       <div>
         <div class="ft-h">Navegação</div>
         <nav class="ft-nav" aria-label="Rodapé">
-          <a href="index.html">Início</a><a href="minha-historia.html">Minha história</a><a href="fl360.html">FL360</a><a href="peneira.html">Peneira</a><a href="noticias.html">Notícias</a><a href="contato.html">Contato</a>
+          <a href="/">Início</a><a href="/minha-historia/">Minha história</a><a href="/fl360/">FL360</a><a href="/descobrindo-talentos/">Peneira</a><a href="/noticias/">Notícias</a><a href="/contato/">Contato</a>
         </nav>
       </div>
       <div>
         <div class="ft-h">Contato</div>
         <ul class="ft-c">
-          <li>{{i:map-pin}}<span>R. Farinha Filho, 50 - Centro<br>Nova Friburgo - RJ, 28610-280</span></li>
-          <li>{{i:door-open}}<span>Gabinete 20</span></li>
-          <li>{{i:envelope-simple}}<span><span class="sel">vereadormaicongoncalves@gmail.com</span> <button class="copy" data-copy="vereadormaicongoncalves@gmail.com" aria-label="Copiar e-mail">{{i:copy}}</button></span></li>
+          <li>{{i:map-pin}}<span><?= implode('<br>', array_map('e', address_lines())) ?></span></li>
+          <li>{{i:door-open}}<span><?= e(S('office')) ?></span></li>
+          <li>{{i:envelope-simple}}<span><span class="sel"><?= e(S('email')) ?></span> <button class="copy" data-copy="<?= e(S('email')) ?>" aria-label="Copiar e-mail">{{i:copy}}</button></span></li>
         </ul>
       </div>
       <div>
         <div class="ft-h">Redes sociais</div>
         <div class="ft-soc">
-          <a href="https://www.facebook.com/share/1KTDkCFLzc/?mibextid=wwXIfr" target="_blank" rel="noopener" aria-label="Facebook">{{i:facebook-logo}}</a>
-          <a href="https://www.instagram.com/maicongoncalvesnf/" target="_blank" rel="noopener" aria-label="Instagram">{{i:instagram-logo}}</a>
-          <a href="https://www.tiktok.com/@maicongoncalvesnf" target="_blank" rel="noopener" aria-label="TikTok">{{i:tiktok-logo}}</a>
+          <?= social_links() ?>
         </div>
       </div>
     </div>
-    <div class="ft-end">© 2026 Vereador Maicon Gonçalves. Todos os direitos reservados.</div>
+    <div class="ft-end">© <?= date('Y') ?> Vereador Maicon Gonçalves. Todos os direitos reservados.</div>
   </div>
 </footer>
-<a class="wa" href="https://wa.me/5522998012278?text=Ol%C3%A1%20Vereador%20Maicon%20Gon%C3%A7alves!%20Gostaria%20de%20falar%20com%20voc%C3%AA" target="_blank" rel="noopener"><b>{{i:whatsapp-logo}}</b><span>Fale comigo!</span></a>
+<a class="wa" href="<?= e(wa_link()) ?>" target="_blank" rel="noopener"><b>{{i:whatsapp-logo}}</b><span>Fale comigo!</span></a>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>

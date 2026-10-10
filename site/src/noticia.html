@@ -1,0 +1,48 @@
+<?php
+$share = rawurlencode($post['abs_url']);
+?>
+<div class="progress" id="progress" aria-hidden="true"></div>
+<main>
+<header class="art-hd"><div class="hero-bg" aria-hidden="true"><span class="orb orb-2"></span></div>
+  <div class="wrap"><div class="art-hd-in">
+    <a class="back" href="/noticias/" data-h>{{ib:arrow-left}}Voltar para as notícias</a>
+<?php if ($post['status'] !== 'published'): ?>
+    <span class="tag" style="background:#B42318" data-h>Rascunho: só você está vendo esta prévia</span>
+<?php endif; ?>
+<?php if ($post['category'] !== ''): ?>
+    <a class="tag" href="/noticias/?cat=<?= e($post['category_slug']) ?>" data-h><?= e($post['category']) ?></a>
+<?php endif; ?>
+    <h1 data-split><?= e($post['title']) ?></h1>
+<?php if ($post['excerpt']): ?>
+    <p class="art-sub" data-h><?= e($post['excerpt']) ?></p>
+<?php endif; ?>
+    <div class="art-meta" data-h><span>{{i:calendar-blank}}<time datetime="<?= e($post['iso']) ?>"><?= e(date_long($post['published_at'])) ?></time></span></div>
+  </div></div></header>
+<?php if ($post['cover_url']): ?>
+<div class="art-cover"><div class="wrap"><figure data-h><img src="<?= e($post['cover_url']) ?>" alt="<?= e($post['cover_alt']) ?>"<?= $post['cover_w'] ? ' width="' . (int) $post['cover_w'] . '" height="' . (int) $post['cover_h'] . '"' : '' ?>></figure></div></div>
+<?php endif; ?>
+<div class="wrap art-body<?= $post['cover_url'] ? '' : ' art-body--nocover' ?>">
+  <article class="prose">
+<?= $post['content'] ?>
+
+<?php if ($post['gallery']): $n = count($post['gallery']); ?>
+<div class="gal"><?php foreach ($post['gallery'] as $k => $g): $src = url('/' . ltrim($g['src'], '/')); ?><button type="button" data-full="<?= e($src) ?>" aria-label="Ampliar foto <?= $k + 1 ?>"><img src="<?= e($src) ?>" alt="Foto <?= $k + 1 ?> de <?= $n ?>: <?= e($post['title']) ?>"<?= !empty($g['w']) ? ' width="' . (int) $g['w'] . '" height="' . (int) $g['h'] . '"' : '' ?> loading="lazy"></button><?php endforeach; ?></div>
+<?php endif; ?>
+  </article>
+  <aside class="side" aria-label="Compartilhar"><div class="side-h">Compartilhe este artigo</div>
+    <div class="share">
+      <a href="https://api.whatsapp.com/send?text=<?= rawurlencode($post['title'] . ' ' . $post['abs_url']) ?>" target="_blank" rel="noopener">{{i:whatsapp-logo}}WhatsApp</a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $share ?>" target="_blank" rel="noopener">{{i:facebook-logo}}Facebook</a>
+      <button type="button" data-copy="<?= e($post['abs_url']) ?>">{{ib:link-simple}}Copiar link</button>
+    </div></aside>
+</div>
+<?php if ($others): ?>
+<section class="sec news"><div class="wrap">
+  <div class="sec-hd"><h2 class="h2" data-split>Últimas notícias</h2><a class="btn btn--line btn--sm" href="/noticias/" data-r><span>Ver mais</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a></div>
+  <div class="news-grid news-list" data-rs>
+<?php foreach ($others as $o) echo card_html($o), "\n"; ?>
+  </div></div></section>
+<?php endif; ?>
+</main>
+<dialog class="lb" id="lb" aria-label="Foto ampliada"><div class="lb-in"><img src="" alt=""></div>
+  <button class="lb-x" aria-label="Fechar">{{ib:x}}</button><button class="lb-p" aria-label="Foto anterior">{{ib:caret-left}}</button><button class="lb-n" aria-label="Próxima foto">{{ib:caret-right}}</button></dialog>
