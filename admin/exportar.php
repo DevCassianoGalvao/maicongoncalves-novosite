@@ -80,7 +80,7 @@ admin_head('Exportar dados', 'export');
 ?>
 <div class="top"><div><h1>Exportar dados</h1><p>Planilhas para abrir no Excel ou no Google Planilhas.</p></div>
   <a class="btn btn--ghost" href="<?= e(url('/admin/atendimentos.php')) ?>"><?= icon('arrow-left') ?>Atendimentos</a></div>
-<div class="grid g2" style="align-items:start">
+<div class="grid g2 exp">
   <div><div class="card">
     <h2>Pessoas</h2>
     <p class="muted" style="margin:-4px 0 14px">Uma linha por pessoa que enviou demanda: nome, e-mail, WhatsApp, bairros, quantas demandas e se aceita receber novidades.</p>
