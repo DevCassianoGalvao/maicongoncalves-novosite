@@ -31,7 +31,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
         <button class="fl" aria-pressed="false" data-st="resolvido"><i class="rd-dot rd-dot--ok"></i>Resolvidos</button>
       </div>
       <label class="rd-sel"><span class="sr">Tipo de problema</span><select id="rd-cat"><option value="">Todos os tipos</option>
-<?php foreach (TICKET_CATS as $k => $v): ?><option value="<?= $k ?>"><?= e($v) ?></option><?php endforeach; ?>
+<?php $used = array_unique(array_column($items, 'cat')); foreach (ticket_cats(true) as $k => $v): if (!in_array($k, $used, true)) continue; ?><option value="<?= e($k) ?>"><?= e($v) ?></option><?php endforeach; ?>
       </select></label>
     </div>
     <div class="rd-mapbox">
@@ -73,11 +73,9 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
       <div class="fd"><label for="rd-rua">Rua e número</label><input id="rd-rua" name="endereco" type="text" maxlength="255" placeholder="Ex.: Rua Farinha Filho, 50"></div>
       <div class="fd"><label for="rd-bairro">Bairro / Localidade</label><select id="rd-bairro" name="bairro">{{bairros}}</select></div>
 
-      <fieldset class="fd fd--full rd-cats"><legend><span class="rd-n">3</span>Tipo do problema</legend>
-<?php foreach (TICKET_CATS as $k => $v): ?>
-        <label class="rd-cat"><input type="radio" name="categoria" value="<?= $k ?>"><span><?= e($v) ?></span></label>
-<?php endforeach; ?>
-      </fieldset>
+      <div class="fd fd--full"><span class="rd-n">3</span><label for="rd-tipo">Tipo da demanda</label><select id="rd-tipo" name="categoria" required><option value="">Escolha o tipo</option>
+<?php foreach (ticket_cats() as $k => $v): ?><option value="<?= e($k) ?>"><?= e($v) ?></option><?php endforeach; ?>
+      </select></div>
       <div class="fd fd--full"><label for="rd-desc">O que está acontecendo?</label><textarea id="rd-desc" name="descricao" maxlength="1500" placeholder="Ex.: Buraco grande no meio da rua há três semanas, carros desviando pela calçada." required></textarea></div>
 
       <div class="fd"><span class="rd-n">4</span><label for="rd-nome">Seu nome</label><input id="rd-nome" name="nome" type="text" maxlength="120" autocomplete="name" placeholder="Nome e sobrenome"></div>

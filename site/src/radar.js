@@ -240,7 +240,7 @@
     var bad = [];
     if (!photos.length) { drop.classList.add('is-bad'); bad.push([drop, 'a foto']); }
     if (!$('#rd-lat').value) { pickEl.classList.add('is-bad'); bad.push([pickEl, 'o local no mapa']); }
-    if (!$('input[name="categoria"]:checked', form)) { $('.rd-cats', form).classList.add('is-bad'); bad.push([$('.rd-cats', form), 'o tipo do problema']); }
+    if (!$('#rd-tipo').value) { $('#rd-tipo').classList.add('is-bad'); bad.push([$('#rd-tipo'), 'o tipo da demanda']); }
     if (!$('#rd-desc').value.trim()) { $('#rd-desc').classList.add('is-bad'); bad.push([$('#rd-desc'), 'a descrição']); }
     if (!$('#rd-anon').checked && !$('#rd-nome').value.trim()) { $('#rd-nome').classList.add('is-bad'); bad.push([$('#rd-nome'), 'seu nome']); }
     if ($('#rd-zap').value.replace(/\D/g, '').length < 10) { $('#rd-zap').classList.add('is-bad'); bad.push([$('#rd-zap'), 'seu WhatsApp com DDD']); }

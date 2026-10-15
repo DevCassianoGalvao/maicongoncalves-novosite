@@ -34,7 +34,7 @@ if (is_post()) {
             $cat = in('category', '', 20);
             $mail = mb_strtolower(in('email', '', 190));
             q('UPDATE tickets SET category = ?, department = ?, protocol = ?, public_text = ?, anonymous = ?, address = ?, neighborhood = ?, email = ?, updated_at = NOW() WHERE id = ?', [
-                isset(TICKET_CATS[$cat]) ? $cat : null, in('department', '', 160) ?: null, in('protocol', '', 80) ?: null, in('public_text', '', 3000) ?: null,
+                isset(ticket_cats(true)[$cat]) ? $cat : null, in('department', '', 160) ?: null, in('protocol', '', 80) ?: null, in('public_text', '', 3000) ?: null,
                 !empty($_POST['anonymous']) ? 1 : 0, in('address', '', 255) ?: null, in('neighborhood', '', 120) ?: null, filter_var($mail, FILTER_VALIDATE_EMAIL) ? $mail : null, $id]);
             flash('ok', 'Dados do atendimento salvos.');
             break;
@@ -47,7 +47,7 @@ if (is_post()) {
             break;
         case 'publish':
             if (!$canPublish) { flash('err', 'Para ir ao mapa, o atendimento precisa de foto e localização.'); break; }
-            if (!$t['category']) q('UPDATE tickets SET category = ? WHERE id = ?', [isset(TICKET_CATS[in('category', '', 20)]) ? in('category', '', 20) : 'outro', $id]);
+            if (!$t['category']) q('UPDATE tickets SET category = ? WHERE id = ?', [isset(ticket_cats(true)[in('category', '', 20)]) ? in('category', '', 20) : 'outro', $id]);
             if ($t['public_text'] === null || $t['public_text'] === '') q('UPDATE tickets SET public_text = description WHERE id = ?', [$id]);
             $set('publicado', ['published_at' => date('Y-m-d H:i:s'), 'resolved_at' => null]);
             flash('ok', 'Aprovado! Já está no mapa e o contador começou a contar.' . $notify('publicado'));
@@ -86,7 +86,7 @@ if (is_post()) {
 $notes = q('SELECT n.*, u.name AS author FROM ticket_notes n LEFT JOIN users u ON u.id = n.user_id WHERE n.ticket_id = ? ORDER BY n.created_at DESC, n.id DESC', [$id])->fetchAll();
 $digits = preg_replace('/\D+/', '', (string) $t['phone']);
 $wa = $digits ? 'https://wa.me/' . (strlen($digits) <= 11 ? '55' : '') . $digits . '?text=' . rawurlencode('Olá' . ($t['name'] ? ', ' . first_name($t['name']) : '') . '! Aqui é do gabinete do Vereador Maicon Gonçalves, sobre a sua ' . ($t['source'] !== 'contato' ? 'demanda ' : 'mensagem ') . ticket_code($id) . '.') : '';
-$what = $t['source'] !== 'contato' ? (TICKET_CATS[$t['category']] ?? 'Demanda') : ($t['subject'] ?: 'Contato');
+$what = $t['source'] !== 'contato' ? cat_label($t['category']) : ($t['subject'] ?: 'Contato');
 $leaflet = '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"><script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>';
 
 admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
@@ -181,7 +181,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
       <?= csrf_field() ?><input type="hidden" name="do" value="save">
       <h2>Encaminhamento</h2>
       <div class="fd"><label for="category">Tipo do problema</label><select id="category" name="category"><option value="">—</option>
-<?php foreach (TICKET_CATS as $k => $v): ?><option value="<?= $k ?>"<?= $t['category'] === $k ? ' selected' : '' ?>><?= e($v) ?></option><?php endforeach; ?></select></div>
+<?php $cats = ticket_cats(); if ($t['category'] && !isset($cats[$t['category']])) $cats[$t['category']] = cat_label($t['category']) . ' (desativado)'; foreach ($cats as $k => $v): ?><option value="<?= $k ?>"<?= $t['category'] === $k ? ' selected' : '' ?>><?= e($v) ?></option><?php endforeach; ?></select></div>
       <div class="fd"><label for="department">Secretaria / órgão</label><input type="text" id="department" name="department" value="<?= e($t['department']) ?>" placeholder="Ex.: Secretaria de Obras"></div>
       <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($t['protocol']) ?>"><p class="hint">Uso interno, não aparece no site.</p></div>
       <div class="fd"><label for="email">E-mail da pessoa</label><input type="email" id="email" name="email" value="<?= e($t['email'] ?? '') ?>"><p class="hint">Recebe os avisos quando for à Prefeitura e quando for resolvida.</p></div>

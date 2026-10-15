@@ -5,16 +5,49 @@
 defined('APP') or exit;
 require_once __DIR__ . '/images.php';
 
-const TICKET_CATS = [
-    'buraco'      => 'Buraco na rua',
-    'iluminacao'  => 'Iluminação pública',
-    'lixo'        => 'Lixo e entulho',
-    'calcada'     => 'Calçada',
-    'agua'        => 'Água e esgoto',
-    'arvore'      => 'Árvore e poda',
-    'sinalizacao' => 'Sinalização e trânsito',
-    'outro'       => 'Outra demanda',
+/** Tipos iniciais (o gabinete gerencia a lista em Atendimentos › Tipos de demanda). */
+const TICKET_CATS_DEFAULT = [
+    'buraco'       => 'Buraco na rua',
+    'pavimentacao' => 'Asfalto e calçamento',
+    'calcada'      => 'Calçada',
+    'iluminacao'   => 'Iluminação pública',
+    'lixo'         => 'Lixo e entulho',
+    'limpeza'      => 'Capina e limpeza urbana',
+    'agua'         => 'Água e esgoto',
+    'drenagem'     => 'Bueiro, drenagem e alagamento',
+    'encosta'      => 'Encosta e risco de deslizamento',
+    'arvore'       => 'Árvore e poda',
+    'sinalizacao'  => 'Sinalização e trânsito',
+    'transporte'   => 'Transporte público',
+    'saude'        => 'Saúde',
+    'educacao'     => 'Educação',
+    'assistencia'  => 'Assistência social',
+    'praca'        => 'Praças, parques e lazer',
+    'esporte'      => 'Esporte',
+    'cultura'      => 'Cultura e turismo',
+    'animais'      => 'Animais e zoonoses',
+    'meioambiente' => 'Meio ambiente e poluição',
+    'acessib'      => 'Acessibilidade',
+    'seguranca'    => 'Segurança e Guarda Municipal',
+    'obras'        => 'Obras e fiscalização',
+    'outro'        => 'Outra demanda',
 ];
+
+/**
+ * Tipos de demanda: slug => nome. $all = true inclui os desativados (para mostrar o nome em demandas antigas).
+ */
+function ticket_cats(bool $all = false): array
+{
+    static $cache = [];
+    if (isset($cache[$all])) return $cache[$all];
+    $out = [];
+    try {
+        db_migrate();
+        foreach (q('SELECT slug, name FROM ticket_categories' . ($all ? '' : ' WHERE active = 1') . ' ORDER BY sort, name')->fetchAll() as $r) $out[$r['slug']] = $r['name'];
+    } catch (Throwable $ex) {}
+    return $cache[$all] = $out ?: TICKET_CATS_DEFAULT;
+}
+function cat_label(?string $slug, string $fallback = 'Demanda'): string { return ticket_cats(true)[(string) $slug] ?? $fallback; }
 const TICKET_STATUS = [
     'novo'      => 'Novo',
     'analise'   => 'Em análise',
@@ -36,7 +69,7 @@ function db_migrate(): void
     } catch (Throwable $ex) {
         return; // site ainda não instalado
     }
-    if ($v >= 4) return;
+    if ($v >= 5) return;
     if ($v < 2) {
     $pdo->exec("CREATE TABLE IF NOT EXISTS tickets (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -103,7 +136,20 @@ function db_migrate(): void
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
     if (!$has('tickets', 'news_optin')) $pdo->exec('ALTER TABLE tickets ADD COLUMN news_optin TINYINT(1) NOT NULL DEFAULT 0 AFTER consent');
     if (!$has('posts', 'notified_at')) $pdo->exec('ALTER TABLE posts ADD COLUMN notified_at DATETIME NULL, ADD COLUMN notified_count INT UNSIGNED NULL');
-    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '4') ON DUPLICATE KEY UPDATE value = '4'");
+    // v5: tipos de demanda gerenciáveis pelo painel
+    $pdo->exec("CREATE TABLE IF NOT EXISTS ticket_categories (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      slug VARCHAR(20) NOT NULL,
+      name VARCHAR(80) NOT NULL,
+      sort INT NOT NULL DEFAULT 0,
+      active TINYINT(1) NOT NULL DEFAULT 1,
+      PRIMARY KEY (id),
+      UNIQUE KEY ticket_categories_slug (slug)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    $ins = $pdo->prepare('INSERT IGNORE INTO ticket_categories (slug, name, sort) VALUES (?, ?, ?)');
+    $i = 0;
+    foreach (TICKET_CATS_DEFAULT as $slug => $name) { $i += 10; $ins->execute([$slug, $name, $slug === 'outro' ? 9999 : $i]); }
+    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '5') ON DUPLICATE KEY UPDATE value = '5'");
 }
 
 /* ---------- fotos (ficam fora da web; só aparecem pelo api/foto.php) ---------- */
@@ -203,7 +249,7 @@ function tickets_public(): array
             'id' => (int) $t['id'],
             'code' => ticket_code((int) $t['id']),
             'cat' => $t['category'] ?: 'outro',
-            'catLabel' => TICKET_CATS[$t['category']] ?? 'Problema na cidade',
+            'catLabel' => cat_label($t['category'], 'Problema na cidade'),
             'status' => $t['status'],
             'lat' => (float) $t['lat'], 'lng' => (float) $t['lng'],
             'place' => trim(($t['address'] ?: '') . ($t['neighborhood'] ? ($t['address'] ? ' – ' : '') . $t['neighborhood'] : '')),

@@ -247,3 +247,18 @@ select{-webkit-appearance:none;appearance:none;padding-right:42px!important;curs
 .exp>div{display:flex}
 .exp .card{flex:1;display:flex;flex-direction:column;align-items:flex-start}
 .exp .card>.btn{margin-top:auto}
+/* tipos de demanda */
+.types{list-style:none;margin:0;padding:0}
+.types li{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.types li:last-child{border-bottom:0}
+.types li.is-off .types-name input{color:var(--muted);text-decoration:line-through}
+.types-ord{display:flex;gap:2px;width:68px;flex:none}
+.types-name{display:flex;gap:8px;align-items:center;flex:1;min-width:0}
+.types-name input{flex:1;min-width:0}
+.types-n{width:96px;flex:none;text-align:right}
+.types-acts{display:flex;gap:14px;width:150px;flex:none;justify-content:flex-end}
+.icon-btn{width:32px;height:32px;border-radius:8px;border:0;background:var(--mist);display:grid;place-items:center;color:var(--ink);cursor:pointer}
+.icon-btn:hover{background:#E3EAF7}
+.icon-btn:disabled{opacity:.35;cursor:default}
+.icon-btn .ic{width:15px;height:15px}
+@media (max-width:760px){.types li{flex-wrap:wrap}.types-name{flex-basis:calc(100% - 80px)}.types-n{text-align:left;width:auto}.types-acts{width:auto;margin-left:auto}}

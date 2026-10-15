@@ -35,7 +35,7 @@ if (is_post()) {
     $published = in_array($v['status'], ['publicado', 'resolvido'], true) ? form_date($v['published_at'], '10:00:00') : null;
     $resolved = $v['status'] === 'resolvido' ? form_date($v['resolved_at'], '17:00:00') : null;
 
-    if (!isset(TICKET_CATS[$v['category']])) $errors[] = 'Escolha o tipo do problema.';
+    if (!isset(ticket_cats()[$v['category']])) $errors[] = 'Escolha o tipo do problema.';
     if ($v['description'] === '') $errors[] = 'Descreva a demanda.';
     if ($v['email'] !== '' && !filter_var($v['email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'E-mail da pessoa inválido.';
     if (strtotime($created) > time() + 3600) $errors[] = 'A data em que a demanda chegou não pode ser no futuro.';
@@ -103,7 +103,7 @@ admin_head('Cadastrar demanda', 'tnew', $leaflet);
       <div class="card">
         <h2>A demanda</h2>
         <div class="fd"><label for="category">Tipo do problema</label><select id="category" name="category" required><option value="">Escolha</option>
-<?php foreach (TICKET_CATS as $k => $label): ?><option value="<?= $k ?>"<?= $v['category'] === $k ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?></select></div>
+<?php foreach (ticket_cats() as $k => $label): ?><option value="<?= $k ?>"<?= $v['category'] === $k ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?></select></div>
         <div class="fd"><label for="description">Relato</label><textarea id="description" name="description" rows="4" required placeholder="O que está acontecendo, desde quando, o que já foi feito."><?= e($v['description']) ?></textarea></div>
         <div class="fd"><label for="public_text">Texto que aparece no mapa <small class="muted">(opcional)</small></label><textarea id="public_text" name="public_text" rows="3" placeholder="Se vazio, usa o relato. Tire dados pessoais."><?= e($v['public_text']) ?></textarea></div>
         <div class="fd"><span class="lbl">Fotos <small class="muted">(até 3; obrigatório para ir ao mapa)</small></span>

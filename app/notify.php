@@ -17,7 +17,7 @@ function citizen_notify(int $id, string $kind): array
     if (!in_array($kind, ['publicado', 'resolvido'], true)) return [false, 'tipo de aviso desconhecido'];
 
     $code = ticket_code($id);
-    $cat = TICKET_CATS[$t['category']] ?? 'Demanda';
+    $cat = cat_label($t['category']);
     $first = first_name($t['name']);
     $place = trim(($t['address'] ?: '') . ($t['neighborhood'] ? ($t['address'] ? ' – ' : '') . $t['neighborhood'] : ''));
     $track = abs_url('/demandas/') . '?d=' . $id . '#mapa';

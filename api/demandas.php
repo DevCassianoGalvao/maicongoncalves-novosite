@@ -43,7 +43,7 @@ $lat = filter_var($_POST['lat'] ?? '', FILTER_VALIDATE_FLOAT);
 $lng = filter_var($_POST['lng'] ?? '', FILTER_VALIDATE_FLOAT);
 $digits = preg_replace('/\D+/', '', $d['phone']);
 
-if (!isset(TICKET_CATS[$d['category']])) json_out(['ok' => false, 'error' => 'Escolha o tipo do problema.', 'field' => 'categoria'], 422);
+if (!isset(ticket_cats()[$d['category']])) json_out(['ok' => false, 'error' => 'Escolha o tipo da demanda.', 'field' => 'categoria'], 422);
 if ($lat === false || $lng === false || abs($lat + 22.28) > 0.6 || abs($lng + 42.53) > 0.6) json_out(['ok' => false, 'error' => 'Marque no mapa onde fica o problema (dentro de Nova Friburgo).', 'field' => 'lat'], 422);
 if ($d['description'] === '') json_out(['ok' => false, 'error' => 'Descreva rapidamente o problema.', 'field' => 'descricao'], 422);
 if (!$anon && $d['name'] === '') json_out(['ok' => false, 'error' => 'Informe seu nome (ou marque para não aparecer).', 'field' => 'nome'], 422);
@@ -75,7 +75,7 @@ if ($f('novidades', 1) === '1') {
 }
 
 // e-mail para o gabinete: "Nova demanda", com as fotos em anexo
-$cat = TICKET_CATS[$d['category']];
+$cat = cat_label($d['category']);
 $code = ticket_code($id);
 $link = abs_url('/admin/atendimento.php?id=' . $id);
 $ll = sprintf('%.6f,%.6f', $d['lat'], $d['lng']);

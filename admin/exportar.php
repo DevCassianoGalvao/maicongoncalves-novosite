@@ -62,7 +62,7 @@ if ($tipo === 'demandas') {
     foreach (q('SELECT * FROM tickets ORDER BY id')->fetchAll() as $t) {
         $mail = mb_strtolower(trim((string) $t['email']));
         $rows[] = [ticket_code((int) $t['id']), TICKET_STATUS[$t['status']] ?? $t['status'],
-            $t['source'] === 'contato' ? ($t['subject'] ?: 'Contato') : (TICKET_CATS[$t['category']] ?? ''),
+            $t['source'] === 'contato' ? ($t['subject'] ?: 'Contato') : cat_label($t['category'], ''),
             ['mapa' => 'Site', 'painel' => 'Painel', 'contato' => 'Formulário antigo'][$t['source']] ?? $t['source'],
             $t['name'], $mail, $t['phone'], $t['address'], $t['neighborhood'], $t['lat'] !== null ? $t['lat'] . ',' . $t['lng'] : '',
             $t['description'], $t['department'], $t['protocol'], $fmt($t['created_at']), $fmt($t['published_at']), $fmt($t['resolved_at']),

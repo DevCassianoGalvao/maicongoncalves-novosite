@@ -113,7 +113,7 @@ for f in ('site.css', 'site.js', 'radar.js'): shutil.copy(os.path.join(SRC, f), 
 
 # ícones pedidos pelo PHP: icon('nome') ou icon('nome', 'bold'|'fill')
 need = {(n, 'i') for n in ('facebook-logo', 'instagram-logo', 'tiktok-logo', 'youtube-logo',  # redes (content.php)
-                           'squares-four', 'newspaper', 'plus-circle', 'tag', 'gear-six', 'user-circle', 'map-pin-plus', 'users', 'download-simple',  # menu do painel
+                           'squares-four', 'newspaper', 'plus-circle', 'tag', 'gear-six', 'user-circle', 'map-pin-plus', 'users', 'download-simple', 'caret-up', 'caret-down',  # menu do painel
                            'check-circle', 'warning-circle', 'tray')}
 for f in glob.glob(os.path.join(REPO, '**', '*.php'), recursive=True):
     if '/vendor/' in f or '/app/pages/' in f: continue

@@ -97,7 +97,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
         <button class="fl" aria-pressed="false" data-st="resolvido"><i class="rd-dot rd-dot--ok"></i>Resolvidos</button>
       </div>
       <label class="rd-sel"><span class="sr">Tipo de problema</span><select id="rd-cat"><option value="">Todos os tipos</option>
-<?php foreach (TICKET_CATS as $k => $v): ?><option value="<?= $k ?>"><?= e($v) ?></option><?php endforeach; ?>
+<?php $used = array_unique(array_column($items, 'cat')); foreach (ticket_cats(true) as $k => $v): if (!in_array($k, $used, true)) continue; ?><option value="<?= e($k) ?>"><?= e($v) ?></option><?php endforeach; ?>
       </select></label>
     </div>
     <div class="rd-mapbox">
@@ -139,11 +139,9 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
       <div class="fd"><label for="rd-rua">Rua e número</label><input id="rd-rua" name="endereco" type="text" maxlength="255" placeholder="Ex.: Rua Farinha Filho, 50"></div>
       <div class="fd"><label for="rd-bairro">Bairro / Localidade</label><select id="rd-bairro" name="bairro"><option value="">Qual bairro?</option><option>Alto dos 50</option><option>Amparo</option><option>Baixada de Salinas</option><option>Barracão dos Mendes</option><option>Benfica</option><option>Boa Esperança</option><option>Bela Vista</option><option>Braunes</option><option>Caledônia</option><option>Campo do Coelho</option><option>Canto do Riacho</option><option>Cardinot</option><option>Cascatinha</option><option>Catarcione</option><option>Centenário</option><option>Centro</option><option>Chácara do Paraíso</option><option>Cônego</option><option>Conselheiro Paulino</option><option>Conquista</option><option>Cordoeira</option><option>Córrego D’Antas</option><option>Curral do Sol</option><option>Da Graça</option><option>Debossan</option><option>Duas Pedras</option><option>Fazenda Bella Vista</option><option>Fazenda da Lage</option><option>Fazenda Rio Grande</option><option>Florândia da Serra</option><option>Floresta</option><option>Furnas</option><option>Galdinópolis</option><option>Girassol</option><option>Granja do Céu</option><option>Granja Mimosa</option><option>Granja Spinelli</option><option>Janela das Andorinhas</option><option>Jardim Califórnia</option><option>Jardim Marajói</option><option>Jardim Ouro Preto</option><option>Sans Souci</option><option>Jardinlândia</option><option>Lagoinha</option><option>Lazareto</option><option>Lumiar</option><option>Macaé de Cima</option><option>Marechal Rondon</option><option>Maria Teresa</option><option>Maringá</option><option>Mury</option><option>Nossa Senhora de Fátima</option><option>Nova Suíça</option><option>Olaria</option><option>Paissandu</option><option>Parque das Flores</option><option>Parque São Clemente</option><option>Perissê</option><option>Pilões</option><option>Ponte Branca</option><option>Ponte da Saudade</option><option>Ponte dos Alemães</option><option>Ponte Preta</option><option>Prado</option><option>Rio Bonito</option><option>Rio Grande de Cima</option><option>Riograndina</option><option>Rui Sanglard</option><option>Salinas</option><option>Santa Bernadete</option><option>Santa Cruz</option><option>Santa Terezinha</option><option>Santiago</option><option>Santo André</option><option>Santo Antônio</option><option>São Cristóvão</option><option>São Geraldo</option><option>São Jorge</option><option>São Lourenço</option><option>São Pedro da Serra</option><option>São Romão</option><option>Serra Nevada</option><option>Sítio São Luiz</option><option>Solares</option><option>Stucky</option><option>Bairro Suíço</option><option>Suspiro</option><option>Theodoro de Oliveira</option><option>Tinguely (ou Tingly)</option><option>Toca da Onça</option><option>Três Cachoeiras</option><option>Três Picos</option><option>Trilha do Céu</option><option>Terra Nova</option><option>Vargem Grande</option><option>Vale das Rosas</option><option>Vale dos Pinheiros</option><option>Varginha</option><option>Venda das Pedras</option><option>Vila Amélia</option><option>Vila Guarani</option><option>Vila Nova</option><option>Vila Rica</option><option>Vilage</option><option>Vargem Alta</option><option>Vale Radiante</option><option>Ypu</option></select></div>
 
-      <fieldset class="fd fd--full rd-cats"><legend><span class="rd-n">3</span>Tipo do problema</legend>
-<?php foreach (TICKET_CATS as $k => $v): ?>
-        <label class="rd-cat"><input type="radio" name="categoria" value="<?= $k ?>"><span><?= e($v) ?></span></label>
-<?php endforeach; ?>
-      </fieldset>
+      <div class="fd fd--full"><span class="rd-n">3</span><label for="rd-tipo">Tipo da demanda</label><select id="rd-tipo" name="categoria" required><option value="">Escolha o tipo</option>
+<?php foreach (ticket_cats() as $k => $v): ?><option value="<?= e($k) ?>"><?= e($v) ?></option><?php endforeach; ?>
+      </select></div>
       <div class="fd fd--full"><label for="rd-desc">O que está acontecendo?</label><textarea id="rd-desc" name="descricao" maxlength="1500" placeholder="Ex.: Buraco grande no meio da rua há três semanas, carros desviando pela calçada." required></textarea></div>
 
       <div class="fd"><span class="rd-n">4</span><label for="rd-nome">Seu nome</label><input id="rd-nome" name="nome" type="text" maxlength="120" autocomplete="name" placeholder="Nome e sobrenome"></div>
@@ -175,7 +173,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>window.RD_ITEMS = <?= json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
-<script src="<?= B ?>/radar.js?v=8ee3635e" defer></script>
+<script src="<?= B ?>/radar.js?v=370fe4b1" defer></script>
 
 <div class="ft-top on-white" aria-hidden="true">
   <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice">
