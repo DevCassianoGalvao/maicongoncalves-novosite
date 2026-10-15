@@ -79,6 +79,7 @@ if (is_post()) {
         q('UPDATE tickets SET status = ?, public_text = ?, department = ?, protocol = ?, after_photo = ?, published_at = ?, resolved_at = ?, created_at = ?, created_by = ?, ip = NULL WHERE id = ?', [
             $v['status'], $v['public_text'] !== '' ? $v['public_text'] : ($published ? $v['description'] : null), $v['department'] ?: null, $v['protocol'] ?: null,
             $after, $published, $resolved, $created, (int) $user['id'], $id]);
+        if (!empty($_POST['news']) && $v['email'] !== '') { q('UPDATE tickets SET news_optin = 1 WHERE id = ?', [$id]); subscriber_optin($v['email'], $v['name'], 'painel'); }
         ticket_note($id, 'Cadastrada pelo painel' . (substr($created, 0, 10) < date('Y-m-d') ? ', com data de ' . date('d/m/Y', strtotime($created)) : '') . '. Situação: ' . TICKET_STATUS[$v['status']] . '.', (int) $user['id']);
         flash('ok', 'Demanda ' . ticket_code($id) . ' cadastrada' . ($published ? ' e já está no mapa.' : '.'));
         redirect(url(in('again') ? '/admin/demanda-nova.php' : '/admin/atendimento.php?id=' . $id));
@@ -128,6 +129,7 @@ admin_head('Cadastrar demanda', 'tnew', $leaflet);
         </div>
         <div class="fd"><label for="email">E-mail</label><input type="email" id="email" name="email" value="<?= e($v['email']) ?>" maxlength="190"><p class="hint">Com e-mail, a pessoa recebe aviso quando a demanda for resolvida (você escolhe na hora de resolver).</p></div>
         <label class="check small"><input type="checkbox" name="anonymous" value="1"<?= $v['anonymous'] ? ' checked' : '' ?>> Não mostrar o nome no mapa</label>
+        <label class="check small" style="margin-top:8px"><input type="checkbox" name="news" value="1"<?= !empty($_POST['news']) ? ' checked' : '' ?>> A pessoa autorizou receber novidades por e-mail (novos artigos)</label>
       </div>
     </div>
 

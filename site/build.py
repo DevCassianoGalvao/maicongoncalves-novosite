@@ -106,13 +106,14 @@ page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'No
 page('noticia', T, '', read('noticia.html'), nav='news')
 page('radar', 'Enviar demanda – Vereador Maicon Gonçalves | Nova Friburgo', 'Envie sua demanda ao gabinete do vereador Maicon Gonçalves e acompanhe em tempo real no mapa até a Prefeitura resolver.', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top='on-white', kind='demandas')
 page('privacidade', 'Política de privacidade – Vereador Maicon Gonçalves', 'Como o gabinete do vereador Maicon Gonçalves trata os dados enviados pelo site, de acordo com a LGPD.', read('privacidade.html'), ft_top='on-white', kind='privacidade')
+page('descadastrar', 'Descadastrar – Vereador Maicon Gonçalves', '', read('descadastrar.html'), kind='descadastrar')
 page('404', 'Página não encontrada – ' + T, '', read('404.html'), kind='404')
 
 for f in ('site.css', 'site.js', 'radar.js'): shutil.copy(os.path.join(SRC, f), os.path.join(REPO, f))
 
 # ícones pedidos pelo PHP: icon('nome') ou icon('nome', 'bold'|'fill')
 need = {(n, 'i') for n in ('facebook-logo', 'instagram-logo', 'tiktok-logo', 'youtube-logo',  # redes (content.php)
-                           'squares-four', 'newspaper', 'plus-circle', 'tag', 'gear-six', 'user-circle', 'map-pin-plus', 'users',  # menu do painel
+                           'squares-four', 'newspaper', 'plus-circle', 'tag', 'gear-six', 'user-circle', 'map-pin-plus', 'users', 'download-simple',  # menu do painel
                            'check-circle', 'warning-circle', 'tray')}
 for f in glob.glob(os.path.join(REPO, '**', '*.php'), recursive=True):
     if '/vendor/' in f or '/app/pages/' in f: continue

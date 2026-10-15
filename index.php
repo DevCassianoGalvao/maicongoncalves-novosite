@@ -27,6 +27,7 @@ $pages = [
     'noticias'             => 'noticias',
     'demandas'             => 'radar',
     'privacidade'          => 'privacidade',
+    'descadastrar'         => 'descadastrar',
 ];
 $legacy = [ // endereços antigos ou alternativos -> endereço oficial
     'index.html' => '/', 'index.php' => '/', 'home' => '/',
@@ -46,6 +47,7 @@ if ($slug === 'llms.txt') { require ROOT . '/app/llms.php'; exit; }
 if ($slug !== '' && substr($path, -1) !== '/' && strpos($slug, '.') === false) redirect(url('/' . $slug . '/') . $qs, 301);
 
 $meta = [];
+if ($slug === 'descadastrar') { require_once ROOT . '/app/tickets.php'; db_migrate(); $meta = ['robots' => 'noindex, nofollow']; header('Cache-Control: no-store'); }
 if ($slug === 'demandas') {
     require_once ROOT . '/app/tickets.php';
     $meta = [

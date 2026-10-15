@@ -69,6 +69,10 @@ $d['geo_manual'] = $f('geo_manual', 1) === '1';
 $d['photos'] = $photos;
 $id = ticket_create($d);
 ticket_note($id, 'Demanda registrada pelo site.');
+if ($f('novidades', 1) === '1') {
+    q('UPDATE tickets SET news_optin = 1 WHERE id = ?', [$id]);
+    try { subscriber_optin($d['email'], $d['name'], 'demanda'); } catch (Throwable $ex) { app_log('demandas', 'inscrição de novidades falhou: ' . $ex->getMessage()); }
+}
 
 // e-mail para o gabinete: "Nova demanda", com as fotos em anexo
 $cat = TICKET_CATS[$d['category']];

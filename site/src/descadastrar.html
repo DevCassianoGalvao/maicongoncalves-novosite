@@ -1,0 +1,30 @@
+<?php
+$tok = (string) ($_GET['t'] ?? $_POST['t'] ?? '');
+$sub = preg_match('/^[a-f0-9]{32}$/', $tok) ? (db_or_null() ? q('SELECT id, email, unsub_at FROM subscribers WHERE token = ?', [$tok])->fetch() : null) : null;
+$done = false;
+if ($sub && ($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    q('UPDATE subscribers SET unsub_at = NOW() WHERE id = ?', [$sub['id']]);
+    q('UPDATE tickets SET news_optin = 0 WHERE LOWER(email) = ?', [$sub['email']]);
+    app_log('artigos', 'descadastro: ' . $sub['email']);
+    $done = true;
+}
+$masked = $sub ? preg_replace('/^(.{2}).*(@.*)$/u', '$1•••$2', $sub['email']) : '';
+?>
+<main>
+<section class="ph-hero ph-hero--c"><div class="hero-bg" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span></div>
+  <div class="wrap ph-hero-in">
+<?php if (!$sub): ?>
+    <h1 class="h1"><span class="scr">Link inválido{{scr}}</span></h1>
+    <p class="lead">Este link de descadastro não é válido ou expirou. Se quiser parar de receber nossos e-mails, responda qualquer um deles pedindo o descadastro.</p>
+<?php elseif ($done || $sub['unsub_at']): ?>
+    <h1 class="h1"><span class="scr">Pronto{{scr}}</span></h1>
+    <p class="lead">O e-mail <?= e($masked) ?> não vai mais receber as novidades do site. Os avisos sobre demandas que você já enviou continuam chegando normalmente.</p>
+    <div class="hero-cta" style="justify-content:center"><a class="btn btn--orange" href="/"><span>Ir para o início</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a></div>
+<?php else: ?>
+    <h1 class="h1"><span class="scr">Parar de receber{{scr}}</span></h1>
+    <p class="lead">Confirme para que o e-mail <?= e($masked) ?> deixe de receber as novidades do site do vereador Maicon Gonçalves.</p>
+    <form method="post" class="hero-cta" style="justify-content:center"><input type="hidden" name="t" value="<?= e($tok) ?>">
+      <button class="btn btn--orange" type="submit"><span>Confirmar descadastro</span><span class="btn-i">{{ib:check}}{{ib:check}}</span></button></form>
+<?php endif; ?>
+  </div></section>
+</main>

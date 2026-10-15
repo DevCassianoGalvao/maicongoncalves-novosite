@@ -35,7 +35,7 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
         'Demandas' => [
             'tickets' => ['/admin/atendimentos.php', 'tray', 'Atendimentos'],
             'tnew' => ['/admin/demanda-nova.php', 'map-pin-plus', 'Cadastrar demanda'],
-        ],
+        ] + (is_admin($u) ? ['export' => ['/admin/exportar.php', 'download-simple', 'Exportar dados']] : []),
         'Blog' => !is_admin($u) ? [] : [
             'posts' => ['/admin/posts.php', 'newspaper', 'Artigos'],
             'new' => ['/admin/post.php', 'plus-circle', 'Novo artigo'],

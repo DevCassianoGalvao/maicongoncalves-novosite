@@ -2,9 +2,10 @@
 require dirname(__DIR__) . '/app/bootstrap.php';
 require ROOT . '/app/admin_ui.php';
 require_once ROOT . '/app/images.php';
+require_once ROOT . '/app/newsletter.php';
 $user = admin_guard(true);
 
-const RESERVED_SLUGS = ['minha-historia', 'fl360', 'descobrindo-talentos', 'contato', 'demandas', 'radarfriburgo', 'radar', 'privacidade', 'noticias', 'admin', 'install', 'uploads', 'img', 'api', 'app', 'storage', 'category', 'feed', 'sitemap', 'peneira', 'blog', 'home', 'index'];
+const RESERVED_SLUGS = ['minha-historia', 'fl360', 'descobrindo-talentos', 'contato', 'demandas', 'radarfriburgo', 'radar', 'privacidade', 'descadastrar', 'noticias', 'admin', 'install', 'uploads', 'img', 'api', 'app', 'storage', 'category', 'feed', 'sitemap', 'peneira', 'blog', 'home', 'index'];
 
 function unique_slug(string $slug, int $id): string
 {
@@ -100,6 +101,16 @@ if (is_post()) {
             $post['id'] = (int) db()->lastInsertId();
         }
         $msg = $publish ? (strtotime($post['published_at']) > time() ? 'Artigo agendado para ' . date('d/m/Y \à\s H:i', strtotime($post['published_at'])) . '.' : 'Artigo publicado.') : 'Rascunho salvo.';
+        // aviso por e-mail para quem aceitou receber novidades (uma vez por artigo, só quando já está no ar)
+        if ($publish && !empty($_POST['notify_subs']) && empty($post['notified_at'])) {
+            if (strtotime($post['published_at']) > time()) {
+                $msg .= ' O aviso por e-mail não foi enviado porque o artigo ainda não está no ar: depois da data, abra o artigo e clique em Atualizar com a caixa marcada.';
+            } else {
+                [$sentN, $failN, $err] = post_notify($post);
+                if ($sentN > 0) { q('UPDATE posts SET notified_at = NOW(), notified_count = ? WHERE id = ?', [$sentN, $post['id']]); $msg .= ' Aviso enviado por e-mail para ' . $sentN . ($sentN === 1 ? ' pessoa.' : ' pessoas.'); }
+                if ($failN > 0 || ($sentN === 0 && $err !== '')) $errors[] = 'Aviso por e-mail: ' . ($failN ? $failN . ' não enviados. ' : '') . $err;
+            }
+        }
         if ($errors) flash('err', 'Salvo, mas: ' . implode(' ', $errors)); else flash('ok', $msg);
         redirect(url('/admin/post.php?id=' . $post['id']));
     }
@@ -149,6 +160,11 @@ admin_head($isNew ? 'Novo artigo' : 'Editar artigo', $isNew ? 'new' : 'posts', $
       <div class="card">
         <div class="fd"><label for="published_at">Data de publicação</label><input type="datetime-local" id="published_at" name="published_at" value="<?= $post['published_at'] ? date('Y-m-d\TH:i', strtotime($post['published_at'])) : '' ?>">
           <p class="hint">Vazio = agora. Uma data futura agenda o artigo.</p></div>
+<?php if (!empty($post['notified_at'])): ?>
+        <p class="small muted" style="margin:0 0 12px"><?= icon('check-circle') ?> Aviso por e-mail enviado em <?= date('d/m/Y H:i', strtotime($post['notified_at'])) ?> para <?= (int) $post['notified_count'] ?> pessoa(s).</p>
+<?php else: $nSubs = subscribers_count(); ?>
+        <label class="check small" style="margin:0 0 12px"><input type="checkbox" name="notify_subs" value="1"<?= !$isPub && $nSubs ? ' checked' : '' ?><?= $nSubs ? '' : ' disabled' ?>> Avisar por e-mail quem aceita novidades (<?= $nSubs ?> <?= $nSubs === 1 ? 'pessoa' : 'pessoas' ?>)</label>
+<?php endif; ?>
         <div class="save-bar">
           <button class="btn btn--or" type="submit" name="do" value="publish"><?= icon('paper-plane-tilt') ?><?= $isPub ? 'Atualizar' : 'Publicar' ?></button>
           <button class="btn btn--ghost" type="submit" name="do" value="draft" formnovalidate><?= $isPub ? 'Voltar a rascunho' : 'Salvar rascunho' ?></button>

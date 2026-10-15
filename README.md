@@ -31,6 +31,17 @@ Fotos grandes: o arquivo `.user.ini` sobe o limite de envio para 16 MB por foto.
 - Remetente: `PUBLIC_FROM_EMAIL` / `PUBLIC_FROM_NAME` (o e-mail do vereador, validado no Brevo). Vazio = usa `MAIL_FROM_EMAIL`.
 - Registro dos envios em `storage/logs/avisos-AAAA-MM.log`.
 
+## Novidades por e-mail (artigo novo)
+
+- No formulário de demandas há a opção "Quero receber por e-mail as novidades do mandato". Só quem marca entra na lista (LGPD).
+- Ao publicar um artigo, a caixa "Avisar por e-mail quem aceita novidades" manda o título e o link para essa lista. Cada artigo avisa uma vez só.
+- Todo e-mail tem link de descadastro (`/descadastrar/`). Registro em `storage/logs/artigos-AAAA-MM.log`.
+
+## Exportar dados
+
+- Painel › Demandas › Exportar dados (só administrador): planilha de pessoas (uma linha por pessoa) e de demandas.
+- Cada exportação fica registrada em `storage/logs/exportacoes-AAAA-MM.log`.
+
 ## Níveis de acesso no painel
 
 - **Administrador:** tudo, inclusive blog, Configurações, Usuários e excluir atendimentos.

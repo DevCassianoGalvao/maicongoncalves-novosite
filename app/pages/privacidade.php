@@ -83,8 +83,9 @@ if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.clas
         <li>Encaminhar o pedido oficialmente à Prefeitura de Nova Friburgo e aos órgãos responsáveis.</li>
         <li>Avisar você por e-mail quando a demanda for enviada à Prefeitura e quando for resolvida.</li>
         <li>Mostrar no mapa público o andamento das demandas.</li>
+        <li>Só se você marcar a opção no formulário: enviar por e-mail as novidades do mandato, como novos artigos do site. Todo e-mail desse tipo tem um link para descadastrar.</li>
       </ul>
-      <p>A base legal é o seu consentimento, dado ao marcar a caixa de concordância no formulário.</p>
+      <p>A base legal é o seu consentimento, dado ao marcar as caixas de concordância no formulário.</p>
 
       <h2>O que aparece no site</h2>
       <p>No mapa público aparecem apenas a foto, o local, o tipo e a descrição do problema (revisada pela equipe) e o seu primeiro nome, a menos que você peça para não mostrar. <strong>Telefone e e-mail nunca são publicados.</strong></p>

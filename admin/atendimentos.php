@@ -42,7 +42,8 @@ admin_head('Atendimentos', 'tickets');
 <div class="top">
   <div><h1>Atendimentos</h1><p>Demandas enviadas pelo site, com acompanhamento no mapa.</p></div>
   <div class="row"><a class="btn btn--ghost" href="<?= e(url('/demandas/')) ?>" target="_blank" rel="noopener"><?= icon('map-trifold') ?>Ver o mapa</a>
-  <a class="btn btn--or" href="<?= e(url('/admin/demanda-nova.php')) ?>"><?= icon('plus', 'bold') ?>Cadastrar demanda</a></div>
+<?php if (is_admin()): ?>  <a class="btn btn--ghost" href="<?= e(url('/admin/exportar.php')) ?>"><?= icon('download-simple') ?>Exportar planilha</a>
+<?php endif; ?>  <a class="btn btn--or" href="<?= e(url('/admin/demanda-nova.php')) ?>"><?= icon('plus', 'bold') ?>Cadastrar demanda</a></div>
 </div>
 <nav class="tabs" aria-label="Situação">
 <?php foreach ($tabs as $k => [$label, $n]): ?>

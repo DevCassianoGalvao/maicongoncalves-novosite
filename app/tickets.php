@@ -36,7 +36,7 @@ function db_migrate(): void
     } catch (Throwable $ex) {
         return; // site ainda não instalado
     }
-    if ($v >= 3) return;
+    if ($v >= 4) return;
     if ($v < 2) {
     $pdo->exec("CREATE TABLE IF NOT EXISTS tickets (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -87,7 +87,23 @@ function db_migrate(): void
     if (!$has('tickets', 'email')) $pdo->exec('ALTER TABLE tickets ADD COLUMN email VARCHAR(190) NULL AFTER phone');
     if (!$has('tickets', 'created_by')) $pdo->exec('ALTER TABLE tickets ADD COLUMN created_by INT UNSIGNED NULL AFTER ip');
     if (!$has('users', 'role')) $pdo->exec("ALTER TABLE users ADD COLUMN role VARCHAR(12) NOT NULL DEFAULT 'admin' AFTER password_hash");
-    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '3') ON DUPLICATE KEY UPDATE value = '3'");
+    // v4: lista de quem aceitou receber novidades por e-mail + controle do aviso de artigo novo
+    $pdo->exec("CREATE TABLE IF NOT EXISTS subscribers (
+      id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+      email VARCHAR(190) NOT NULL,
+      name VARCHAR(120) NULL,
+      token CHAR(32) NOT NULL,
+      source VARCHAR(20) NOT NULL DEFAULT 'demanda',
+      optin_at DATETIME NULL,
+      unsub_at DATETIME NULL,
+      created_at DATETIME NOT NULL,
+      PRIMARY KEY (id),
+      UNIQUE KEY subscribers_email (email),
+      UNIQUE KEY subscribers_token (token)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+    if (!$has('tickets', 'news_optin')) $pdo->exec('ALTER TABLE tickets ADD COLUMN news_optin TINYINT(1) NOT NULL DEFAULT 0 AFTER consent');
+    if (!$has('posts', 'notified_at')) $pdo->exec('ALTER TABLE posts ADD COLUMN notified_at DATETIME NULL, ADD COLUMN notified_count INT UNSIGNED NULL');
+    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '4') ON DUPLICATE KEY UPDATE value = '4'");
 }
 
 /* ---------- fotos (ficam fora da web; só aparecem pelo api/foto.php) ---------- */
@@ -128,6 +144,17 @@ function ticket_create(array $d): int
         !empty($d['photos']) ? json_encode($d['photos'], JSON_UNESCAPED_SLASHES) : null, !empty($d['consent']) ? 1 : 0, client_ip(),
     ]);
     return (int) db()->lastInsertId();
+}
+
+/** Inscreve (ou reinscreve) um e-mail para receber novidades do site. */
+function subscriber_optin(string $email, string $name = '', string $source = 'demanda'): void
+{
+    $email = mb_strtolower(trim($email));
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) return;
+    db_migrate();
+    q('INSERT INTO subscribers (email, name, token, source, optin_at, created_at) VALUES (?, ?, ?, ?, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE name = COALESCE(NULLIF(VALUES(name), \'\'), name), optin_at = NOW(), unsub_at = NULL',
+       [$email, $name !== '' ? mb_substr($name, 0, 120) : null, bin2hex(random_bytes(16)), $source]);
 }
 
 function ticket_note(int $id, string $body, ?int $userId = null): void
