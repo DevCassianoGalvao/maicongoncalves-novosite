@@ -66,7 +66,8 @@ admin_head('Usuários', 'users');
             <select name="role"><?php foreach (USER_ROLES as $k => $v): ?><option value="<?= $k ?>"<?= $u['role'] === $k ? ' selected' : '' ?>><?= $v ?></option><?php endforeach; ?></select>
             <button class="btn btn--ghost btn--sm" type="submit">Trocar nível</button></form>
           <form method="post" class="row"><?= csrf_field() ?><input type="hidden" name="do" value="password"><input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
-            <input type="text" name="password" minlength="8" placeholder="Nova senha (mín. 8)" autocomplete="off" required>
+            <div class="pw"><input type="password" name="password" minlength="8" placeholder="Nova senha (mín. 8)" autocomplete="new-password" required><button type="button" class="pw-eye" data-eye aria-label="Mostrar senha"><?= icon('eye') ?></button></div>
+            <button type="button" class="btn btn--ghost btn--sm" data-gen>Gerar senha forte</button>
             <button class="btn btn--ghost btn--sm" type="submit">Trocar senha</button></form>
           <form method="post" data-confirm="Excluir o acesso de <?= e($u['name']) ?>?"><?= csrf_field() ?><input type="hidden" name="do" value="delete"><input type="hidden" name="id" value="<?= (int) $u['id'] ?>">
             <button class="link-btn small" type="submit" style="color:#C0262D">Excluir acesso</button></form>
@@ -81,8 +82,8 @@ admin_head('Usuários', 'users');
       <?= csrf_field() ?><input type="hidden" name="do" value="create">
       <h2>Novo acesso</h2>
       <div class="fd"><label for="name">Nome</label><input type="text" id="name" name="name" value="<?= e($form['name']) ?>" required></div>
-      <div class="fd"><label for="email">E-mail</label><input type="email" id="email" name="email" value="<?= e($form['email']) ?>" required autocomplete="off"></div>
-      <div class="fd"><label for="password">Senha inicial</label><input type="text" id="password" name="password" minlength="8" required autocomplete="off"><p class="hint">A pessoa pode trocar depois em Minha conta.</p></div>
+      <div class="fd"><label for="email">E-mail</label><input type="email" id="email" name="email" value="<?= e($form['email']) ?>" required autocomplete="username"></div>
+      <div class="fd"><label for="password">Senha inicial</label><div class="row"><div class="pw"><input type="password" id="password" name="password" minlength="8" required autocomplete="new-password"><button type="button" class="pw-eye" data-eye aria-label="Mostrar senha"><?= icon('eye') ?></button></div><button type="button" class="btn btn--ghost btn--sm" data-gen>Gerar senha forte</button></div><p class="hint">Clique no campo para o navegador sugerir uma senha forte, ou use o botão. Anote a senha para enviar à pessoa; ela pode trocar depois em Minha conta.</p></div>
       <div class="fd"><label for="role">Nível</label><select id="role" name="role"><?php foreach (USER_ROLES as $k => $v): ?><option value="<?= $k ?>"<?= $form['role'] === $k ? ' selected' : '' ?>><?= $v ?></option><?php endforeach; ?></select></div>
       <button class="btn btn--or" type="submit"><?= icon('user-plus') ?>Criar acesso</button>
     </form>
@@ -93,4 +94,26 @@ admin_head('Usuários', 'users');
     </div>
   </div>
 </div>
-<?php admin_foot();
+<?php ob_start(); ?>
+<script>
+(function () {
+  var gen = function () {
+    var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@#$%&*?', a = new Uint32Array(16), out = '';
+    crypto.getRandomValues(a); for (var i = 0; i < a.length; i++) out += chars[a[i] % chars.length];
+    return out;
+  };
+  document.querySelectorAll('[data-gen]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var inp = b.parentNode.querySelector('input[name="password"]');
+      inp.value = gen(); inp.type = 'text'; inp.focus(); inp.select();
+    });
+  });
+  document.querySelectorAll('[data-eye]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var inp = b.parentNode.querySelector('input'); var show = inp.type === 'password';
+      inp.type = show ? 'text' : 'password'; b.setAttribute('aria-label', show ? 'Esconder senha' : 'Mostrar senha');
+    });
+  });
+})();
+</script>
+<?php admin_foot(ob_get_clean());
