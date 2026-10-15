@@ -8,8 +8,8 @@ $name = $user['name'];
 $email = $user['email'];
 if (is_post()) {
     csrf_check();
-    $name = in('name');
-    $email = mb_strtolower(in('email'));
+    $name = in('name', '', 120);
+    $email = mb_strtolower(in('email', '', 190));
     $cur = (string) ($_POST['current'] ?? '');
     $new = (string) ($_POST['password'] ?? '');
     $hash = q('SELECT password_hash FROM users WHERE id = ?', [$user['id']])->fetchColumn();
@@ -21,7 +21,7 @@ if (is_post()) {
     if ($new !== '' && $new !== (string) ($_POST['password2'] ?? '')) $errors[] = 'As novas senhas não conferem.';
     if (!$errors) {
         q('UPDATE users SET name = ?, email = ? WHERE id = ?', [$name, $email, $user['id']]);
-        if ($new !== '') q('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($new, PASSWORD_DEFAULT), $user['id']]);
+        if ($new !== '') { q('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($new, PASSWORD_DEFAULT), $user['id']]); session_refresh_pass((int) $user['id']); }
         flash('ok', $new !== '' ? 'Dados e senha atualizados.' : 'Dados atualizados.');
         redirect(url('/admin/conta.php'));
     }

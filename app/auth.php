@@ -28,6 +28,8 @@ function auth_user(): ?array
     $_SESSION['seen'] = time();
     try {
         $row = q('SELECT * FROM users WHERE id = ?', [$_SESSION['uid']])->fetch();
+        // senha trocada (por você ou pelo administrador) derruba as sessões abertas com a senha antiga
+        if ($row && !hash_equals((string) ($_SESSION['pv'] ?? ''), pass_version($row['password_hash']))) { $_SESSION = []; $row = null; }
         if ($row) { unset($row['password_hash']); $row['role'] = ($row['role'] ?? 'admin') === 'assessoria' ? 'assessoria' : 'admin'; }
         $user = $row ?: null;
     } catch (Throwable $ex) {
@@ -39,6 +41,16 @@ function auth_user(): ?array
 const USER_ROLES = ['admin' => 'Administrador', 'assessoria' => 'Assessoria'];
 function is_admin(?array $u = null): bool { $u = $u ?? auth_user(); return ($u['role'] ?? '') === 'admin'; }
 
+/** Impressão digital curta da senha guardada, para invalidar sessões quando ela muda. */
+function pass_version(string $hash): string { return substr(hash('sha256', $hash), 0, 16); }
+/** Depois que o próprio usuário troca a senha, mantém a sessão dele aberta. */
+function session_refresh_pass(int $uid): void
+{
+    $h = (string) q('SELECT password_hash FROM users WHERE id = ?', [$uid])->fetchColumn();
+    session_boot();
+    $_SESSION['pv'] = pass_version($h);
+}
+
 function require_login(): array
 {
     $u = auth_user();
@@ -46,10 +58,12 @@ function require_login(): array
     return $u;
 }
 
-function login_blocked(): bool
+function login_blocked(string $email = ''): bool
 {
     q('DELETE FROM login_attempts WHERE attempted_at < (NOW() - INTERVAL 1 DAY)');
-    return (int) q('SELECT COUNT(*) FROM login_attempts WHERE ip = ? AND attempted_at > (NOW() - INTERVAL 15 MINUTE)', [client_ip()])->fetchColumn() >= 8;
+    if ((int) q('SELECT COUNT(*) FROM login_attempts WHERE ip = ? AND attempted_at > (NOW() - INTERVAL 15 MINUTE)', [client_ip()])->fetchColumn() >= 8) return true;
+    $email = mb_strtolower(trim($email));
+    return $email !== '' && (int) q('SELECT COUNT(*) FROM login_attempts WHERE email = ? AND attempted_at > (NOW() - INTERVAL 15 MINUTE)', [substr($email, 0, 190)])->fetchColumn() >= 10;
 }
 
 function attempt_login(string $email, string $password): bool
@@ -59,15 +73,16 @@ function attempt_login(string $email, string $password): bool
     if (password_verify($password, $hash) && $row) {
         session_boot();
         session_regenerate_id(true);
-        $_SESSION = ['uid' => (int) $row['id'], 'seen' => time(), 'csrf' => bin2hex(random_bytes(32))];
         if (password_needs_rehash($row['password_hash'], PASSWORD_DEFAULT)) {
-            q('UPDATE users SET password_hash = ? WHERE id = ?', [password_hash($password, PASSWORD_DEFAULT), $row['id']]);
+            $row['password_hash'] = password_hash($password, PASSWORD_DEFAULT);
+            q('UPDATE users SET password_hash = ? WHERE id = ?', [$row['password_hash'], $row['id']]);
         }
+        $_SESSION = ['uid' => (int) $row['id'], 'seen' => time(), 'csrf' => bin2hex(random_bytes(32)), 'pv' => pass_version($row['password_hash'])];
         q('UPDATE users SET last_login_at = NOW() WHERE id = ?', [$row['id']]);
         q('DELETE FROM login_attempts WHERE ip = ?', [client_ip()]);
         return true;
     }
-    q('INSERT INTO login_attempts (ip, email, attempted_at) VALUES (?, ?, NOW())', [client_ip(), substr($email, 0, 190)]);
+    q('INSERT INTO login_attempts (ip, email, attempted_at) VALUES (?, ?, NOW())', [client_ip(), substr(mb_strtolower(trim($email)), 0, 190)]);
     return false;
 }
 

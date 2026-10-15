@@ -7,7 +7,7 @@ $errors = [];
 $v = settings_all(true);
 if (is_post()) {
     csrf_check();
-    $v = array_merge($v, array_map('trim', array_intersect_key($_POST, SETTINGS_DEFAULTS)));
+    $v = array_merge($v, array_map(function ($x) { return is_string($x) ? mb_substr(trim($x), 0, 500) : ''; }, array_intersect_key($_POST, SETTINGS_DEFAULTS)));
     $digits = preg_replace('/\D+/', '', $v['whatsapp']);
     if ($digits !== '' && strlen($digits) <= 11) $digits = '55' . $digits;
     if ($digits !== '' && (strlen($digits) < 12 || strlen($digits) > 13)) $errors[] = 'WhatsApp: informe DDD + número, ex.: (22) 99801-2278.';

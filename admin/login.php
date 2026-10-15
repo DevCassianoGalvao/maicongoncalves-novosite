@@ -10,7 +10,7 @@ if (auth_user()) redirect($next);
 $error = '';
 if (is_post()) {
     csrf_check();
-    if (login_blocked()) {
+    if (login_blocked(in('email'))) {
         $error = 'Muitas tentativas. Aguarde 15 minutos e tente de novo.';
     } elseif (attempt_login(in('email'), (string) ($_POST['password'] ?? ''))) {
         redirect($next);

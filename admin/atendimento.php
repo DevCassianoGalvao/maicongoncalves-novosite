@@ -31,15 +31,15 @@ if (is_post()) {
     };
     switch ($do) {
         case 'save':
-            $cat = in('category');
-            $mail = mb_strtolower(in('email'));
+            $cat = in('category', '', 20);
+            $mail = mb_strtolower(in('email', '', 190));
             q('UPDATE tickets SET category = ?, department = ?, protocol = ?, public_text = ?, anonymous = ?, address = ?, neighborhood = ?, email = ?, updated_at = NOW() WHERE id = ?', [
-                isset(TICKET_CATS[$cat]) ? $cat : null, in('department') ?: null, in('protocol') ?: null, in('public_text') ?: null,
-                !empty($_POST['anonymous']) ? 1 : 0, in('address') ?: null, in('neighborhood') ?: null, filter_var($mail, FILTER_VALIDATE_EMAIL) ? $mail : null, $id]);
+                isset(TICKET_CATS[$cat]) ? $cat : null, in('department', '', 160) ?: null, in('protocol', '', 80) ?: null, in('public_text', '', 3000) ?: null,
+                !empty($_POST['anonymous']) ? 1 : 0, in('address', '', 255) ?: null, in('neighborhood', '', 120) ?: null, filter_var($mail, FILTER_VALIDATE_EMAIL) ? $mail : null, $id]);
             flash('ok', 'Dados do atendimento salvos.');
             break;
         case 'note':
-            if (in('body') !== '') { ticket_note($id, in('body'), (int) $user['id']); flash('ok', 'Anotação registrada.'); }
+            if (in('body', '', 3000) !== '') { ticket_note($id, in('body', '', 3000), (int) $user['id']); flash('ok', 'Anotação registrada.'); }
             break;
         case 'analise':
             $set('analise');
@@ -47,7 +47,7 @@ if (is_post()) {
             break;
         case 'publish':
             if (!$canPublish) { flash('err', 'Para ir ao mapa, o atendimento precisa de foto e localização.'); break; }
-            if (!$t['category']) q('UPDATE tickets SET category = ? WHERE id = ?', [isset(TICKET_CATS[in('category')]) ? in('category') : 'outro', $id]);
+            if (!$t['category']) q('UPDATE tickets SET category = ? WHERE id = ?', [isset(TICKET_CATS[in('category', '', 20)]) ? in('category', '', 20) : 'outro', $id]);
             if ($t['public_text'] === null || $t['public_text'] === '') q('UPDATE tickets SET public_text = description WHERE id = ?', [$id]);
             $set('publicado', ['published_at' => date('Y-m-d H:i:s'), 'resolved_at' => null]);
             flash('ok', 'Aprovado! Já está no mapa e o contador começou a contar.' . $notify('publicado'));

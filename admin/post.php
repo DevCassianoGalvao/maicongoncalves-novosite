@@ -44,12 +44,12 @@ $errors = [];
 if (is_post()) {
     csrf_check();
     $publish = in('do') !== 'draft';
-    $post['title'] = in('title');
+    $post['title'] = in('title', '', 255);
     $post['slug'] = slugify(in('slug') !== '' ? in('slug') : $post['title']);
-    $post['excerpt'] = in('excerpt');
-    $post['meta_description'] = in('meta_description');
+    $post['excerpt'] = in('excerpt', '', 1000);
+    $post['meta_description'] = in('meta_description', '', 300);
     $post['content'] = html_sanitize((string) ($_POST['content'] ?? ''));
-    $post['cover_alt'] = in('cover_alt');
+    $post['cover_alt'] = in('cover_alt', '', 255);
     $post['category_id'] = (int) in('category_id') ?: null;
     $when = in('published_at');
     $post['published_at'] = $when !== '' && strtotime($when) ? date('Y-m-d H:i:s', strtotime($when)) : ($post['published_at'] ?: ($publish ? date('Y-m-d H:i:s') : null));
@@ -58,7 +58,7 @@ if (is_post()) {
     if ($post['title'] === '') $errors[] = 'Escreva o título do artigo.';
     if ($publish && trim(strip_tags($post['content'], '<img><iframe>')) === '') $errors[] = 'O artigo está sem conteúdo.';
 
-    $newCat = in('new_category');
+    $newCat = in('new_category', '', 80);
     if (!$errors && $newCat !== '') {
         $cslug = slugify($newCat);
         $found = q('SELECT id FROM categories WHERE slug = ?', [$cslug])->fetchColumn();

@@ -7,7 +7,7 @@ if (is_post()) {
     csrf_check();
     $action = in('action');
     $id = (int) in('id');
-    $name = in('name');
+    $name = in('name', '', 80);
     $slug = slugify(in('slug') !== '' ? in('slug') : $name);
     if (in_array($action, ['add', 'edit'], true)) {
         if ($name === '' || $slug === '') {

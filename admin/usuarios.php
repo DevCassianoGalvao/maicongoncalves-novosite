@@ -13,12 +13,13 @@ if (is_post()) {
     $id = (int) in('id');
     $target = $id ? q('SELECT id, name, role FROM users WHERE id = ?', [$id])->fetch() : null;
     if ($do === 'create') {
-        $form = ['name' => in('name'), 'email' => mb_strtolower(in('email')), 'role' => in('role') === 'admin' ? 'admin' : 'assessoria'];
+        $form = ['name' => in('name', '', 120), 'email' => mb_strtolower(in('email', '', 190)), 'role' => in('role') === 'admin' ? 'admin' : 'assessoria'];
         $pass = (string) ($_POST['password'] ?? '');
         if ($form['name'] === '') $errors[] = 'Informe o nome.';
         if (!filter_var($form['email'], FILTER_VALIDATE_EMAIL)) $errors[] = 'E-mail inválido.';
         elseif (q('SELECT COUNT(*) FROM users WHERE email = ?', [$form['email']])->fetchColumn()) $errors[] = 'Já existe um acesso com esse e-mail.';
         if (mb_strlen($pass) < 8) $errors[] = 'A senha precisa ter pelo menos 8 caracteres.';
+        elseif (mb_strlen($pass) > 200) $errors[] = 'Senha longa demais.';
         if (!$errors) {
             q('INSERT INTO users (name, email, password_hash, role, created_at) VALUES (?, ?, ?, ?, NOW())', [$form['name'], $form['email'], password_hash($pass, PASSWORD_DEFAULT), $form['role']]);
             flash('ok', 'Acesso criado para ' . $form['name'] . '. Envie o e-mail e a senha para a pessoa entrar em ' . abs_url('/admin/') . '.');

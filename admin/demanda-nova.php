@@ -23,7 +23,9 @@ function form_date(string $s, string $time = '09:00:00'): ?string
 
 if (is_post()) {
     csrf_check();
-    foreach ($v as $k => $_) if ($k !== 'anonymous') $v[$k] = in($k);
+    $max = ['category' => 20, 'description' => 3000, 'public_text' => 3000, 'name' => 120, 'phone' => 30, 'email' => 190, 'address' => 255,
+        'neighborhood' => 120, 'lat' => 20, 'lng' => 20, 'status' => 12, 'department' => 160, 'protocol' => 80, 'created_at' => 16, 'published_at' => 16, 'resolved_at' => 16];
+    foreach ($v as $k => $_) if ($k !== 'anonymous') $v[$k] = in($k, '', $max[$k] ?? 255);
     $v['anonymous'] = !empty($_POST['anonymous']) ? '1' : '';
     $v['email'] = mb_strtolower($v['email']);
     if (!isset(TICKET_STATUS[$v['status']]) || $v['status'] === 'novo' || $v['status'] === 'arquivado') $v['status'] = 'analise';

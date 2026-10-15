@@ -159,11 +159,13 @@ function auth_page_end(): void
     echo "  </div>\n</div>\n</body>\n</html>\n";
 }
 
-/** Valor de um campo do formulário enviado (texto). */
-function in(string $k, string $default = ''): string
+/** Valor de um campo do formulário enviado (texto), sem caracteres de controle e com tamanho máximo. */
+function in(string $k, string $default = '', int $max = 20000): string
 {
     $v = $_POST[$k] ?? $default;
-    return is_string($v) ? trim($v) : $default;
+    if (!is_string($v)) return $default;
+    $v = trim((string) preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', '', $v));
+    return mb_substr($v, 0, $max);
 }
 
 function status_badge(array $p): string

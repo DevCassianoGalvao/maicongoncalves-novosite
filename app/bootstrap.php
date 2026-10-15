@@ -38,6 +38,17 @@ define('ENV_FILE', load_env([dirname(ROOT) . '/.env', ROOT . '/.env']));
 define('DEBUG', filter_var(env('APP_DEBUG', 'false'), FILTER_VALIDATE_BOOLEAN));
 error_reporting(E_ALL);
 ini_set('display_errors', DEBUG ? '1' : '0');
+// Erro inesperado: registra o detalhe no log e mostra só uma mensagem genérica (nada de caminhos, SQL ou dados internos)
+if (!DEBUG) set_exception_handler(function (Throwable $ex) {
+    @file_put_contents(__DIR__ . '/../storage/logs/erros-' . date('Y-m') . '.log', '[' . date('Y-m-d H:i:s') . '] ' . get_class($ex) . ': ' . $ex->getMessage() . ' em ' . $ex->getFile() . ':' . $ex->getLine() . ' | ' . ($_SERVER['REQUEST_URI'] ?? '') . "\n", FILE_APPEND | LOCK_EX);
+    if (!headers_sent()) http_response_code(500);
+    if (strpos((string) ($_SERVER['REQUEST_URI'] ?? ''), '/api/') !== false) {
+        if (!headers_sent()) header('Content-Type: application/json; charset=utf-8');
+        echo '{"ok":false,"error":"Erro no servidor. Tente de novo em instantes."}';
+    } else {
+        echo '<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Erro</title><body style="font-family:system-ui,sans-serif;max-width:520px;margin:12vh auto;padding:0 20px;color:#0F1B3A"><h1 style="font-size:22px">Algo deu errado</h1><p>Tente de novo em instantes. Se continuar, avise a equipe do site.</p><p><a href="/">Ir para o início</a></p></body>';
+    }
+});
 date_default_timezone_set(env('APP_TIMEZONE', 'America/Sao_Paulo'));
 if (function_exists('mb_internal_encoding')) mb_internal_encoding('UTF-8');
 
