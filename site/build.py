@@ -25,6 +25,9 @@ def read(n): return open(os.path.join(SRC, n), encoding='utf-8').read()
 
 
 def svg(name, kind='i'):
+    if name == 'whatsapp':  # logo oficial enviado pelo cliente (src/whatsapp.svg)
+        d = re.search(r'<path d="([^"]+)"', read('whatsapp.svg')).group(1)
+        return f'<svg class="ic" viewBox="0 0 32 32" fill="currentColor" aria-hidden="true"><path d="{d}"/></svg>'
     w = {'i': 'regular', 'ib': 'bold', 'if': 'fill'}[kind]
     f = os.path.join(ICONS, w, name + ('' if w == 'regular' else '-' + w) + '.svg')
     inner = re.search(r'<svg[^>]*>(.*)</svg>', open(f, encoding='utf-8').read(), re.S).group(1)

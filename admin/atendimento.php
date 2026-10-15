@@ -163,7 +163,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
       <h2>Quem enviou</h2>
       <p style="margin:0 0 4px"><b><?= e($t['name'] ?: 'Sem nome') ?></b><?= $t['anonymous'] ? ' <span class="badge">não quer o nome no mapa</span>' : '' ?></p>
       <p class="small muted" style="margin:0 0 12px"><?= e($t['phone']) ?><?= $t['birth'] ? ' · nasc. ' . e($t['birth']) : '' ?></p>
-<?php if ($wa): ?><a class="btn btn--block" style="background:#1FAF5A" href="<?= e($wa) ?>" target="_blank" rel="noopener"><?= icon('whatsapp-logo') ?>Conversar no WhatsApp</a><?php endif; ?>
+<?php if ($wa): ?><a class="btn btn--block" style="background:#1FAF5A" href="<?= e($wa) ?>" target="_blank" rel="noopener"><?= icon('whatsapp') ?>Conversar no WhatsApp</a><?php endif; ?>
     </div>
     <form method="post" class="card">
       <?= csrf_field() ?><input type="hidden" name="do" value="save">

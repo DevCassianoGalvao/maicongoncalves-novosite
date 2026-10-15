@@ -341,7 +341,7 @@ ul,ol{padding:0;list-style:none}
 .wa:hover{transform:translateY(-3px) scale(1.03)}
 .wa b{width:36px;height:36px;border-radius:50%;background:#1FAF5A;color:#fff;display:grid;place-items:center;position:relative}
 .wa b::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #1FAF5A;animation:ping 2.4s var(--ease-out) infinite}
-.wa .ic{width:20px;height:20px}
+.wa .ic{width:19px;height:19px}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 26px);translate:-50% 40px;z-index:120;background:var(--navy-deep);color:#fff;padding:11px 18px;border-radius:999px;font-weight:600;font-size:14px;
   box-shadow:0 20px 40px -18px rgba(2,11,31,.7);opacity:0;pointer-events:none;transition:opacity .35s,translate .5s var(--ease-out);max-width:calc(100vw - 32px);text-align:center}
 .toast.is-on{opacity:1;translate:-50% 0}
@@ -575,6 +575,8 @@ ul,ol{padding:0;list-style:none}
 .share a,.share button{display:flex;align-items:center;gap:11px;padding:10px 13px;border-radius:12px;background:#fff;font-weight:700;font-size:14.5px;text-align:left;transition:transform .35s var(--ease-out),background .25s,color .25s}
 .share a:hover,.share button:hover{transform:translateX(5px);background:var(--navy);color:#fff}
 .share .ic{width:20px;height:20px;color:var(--orange)}
+.share .wai{flex:none;width:22px;height:22px;margin:0 -1px 0 -1px;border-radius:50%;background:#1FAF5A;display:grid;place-items:center}
+.share .wai .ic{width:13px;height:13px;color:#fff}
 .lb{border:0;padding:0;background:transparent;max-width:100vw;max-height:100vh;width:100vw;height:100vh;overflow:hidden}
 .lb::backdrop{background:rgba(2,11,31,.92)}
 .lb-in{width:100%;height:100%;display:grid;grid-template:minmax(0,1fr)/minmax(0,1fr);place-items:center;padding:64px 72px}

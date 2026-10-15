@@ -31,7 +31,7 @@ $share = rawurlencode($post['abs_url']);
   </article>
   <aside class="side" aria-label="Compartilhar"><div class="side-h">Compartilhe este artigo</div>
     <div class="share">
-      <a href="https://api.whatsapp.com/send?text=<?= rawurlencode($post['title'] . ' ' . $post['abs_url']) ?>" target="_blank" rel="noopener">{{i:whatsapp-logo}}WhatsApp</a>
+      <a href="https://api.whatsapp.com/send?text=<?= rawurlencode($post['title'] . ' ' . $post['abs_url']) ?>" target="_blank" rel="noopener"><span class="wai">{{i:whatsapp}}</span>WhatsApp</a>
       <a href="https://www.facebook.com/sharer/sharer.php?u=<?= $share ?>" target="_blank" rel="noopener">{{i:facebook-logo}}Facebook</a>
       <button type="button" data-copy="<?= e($post['abs_url']) ?>">{{ib:link-simple}}Copiar link</button>
     </div></aside>
