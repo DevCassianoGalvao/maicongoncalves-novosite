@@ -41,7 +41,7 @@ admin_head('Atendimentos', 'tickets');
 ?>
 <div class="top">
   <div><h1>Atendimentos</h1><p>Demandas enviadas pelo site, com acompanhamento no mapa.</p></div>
-  <div class="row"><a class="btn btn--ghost btn--sm" href="<?= e(url('/admin/tipos.php')) ?>"><?= icon('tag') ?>Tipos de demanda</a>
+  <div class="row"><a class="btn btn--ghost" href="<?= e(url('/admin/tipos.php')) ?>"><?= icon('tag') ?>Tipos de demanda</a>
   <a class="btn btn--ghost" href="<?= e(url('/demandas/')) ?>" target="_blank" rel="noopener"><?= icon('map-trifold') ?>Ver o mapa</a>
 <?php if (is_admin()): ?>  <a class="btn btn--ghost" href="<?= e(url('/admin/exportar.php')) ?>"><?= icon('download-simple') ?>Exportar planilha</a>
 <?php endif; ?>  <a class="btn btn--or" href="<?= e(url('/admin/demanda-nova.php')) ?>"><?= icon('plus', 'bold') ?>Cadastrar demanda</a></div>
