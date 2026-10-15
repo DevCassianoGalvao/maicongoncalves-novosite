@@ -88,8 +88,8 @@ admin_head('Usuários', 'users');
     </form>
     <div class="card">
       <h2>O que cada nível pode fazer</h2>
-      <p class="small" style="margin:0 0 8px"><b>Assessoria:</b> atendimentos (aprovar, publicar no mapa, resolver, cadastrar demandas) e blog (artigos e categorias).</p>
-      <p class="small" style="margin:0"><b>Administrador:</b> tudo da assessoria e também configurações do site, usuários e exclusão de atendimentos.</p>
+      <p class="small" style="margin:0 0 8px"><b>Assessoria:</b> só as demandas: atendimentos (aprovar, publicar no mapa, resolver) e cadastrar demandas.</p>
+      <p class="small" style="margin:0"><b>Administrador:</b> tudo da assessoria e também o blog (artigos e categorias), configurações do site, usuários e exclusão de atendimentos.</p>
     </div>
   </div>
 </div>

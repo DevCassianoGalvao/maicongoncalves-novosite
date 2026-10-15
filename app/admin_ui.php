@@ -14,7 +14,7 @@ function admin_guard(bool $adminOnly = false): array
     $u = require_login();
     if ($adminOnly && !is_admin($u)) {
         flash('err', 'Essa área é só para o administrador.');
-        redirect(url('/admin/'));
+        redirect(url('/admin/atendimentos.php'));
     }
     return $u;
 }
@@ -31,12 +31,12 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
 {
     $u = auth_user();
     $groups = [
-        '' => ['dash' => ['/admin/', 'squares-four', 'Painel']],
+        '' => is_admin($u) ? ['dash' => ['/admin/', 'squares-four', 'Painel']] : [],
         'Demandas' => [
             'tickets' => ['/admin/atendimentos.php', 'tray', 'Atendimentos'],
             'tnew' => ['/admin/demanda-nova.php', 'map-pin-plus', 'Cadastrar demanda'],
         ],
-        'Blog' => [
+        'Blog' => !is_admin($u) ? [] : [
             'posts' => ['/admin/posts.php', 'newspaper', 'Artigos'],
             'new' => ['/admin/post.php', 'plus-circle', 'Novo artigo'],
             'cats' => ['/admin/categorias.php', 'tag', 'Categorias'],
@@ -67,7 +67,7 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
   <aside class="side" id="side">
     <a class="side-logo" href="<?= e(url('/admin/')) ?>"><img src="<?= e(url('/img/logo.webp')) ?>" alt="Vereador Maicon Gonçalves"></a>
     <nav class="nav" aria-label="Painel">
-<?php foreach ($groups as $gname => $items): ?>
+<?php foreach (array_filter($groups) as $gname => $items): ?>
 <?php if ($gname !== ''): ?>      <div class="nav-h"><?= e($gname) ?></div>
 <?php endif; ?>
 <?php foreach ($items as $key => [$href, $ic, $label]): ?>

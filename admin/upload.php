@@ -5,6 +5,7 @@ require ROOT . '/app/auth.php';
 require_once ROOT . '/app/images.php';
 
 if (!auth_user()) json_out(['error' => 'Sessão expirada. Entre de novo no painel.'], 401);
+if (!is_admin()) json_out(['error' => 'Só o administrador pode enviar imagens para o blog.'], 403);
 if (!is_post()) json_out(['error' => 'Método não permitido.'], 405);
 $t = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
 if (!is_string($t) || !hash_equals(csrf_token(), $t)) json_out(['error' => 'Sessão expirada. Recarregue a página.'], 419);

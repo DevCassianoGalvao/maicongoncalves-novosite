@@ -33,8 +33,8 @@ Fotos grandes: o arquivo `.user.ini` sobe o limite de envio para 16 MB por foto.
 
 ## Níveis de acesso no painel
 
-- **Administrador:** tudo, inclusive Configurações, Usuários e excluir atendimentos.
-- **Assessoria:** atendimentos (aprovar, resolver, cadastrar demandas) e blog.
+- **Administrador:** tudo, inclusive blog, Configurações, Usuários e excluir atendimentos.
+- **Assessoria:** só as demandas (atendimentos e cadastrar demanda).
 - Contas novas em Painel › Sistema › Usuários.
 
 ## Localização no formulário

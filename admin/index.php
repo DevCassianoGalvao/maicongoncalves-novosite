@@ -2,6 +2,7 @@
 require dirname(__DIR__) . '/app/bootstrap.php';
 require ROOT . '/app/admin_ui.php';
 $user = admin_guard();
+if (!is_admin($user)) redirect(url('/admin/atendimentos.php')); // assessoria trabalha só com as demandas
 
 $pub = (int) q("SELECT COUNT(*) FROM posts WHERE status = 'published'")->fetchColumn();
 $draft = (int) q("SELECT COUNT(*) FROM posts WHERE status <> 'published'")->fetchColumn();

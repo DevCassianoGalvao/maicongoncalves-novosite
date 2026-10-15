@@ -60,7 +60,7 @@ if (isset($pages[$slug])) {
 
 if (preg_match('#^[a-z0-9][a-z0-9-]*$#', $slug)) {
     $preview = isset($_GET['preview']);
-    if ($preview) { require ROOT . '/app/auth.php'; $preview = auth_user() !== null; }
+    if ($preview) { require ROOT . '/app/auth.php'; $preview = auth_user() !== null && is_admin(); }
     $post = post_by_slug($slug, $preview);
     if ($post) {
         $meta = [
