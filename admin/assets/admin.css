@@ -26,9 +26,11 @@ h1,h2,h3{margin:0;line-height:1.15;letter-spacing:-.02em}
 .nav a{display:flex;align-items:center;gap:11px;padding:10px 12px;border-radius:10px;color:#C9D5EE;font-weight:600}
 .nav a:hover{background:rgba(255,255,255,.07);color:#fff;text-decoration:none}
 .nav a.on{background:rgba(255,255,255,.1);color:#fff;box-shadow:inset 3px 0 0 var(--orange)}
+.nav-h{font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:#7F93BE;padding:14px 12px 4px}
 .nav-sep{height:1px;background:rgba(255,255,255,.1);margin:8px 6px}
 .side-ft{margin-top:auto;font-size:13px;padding:0 10px;color:#8EA3CC}
 .side-ft b{display:block;color:#fff;font-weight:700}
+.side-ft span{display:block;font-size:12px;margin-top:2px}
 .main{padding:28px clamp(16px,3vw,40px) 60px;min-width:0}
 .top{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 20px;margin-bottom:22px}
 .top h1{font-size:clamp(22px,2.4vw,28px);font-weight:800}
@@ -217,3 +219,19 @@ code{font-size:13px;background:var(--mist);padding:2px 6px;border-radius:6px}
 .tk-acts{display:grid;gap:10px}
 .tk-acts form{margin:0}
 .tk-resolve{display:grid;gap:8px}
+/* usuários */
+.users{list-style:none;margin:0;padding:0}
+.users li{padding:14px 0;border-bottom:1px solid var(--line)}
+.users li:last-child{border-bottom:0}
+.users-hd{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.users-ed{margin-top:10px}
+.users-ed summary{cursor:pointer;font-size:13.5px;font-weight:700;color:var(--blue)}
+.users-ed form{margin-top:10px}
+.users-ed .row>input,.users-ed .row>select{flex:1;min-width:0;width:auto}
+/* linhas inteiras clicáveis */
+.tbl tr[data-href]{cursor:pointer;transition:background .15s}
+.tbl tr[data-href]:hover td{background:#F6F8FD}
+.tbl tr[data-href]:focus-visible td{background:#EEF3FC;outline:none}
+[hidden]{display:none!important}
+/* setas dos selects afastadas da borda */
+select{-webkit-appearance:none;appearance:none;padding-right:42px!important;cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cpath fill='%23041C4B' d='M216.49 104.49l-80 80a12 12 0 0 1-17 0l-80-80a12 12 0 0 1 17-17L128 159l71.51-71.52a12 12 0 0 1 17 17Z'/%3E%3C/svg%3E")!important;background-repeat:no-repeat!important;background-position:right 15px center!important;background-size:13px!important}

@@ -59,7 +59,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
   <div class="wrap rd-form-wrap">
     <div class="stackv rd-form-hd">
       <h2 class="h2">Enviar demanda</h2>
-      <p class="lead">Leva menos de dois minutos. Seu telefone nunca aparece no site.</p>
+      <p class="lead">Leva menos de dois minutos. Seu telefone e seu e-mail nunca aparecem no site.</p>
     </div>
     <form class="form rd-form" id="rd-form" action="/api/demandas.php" method="post" enctype="multipart/form-data" novalidate>
       <div class="fd fd--full"><span class="rd-n">1</span><label for="rd-fotos">Foto do problema <small>(até 3)</small></label>
@@ -82,8 +82,9 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 
       <div class="fd"><span class="rd-n">4</span><label for="rd-nome">Seu nome</label><input id="rd-nome" name="nome" type="text" maxlength="120" autocomplete="name" placeholder="Nome e sobrenome"></div>
       <div class="fd"><label for="rd-zap">WhatsApp</label><input id="rd-zap" name="whatsapp" type="tel" maxlength="16" autocomplete="tel" placeholder="(22) 99999-9999" data-mask="phone" required></div>
+      <div class="fd fd--full"><label for="rd-mail">E-mail <small>(para avisarmos quando a demanda for à Prefeitura e quando for resolvida)</small></label><input id="rd-mail" name="email" type="email" maxlength="190" autocomplete="email" inputmode="email" placeholder="seuemail@exemplo.com" required></div>
       <label class="rd-check fd--full"><input type="checkbox" name="anonimo" value="1" id="rd-anon"><span>Não mostrar meu nome no mapa <small>(o gabinete continua sabendo quem enviou para falar com você)</small></span></label>
-      <label class="rd-check fd--full"><input type="checkbox" name="consentimento" value="1" id="rd-ok" required><span>Concordo que o gabinete do vereador use estes dados para encaminhar a demanda à Prefeitura e falar comigo. A foto, o local e a descrição podem ser publicados no mapa; meu telefone, não.</span></label>
+      <label class="rd-check fd--full"><input type="checkbox" name="consentimento" value="1" id="rd-ok" required><span>Concordo que o gabinete do vereador use estes dados para encaminhar a demanda à Prefeitura e falar comigo. A foto, o local e a descrição podem ser publicados no mapa; meu telefone e meu e-mail, não. <a href="/privacidade/" target="_blank">Política de privacidade</a>.</span></label>
 
       <input type="hidden" name="lat" id="rd-lat"><input type="hidden" name="lng" id="rd-lng"><input type="hidden" name="acc" id="rd-acc"><input type="hidden" name="geo_addr" id="rd-addr"><input type="hidden" name="geo_manual" id="rd-manual"><input type="hidden" name="t" id="rd-t">
       <div class="hp" aria-hidden="true"><label for="rd-site">Não preencha</label><input id="rd-site" name="website" type="text" tabindex="-1" autocomplete="off"></div>
@@ -96,7 +97,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
     <div class="rd-done" id="rd-done" hidden>
       <span class="rd-done-i">{{if:check-circle}}</span>
       <h3 class="h3">Recebemos sua demanda!</h3>
-      <p>Protocolo <b id="rd-code"></b>. A equipe do vereador vai analisar e falar com você pelo WhatsApp. Quando o pedido for levado à Prefeitura, ele aparece no mapa.</p>
+      <p>Protocolo <b id="rd-code"></b>. A equipe do vereador vai analisar e falar com você pelo WhatsApp. Quando o pedido for levado à Prefeitura, ele aparece no mapa e você recebe um aviso por e-mail.</p>
       <button type="button" class="btn btn--line btn--sm" id="rd-again"><span>Enviar outra demanda</span><span class="btn-i">{{ib:plus}}{{ib:plus}}</span></button>
     </div>
   </div>

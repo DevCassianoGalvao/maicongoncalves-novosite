@@ -4,28 +4,32 @@ defined('APP') or exit;
 /**
  * Envia um e-mail transacional pela API do Brevo.
  * $attachments: lista de ['name' => 'foto.jpg', 'content' => bytes]
+ * $opts (para e-mails ao cidadão): 'to' => [['email' => .., 'name' => ..]], 'sender' => ['email' => .., 'name' => ..], 'tag' => '..'
+ *   Sem 'to', vai para o gabinete (MAIL_TO, com MAIL_BCC).
  * Retorna [true, messageId] ou [false, mensagem de erro].
  */
-function brevo_send(string $subject, string $html, string $text, array $attachments = [], ?array $replyTo = null): array
+function brevo_send(string $subject, string $html, string $text, array $attachments = [], ?array $replyTo = null, array $opts = []): array
 {
     $key = (string) env('BREVO_API_KEY', '');
-    $from = (string) env('MAIL_FROM_EMAIL', '');
-    if ($key === '' || $from === '') return [false, 'BREVO_API_KEY ou MAIL_FROM_EMAIL não configurados no .env'];
+    $sender = $opts['sender'] ?? ['email' => (string) env('MAIL_FROM_EMAIL', ''), 'name' => (string) env('MAIL_FROM_NAME', 'Site')];
+    if ($key === '' || $sender['email'] === '') return [false, 'BREVO_API_KEY ou MAIL_FROM_EMAIL não configurados no .env'];
     if (!function_exists('curl_init')) return [false, 'extensão cURL do PHP não está ativa'];
 
-    $to = [];
-    foreach (explode(',', (string) env('MAIL_TO', 'vereadormaicongoncalves@gmail.com')) as $addr) {
-        if (trim($addr) !== '') $to[] = ['email' => trim($addr), 'name' => (string) env('MAIL_TO_NAME', '')];
+    $to = $opts['to'] ?? [];
+    if (!$to) {
+        foreach (explode(',', (string) env('MAIL_TO', 'vereadormaicongoncalves@gmail.com')) as $addr) {
+            if (trim($addr) !== '') $to[] = ['email' => trim($addr), 'name' => (string) env('MAIL_TO_NAME', '')];
+        }
     }
     $payload = [
-        'sender' => ['email' => $from, 'name' => (string) env('MAIL_FROM_NAME', 'Site')],
+        'sender' => $sender,
         'to' => $to,
         'subject' => $subject,
         'htmlContent' => $html,
         'textContent' => $text,
-        'tags' => ['contato-site'],
+        'tags' => [$opts['tag'] ?? 'demanda-gabinete'],
     ];
-    $bcc = array_filter(array_map('trim', explode(',', (string) env('MAIL_BCC', ''))));
+    $bcc = empty($opts['to']) ? array_filter(array_map('trim', explode(',', (string) env('MAIL_BCC', '')))) : [];
     if ($bcc) $payload['bcc'] = array_map(function ($e) { return ['email' => $e]; }, array_values($bcc));
     if ($replyTo) $payload['replyTo'] = $replyTo;
     if ($attachments) {

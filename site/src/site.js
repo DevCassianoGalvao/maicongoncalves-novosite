@@ -190,6 +190,18 @@
     }
   }
 
+  /* aviso de cookies (LGPD) */
+  var ck = $('#ck');
+  if (ck) {
+    var seen = false;
+    try { seen = localStorage.getItem('mg_cookies') === 'ok'; } catch (e) {}
+    if (!seen) { ck.hidden = false; document.documentElement.classList.add('ck-on'); }
+    $('#ck-ok').addEventListener('click', function () {
+      try { localStorage.setItem('mg_cookies', 'ok'); } catch (e) {}
+      ck.hidden = true; document.documentElement.classList.remove('ck-on');
+    });
+  }
+
   /* lista de notícias: filtro, busca e paginação */
   var grid = $('#lista');
   if (grid) {

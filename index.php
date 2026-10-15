@@ -26,6 +26,7 @@ $pages = [
     'descobrindo-talentos' => 'peneira',
     'noticias'             => 'noticias',
     'demandas'             => 'radar',
+    'privacidade'          => 'privacidade',
 ];
 $legacy = [ // endereços antigos ou alternativos -> endereço oficial
     'index.html' => '/', 'index.php' => '/', 'home' => '/',
@@ -46,7 +47,7 @@ if ($slug !== '' && substr($path, -1) !== '/' && strpos($slug, '.') === false) r
 
 $meta = [];
 if ($slug === 'demandas') {
-    require ROOT . '/app/tickets.php';
+    require_once ROOT . '/app/tickets.php';
     $meta = [
         'title' => 'Enviar demanda – Vereador Maicon Gonçalves | Nova Friburgo',
         'description' => 'Envie sua demanda ao gabinete do vereador Maicon Gonçalves: o gabinete confere, encaminha oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.',

@@ -1,7 +1,7 @@
 <?php
 require dirname(__DIR__) . '/app/bootstrap.php';
 require ROOT . '/app/admin_ui.php';
-admin_guard();
+admin_guard(true);
 
 $errors = [];
 $v = settings_all(true);

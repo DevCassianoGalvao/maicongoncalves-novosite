@@ -7,7 +7,7 @@ $latest = $posts ? date('Y-m-d', strtotime($posts[0]['updated_at'] ?: $posts[0][
 $urls = [
     ['/', max($mod('home'), (string) $latest), [abs_url('/img/hero-retrato.webp')]],
     ['/minha-historia/', $mod('historia'), []], ['/fl360/', $mod('fl360'), []], ['/descobrindo-talentos/', $mod('peneira'), []],
-    ['/noticias/', $latest, []], ['/demandas/', $mod('radar'), []],
+    ['/noticias/', $latest, []], ['/demandas/', $mod('radar'), []], ['/privacidade/', $mod('privacidade'), []],
 ];
 foreach ($posts as $p) {
     $imgs = $p['cover'] ? [abs_url('/' . ltrim($p['cover'], '/'))] : [];

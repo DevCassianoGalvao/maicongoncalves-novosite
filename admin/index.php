@@ -18,7 +18,7 @@ admin_head('Painel', 'dash');
   <div><h1>Olá, <?= e($first) ?></h1><p>O que vamos publicar hoje?</p></div>
   <a class="btn btn--or" href="<?= e(url('/admin/post.php')) ?>"><?= icon('plus', 'bold') ?>Novo artigo</a>
 </div>
-<?php if (!$mailReady): ?>
+<?php if (!$mailReady && is_admin($user)): ?>
 <div class="alert alert--warn"><?= icon('warning-circle') ?><span>As demandas ainda não chegam por e-mail: preencha <code>BREVO_API_KEY</code> e <code>MAIL_FROM_EMAIL</code> no arquivo .env.</span></div>
 <?php endif; ?>
 <div class="grid g4">

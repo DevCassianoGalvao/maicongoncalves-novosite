@@ -19,7 +19,7 @@ $where = [];
 $args = [];
 if ($status === 'abertos') $where[] = "status IN ('novo','analise')";
 elseif ($status !== 'todos') { $where[] = 'status = ?'; $args[] = $status; }
-if (in_array($source, ['mapa', 'contato'], true)) { $where[] = 'source = ?'; $args[] = $source; }
+if (in_array($source, ['mapa', 'painel', 'contato'], true)) { $where[] = 'source = ?'; $args[] = $source; }
 if ($term !== '') {
     $id = (int) ltrim($term, '#0');
     $where[] = '(name LIKE ? OR phone LIKE ? OR neighborhood LIKE ? OR address LIKE ? OR description LIKE ?' . ($id ? ' OR id = ' . $id : '') . ')';
@@ -41,7 +41,8 @@ admin_head('Atendimentos', 'tickets');
 ?>
 <div class="top">
   <div><h1>Atendimentos</h1><p>Demandas enviadas pelo site, com acompanhamento no mapa.</p></div>
-  <a class="btn btn--ghost" href="<?= e(url('/demandas/')) ?>" target="_blank" rel="noopener"><?= icon('map-trifold') ?>Ver o mapa</a>
+  <div class="row"><a class="btn btn--ghost" href="<?= e(url('/demandas/')) ?>" target="_blank" rel="noopener"><?= icon('map-trifold') ?>Ver o mapa</a>
+  <a class="btn btn--or" href="<?= e(url('/admin/demanda-nova.php')) ?>"><?= icon('plus', 'bold') ?>Cadastrar demanda</a></div>
 </div>
 <nav class="tabs" aria-label="Situação">
 <?php foreach ($tabs as $k => [$label, $n]): ?>
@@ -55,6 +56,7 @@ admin_head('Atendimentos', 'tickets');
     <select name="origem" onchange="this.form.submit()">
       <option value="">Todas as origens</option>
       <option value="mapa"<?= $source === 'mapa' ? ' selected' : '' ?>>Demandas do site</option>
+      <option value="painel"<?= $source === 'painel' ? ' selected' : '' ?>>Cadastradas no painel</option>
       <option value="contato"<?= $source === 'contato' ? ' selected' : '' ?>>Formulário de contato (antigo)</option>
     </select>
     <button class="btn btn--ghost" type="submit"><?= icon('magnifying-glass') ?>Buscar</button>
@@ -67,12 +69,12 @@ admin_head('Atendimentos', 'tickets');
     <tbody>
 <?php foreach ($rows as $t):
     $ph = json_decode((string) $t['photos'], true) ?: [];
-    $what = $t['source'] === 'mapa' ? (TICKET_CATS[$t['category']] ?? 'Demanda') : ($t['subject'] ?: 'Contato');
+    $what = $t['source'] !== 'contato' ? (TICKET_CATS[$t['category']] ?? 'Demanda') : ($t['subject'] ?: 'Contato');
     $link = url('/admin/atendimento.php?id=' . $t['id']); ?>
-      <tr<?= $t['status'] === 'novo' ? ' class="is-new"' : '' ?>>
-        <td class="hide-m" style="width:76px"><?php if ($ph): ?><img class="thumb" src="<?= e(ticket_photo_url((int) $t['id'], $ph[0]['src'])) ?>" alt="" loading="lazy"><?php else: ?><div class="thumb thumb--ic"><?= icon($t['source'] === 'mapa' ? 'map-pin' : 'envelope-simple') ?></div><?php endif; ?></td>
+      <tr data-href="<?= e($link) ?>" tabindex="0"<?= $t['status'] === 'novo' ? ' class="is-new"' : '' ?>>
+        <td class="hide-m" style="width:76px"><?php if ($ph): ?><img class="thumb" src="<?= e(ticket_photo_url((int) $t['id'], $ph[0]['src'])) ?>" alt="" loading="lazy"><?php else: ?><div class="thumb thumb--ic"><?= icon($t['source'] !== 'contato' ? 'map-pin' : 'envelope-simple') ?></div><?php endif; ?></td>
         <td><a class="t" href="<?= e($link) ?>"><?= e($what) ?></a> <span class="small muted"><?= ticket_code((int) $t['id']) ?></span>
-          <div class="small muted"><?= e($t['neighborhood'] ?: ($t['address'] ?: '—')) ?> · <span class="badge badge--src"><?= $t['source'] === 'mapa' ? 'Mapa' : 'Contato' ?></span></div></td>
+          <div class="small muted"><?= e($t['neighborhood'] ?: ($t['address'] ?: '—')) ?> · <span class="badge badge--src"><?= ['mapa' => 'Site', 'painel' => 'Painel', 'contato' => 'Contato'][$t['source']] ?? 'Site' ?></span></div></td>
         <td class="hide-m"><?= e($t['name'] ?: 'Sem nome') ?><div class="small muted"><?= e($t['phone']) ?></div></td>
         <td class="hide-m"><?= ticket_badge($t) ?></td>
         <td class="small muted"><?= date('d/m H:i', strtotime($t['created_at'])) ?><br>há <?= human_span(time() - strtotime($t['created_at'])) ?></td>

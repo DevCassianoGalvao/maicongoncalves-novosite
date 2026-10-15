@@ -36,7 +36,8 @@ function db_migrate(): void
     } catch (Throwable $ex) {
         return; // site ainda não instalado
     }
-    if ($v >= 2) return;
+    if ($v >= 3) return;
+    if ($v < 2) {
     $pdo->exec("CREATE TABLE IF NOT EXISTS tickets (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT,
       source VARCHAR(12) NOT NULL DEFAULT 'mapa',
@@ -80,7 +81,13 @@ function db_migrate(): void
       KEY ticket_notes_ticket (ticket_id),
       CONSTRAINT ticket_notes_fk FOREIGN KEY (ticket_id) REFERENCES tickets (id) ON DELETE CASCADE
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
-    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '2') ON DUPLICATE KEY UPDATE value = '2'");
+    }
+    // v3: e-mail de quem envia a demanda e níveis de acesso no painel
+    $has = function (string $table, string $col) use ($pdo): bool { return (bool) $pdo->query("SHOW COLUMNS FROM `$table` LIKE " . $pdo->quote($col))->fetch(); };
+    if (!$has('tickets', 'email')) $pdo->exec('ALTER TABLE tickets ADD COLUMN email VARCHAR(190) NULL AFTER phone');
+    if (!$has('tickets', 'created_by')) $pdo->exec('ALTER TABLE tickets ADD COLUMN created_by INT UNSIGNED NULL AFTER ip');
+    if (!$has('users', 'role')) $pdo->exec("ALTER TABLE users ADD COLUMN role VARCHAR(12) NOT NULL DEFAULT 'admin' AFTER password_hash");
+    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '3') ON DUPLICATE KEY UPDATE value = '3'");
 }
 
 /* ---------- fotos (ficam fora da web; só aparecem pelo api/foto.php) ---------- */
@@ -113,9 +120,9 @@ function ticket_photo_path(string $src): ?string
 function ticket_create(array $d): int
 {
     db_migrate();
-    q('INSERT INTO tickets (source, status, category, subject, name, phone, birth, anonymous, description, address, neighborhood, geo_address, lat, lng, accuracy, geo_manual, photos, consent, ip, created_at, updated_at)
-       VALUES (?, \'novo\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())', [
-        $d['source'], $d['category'] ?? null, $d['subject'] ?? null, $d['name'] ?? null, $d['phone'] ?? null, $d['birth'] ?? null,
+    q('INSERT INTO tickets (source, status, category, subject, name, phone, email, birth, anonymous, description, address, neighborhood, geo_address, lat, lng, accuracy, geo_manual, photos, consent, ip, created_at, updated_at)
+       VALUES (?, \'novo\', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())', [
+        $d['source'], $d['category'] ?? null, $d['subject'] ?? null, $d['name'] ?? null, $d['phone'] ?? null, ($d['email'] ?? '') !== '' ? $d['email'] : null, $d['birth'] ?? null,
         !empty($d['anonymous']) ? 1 : 0, $d['description'] ?? null, $d['address'] ?? null, $d['neighborhood'] ?? null, $d['geo_address'] ?? null,
         $d['lat'] ?? null, $d['lng'] ?? null, $d['accuracy'] ?? null, !empty($d['geo_manual']) ? 1 : 0,
         !empty($d['photos']) ? json_encode($d['photos'], JSON_UNESCAPED_SLASHES) : null, !empty($d['consent']) ? 1 : 0, client_ip(),

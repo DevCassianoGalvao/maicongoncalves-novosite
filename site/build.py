@@ -94,6 +94,8 @@ os.makedirs(PAGES, exist_ok=True)
 for f in glob.glob(os.path.join(PAGES, '*.php')): os.remove(f)
 
 bairros = read('_bairros.txt').split('\n')
+with open(os.path.join(REPO, 'app', 'bairros.php'), 'w', encoding='utf-8') as out:  # lista para o painel
+    out.write("<?php\n// Gerado por site/build.py a partir de site/src/_bairros.txt.\nreturn " + json.dumps([b for b in bairros[1:] if b.strip()], ensure_ascii=False).replace('[', '[', 1) + ";\n")
 bopts = '<option value="">' + e(bairros[0]) + '</option>' + ''.join(f'<option>{e(b)}</option>' for b in bairros[1:] if b.strip())
 T = 'Vereador Maicon Gonçalves'
 page('home', 'Vereador Maicon Gonçalves | Nova Friburgo – RJ', 'Site oficial do vereador Maicon Gonçalves, de Nova Friburgo (RJ): ações do mandato, projetos de lei, programas FL360 e Peneira Descobrindo Talentos, notícias e contato direto com o gabinete.', read('index.html'), nav='home', intro='true', kind='home')
@@ -103,13 +105,14 @@ page('peneira', 'Peneira Descobrindo Talentos – futebol de base em Nova Fribur
 page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'Notícias do mandato do vereador Maicon Gonçalves: projetos, leis, fiscalização e ações na Câmara Municipal de Nova Friburgo (RJ).', read('noticias.html'), nav='news', kind='noticias')
 page('noticia', T, '', read('noticia.html'), nav='news')
 page('radar', 'Enviar demanda – Vereador Maicon Gonçalves | Nova Friburgo', 'Envie sua demanda ao gabinete do vereador Maicon Gonçalves e acompanhe em tempo real no mapa até a Prefeitura resolver.', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top='on-white', kind='demandas')
+page('privacidade', 'Política de privacidade – Vereador Maicon Gonçalves', 'Como o gabinete do vereador Maicon Gonçalves trata os dados enviados pelo site, de acordo com a LGPD.', read('privacidade.html'), ft_top='on-white', kind='privacidade')
 page('404', 'Página não encontrada – ' + T, '', read('404.html'), kind='404')
 
 for f in ('site.css', 'site.js', 'radar.js'): shutil.copy(os.path.join(SRC, f), os.path.join(REPO, f))
 
 # ícones pedidos pelo PHP: icon('nome') ou icon('nome', 'bold'|'fill')
 need = {(n, 'i') for n in ('facebook-logo', 'instagram-logo', 'tiktok-logo', 'youtube-logo',  # redes (content.php)
-                           'squares-four', 'newspaper', 'plus-circle', 'tag', 'gear-six', 'user-circle',  # menu do painel
+                           'squares-four', 'newspaper', 'plus-circle', 'tag', 'gear-six', 'user-circle', 'map-pin-plus', 'users',  # menu do painel
                            'check-circle', 'warning-circle', 'tray')}
 for f in glob.glob(os.path.join(REPO, '**', '*.php'), recursive=True):
     if '/vendor/' in f or '/app/pages/' in f: continue

@@ -112,6 +112,15 @@
     });
     $('#rd-cat').addEventListener('change', function () { cat = this.value; apply(); });
     apply();
+    // link direto para uma demanda (?d=123), usado nos e-mails de acompanhamento
+    var want = parseInt(new URLSearchParams(location.search).get('d'), 10);
+    var target = want && markers.filter(function (m) { return m.item.id === want; })[0];
+    if (target) {
+      setTimeout(function () {
+        mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        cluster.zoomToShowLayer(target, function () { map.setView(target.getLatLng(), Math.max(map.getZoom(), 16)); target.fire('click'); });
+      }, 400);
+    }
     // contadores ao vivo
     setInterval(function () { $$('[data-since]').forEach(function (el) { el.textContent = span(el.getAttribute('data-since')); }); }, 30000);
   }
@@ -235,6 +244,7 @@
     if (!$('#rd-desc').value.trim()) { $('#rd-desc').classList.add('is-bad'); bad.push([$('#rd-desc'), 'a descrição']); }
     if (!$('#rd-anon').checked && !$('#rd-nome').value.trim()) { $('#rd-nome').classList.add('is-bad'); bad.push([$('#rd-nome'), 'seu nome']); }
     if ($('#rd-zap').value.replace(/\D/g, '').length < 10) { $('#rd-zap').classList.add('is-bad'); bad.push([$('#rd-zap'), 'seu WhatsApp com DDD']); }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test($('#rd-mail').value.trim())) { $('#rd-mail').classList.add('is-bad'); bad.push([$('#rd-mail'), 'seu e-mail']); }
     if (!$('#rd-ok').checked) bad.push([$('#rd-ok'), 'a concordância com o uso dos dados']);
     if (bad.length) { say('Falta: ' + bad.map(function (b) { return b[1]; }).join(', ') + '.'); bad[0][0].scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
     send.classList.add('is-busy'); $('span', send).textContent = 'ENVIANDO…'; msg.hidden = true;
@@ -248,7 +258,7 @@
       form.hidden = true; $('#rd-done').hidden = false;
       $('#rd-done').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }).catch(function () { say('Sem conexão no momento. Verifique a internet e tente de novo.'); })
-      .then(function () { send.classList.remove('is-busy'); $('span', send).textContent = 'ENVIAR'; });
+      .then(function () { send.classList.remove('is-busy'); $('span', send).textContent = 'ENVIAR DEMANDA'; });
   });
   $('#rd-again').addEventListener('click', function () {
     form.reset(); photos = []; draw(); msg.hidden = true; ruaAuto = false; $('#rd-t').value = Date.now();

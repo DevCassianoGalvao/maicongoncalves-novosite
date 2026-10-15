@@ -3,12 +3,19 @@ defined('APP') or exit;
 require_once __DIR__ . '/auth.php';
 require_once __DIR__ . '/tickets.php';
 
-/** Garante instalação feita e usuário logado. */
-function admin_guard(): array
+/**
+ * Garante instalação feita e usuário logado.
+ * $adminOnly: páginas que a Assessoria não acessa (configurações, usuários).
+ */
+function admin_guard(bool $adminOnly = false): array
 {
     if (!is_file(ROOT . '/storage/installed.lock')) redirect(url('/install/'));
-    $u = require_login();
     db_migrate();
+    $u = require_login();
+    if ($adminOnly && !is_admin($u)) {
+        flash('err', 'Essa área é só para o administrador.');
+        redirect(url('/admin/'));
+    }
     return $u;
 }
 
@@ -23,14 +30,22 @@ function admin_css(): string
 function admin_head(string $title, string $active = '', string $extraHead = ''): void
 {
     $u = auth_user();
-    $items = [
-        'dash' => ['/admin/', 'squares-four', 'Painel'],
-        'tickets' => ['/admin/atendimentos.php', 'tray', 'Atendimentos'],
-        'posts' => ['/admin/posts.php', 'newspaper', 'Artigos'],
-        'new' => ['/admin/post.php', 'plus-circle', 'Novo artigo'],
-        'cats' => ['/admin/categorias.php', 'tag', 'Categorias'],
-        'settings' => ['/admin/configuracoes.php', 'gear-six', 'Configurações'],
-        'account' => ['/admin/conta.php', 'user-circle', 'Minha conta'],
+    $groups = [
+        '' => ['dash' => ['/admin/', 'squares-four', 'Painel']],
+        'Demandas' => [
+            'tickets' => ['/admin/atendimentos.php', 'tray', 'Atendimentos'],
+            'tnew' => ['/admin/demanda-nova.php', 'map-pin-plus', 'Cadastrar demanda'],
+        ],
+        'Blog' => [
+            'posts' => ['/admin/posts.php', 'newspaper', 'Artigos'],
+            'new' => ['/admin/post.php', 'plus-circle', 'Novo artigo'],
+            'cats' => ['/admin/categorias.php', 'tag', 'Categorias'],
+        ],
+        'Sistema' => is_admin($u) ? [
+            'users' => ['/admin/usuarios.php', 'users', 'Usuários'],
+            'settings' => ['/admin/configuracoes.php', 'gear-six', 'Configurações'],
+            'account' => ['/admin/conta.php', 'user-circle', 'Minha conta'],
+        ] : ['account' => ['/admin/conta.php', 'user-circle', 'Minha conta']],
     ];
     $newTickets = 0;
     try { $newTickets = (int) q("SELECT COUNT(*) FROM tickets WHERE status = 'novo'")->fetchColumn(); } catch (Throwable $ex) {}
@@ -52,14 +67,18 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
   <aside class="side" id="side">
     <a class="side-logo" href="<?= e(url('/admin/')) ?>"><img src="<?= e(url('/img/logo.webp')) ?>" alt="Vereador Maicon Gonçalves"></a>
     <nav class="nav" aria-label="Painel">
+<?php foreach ($groups as $gname => $items): ?>
+<?php if ($gname !== ''): ?>      <div class="nav-h"><?= e($gname) ?></div>
+<?php endif; ?>
 <?php foreach ($items as $key => [$href, $ic, $label]): ?>
       <a href="<?= e(url($href)) ?>"<?= $key === $active ? ' class="on" aria-current="page"' : '' ?>><?= icon($ic) ?><?= $label ?><?= $key === 'tickets' && $newTickets ? '<span class="nav-n" title="Novos">' . $newTickets . '</span>' : '' ?></a>
+<?php endforeach; ?>
 <?php endforeach; ?>
       <div class="nav-sep"></div>
       <a href="<?= e(url('/')) ?>" target="_blank" rel="noopener"><?= icon('arrow-square-out') ?>Ver o site</a>
       <a href="<?= e(url('/admin/sair.php')) ?>"><?= icon('sign-out') ?>Sair</a>
     </nav>
-    <div class="side-ft">Conectado como<b><?= e($u['name'] ?? '') ?></b></div>
+    <div class="side-ft">Conectado como<b><?= e($u['name'] ?? '') ?></b><span><?= e(USER_ROLES[$u['role'] ?? 'admin'] ?? '') ?></span></div>
   </aside>
   <main class="main">
 <?php $fl = flashes(); if ($fl): ?>
@@ -83,6 +102,12 @@ function admin_foot(string $extra = ''): void
   document.addEventListener('click', function (ev) { if (s.classList.contains('open') && !s.contains(ev.target)) s.classList.remove('open'); });
   document.querySelectorAll('[data-confirm]').forEach(function (f) {
     f.addEventListener('submit', function (ev) { if (!confirm(f.getAttribute('data-confirm'))) { ev.preventDefault(); ev.stopImmediatePropagation(); } });
+  });
+  // linha inteira da tabela abre o item
+  document.querySelectorAll('tr[data-href]').forEach(function (tr) {
+    var go = function (ev) { if (ev.target.closest('a, button, input, select, label')) return; if (ev.ctrlKey || ev.metaKey) window.open(tr.dataset.href); else location.href = tr.dataset.href; };
+    tr.addEventListener('click', go);
+    tr.addEventListener('keydown', function (ev) { if (ev.key === 'Enter') go(ev); });
   });
   // avisos somem sozinhos (erros ficam até fechar)
   document.querySelectorAll('.toast').forEach(function (t) {

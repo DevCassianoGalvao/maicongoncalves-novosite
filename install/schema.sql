@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS users (
   name VARCHAR(120) NOT NULL,
   email VARCHAR(190) NOT NULL,
   password_hash VARCHAR(255) NOT NULL,
+  role VARCHAR(12) NOT NULL DEFAULT 'admin',
   created_at DATETIME NOT NULL,
   last_login_at DATETIME NULL,
   PRIMARY KEY (id),

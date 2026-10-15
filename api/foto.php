@@ -1,7 +1,7 @@
 <?php
 /** Mostra a foto de uma demanda: só se ela já estiver no mapa, ou para quem está logado no painel. */
 require dirname(__DIR__) . '/app/bootstrap.php';
-require ROOT . '/app/tickets.php';
+require_once ROOT . '/app/tickets.php';
 require ROOT . '/app/auth.php';
 
 $id = (int) ($_GET['t'] ?? 0);

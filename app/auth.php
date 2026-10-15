@@ -27,13 +27,17 @@ function auth_user(): ?array
     if (($_SESSION['seen'] ?? 0) < time() - 8 * 3600) { $_SESSION = []; return null; }
     $_SESSION['seen'] = time();
     try {
-        $row = q('SELECT id, name, email FROM users WHERE id = ?', [$_SESSION['uid']])->fetch();
+        $row = q('SELECT * FROM users WHERE id = ?', [$_SESSION['uid']])->fetch();
+        if ($row) { unset($row['password_hash']); $row['role'] = ($row['role'] ?? 'admin') === 'assessoria' ? 'assessoria' : 'admin'; }
         $user = $row ?: null;
     } catch (Throwable $ex) {
         $user = null;
     }
     return $user;
 }
+
+const USER_ROLES = ['admin' => 'Administrador', 'assessoria' => 'Assessoria'];
+function is_admin(?array $u = null): bool { $u = $u ?? auth_user(); return ($u['role'] ?? '') === 'admin'; }
 
 function require_login(): array
 {

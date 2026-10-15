@@ -25,6 +25,18 @@ Fotos grandes: o arquivo `.user.ini` sobe o limite de envio para 16 MB por foto.
 - As demandas chegam em `MAIL_TO` com as fotos em anexo (convertidas para JPG) e, quando a pessoa compartilha, a localização com link para o Google Maps.
 - Se o envio falhar, os dados ficam registrados em `storage/logs/demandas-AAAA-MM.log`.
 
+## Avisos para quem enviou a demanda
+
+- Quando o gabinete aprova (vai à Prefeitura) e quando marca como resolvida, a pessoa recebe um e-mail com o protocolo e o link para acompanhar no mapa (dá para desmarcar na hora).
+- Remetente: `PUBLIC_FROM_EMAIL` / `PUBLIC_FROM_NAME` (o e-mail do vereador, validado no Brevo). Vazio = usa `MAIL_FROM_EMAIL`.
+- Registro dos envios em `storage/logs/avisos-AAAA-MM.log`.
+
+## Níveis de acesso no painel
+
+- **Administrador:** tudo, inclusive Configurações, Usuários e excluir atendimentos.
+- **Assessoria:** atendimentos (aprovar, resolver, cadastrar demandas) e blog.
+- Contas novas em Painel › Sistema › Usuários.
+
 ## Localização no formulário
 
 Usa o GPS do aparelho (precisa de **https**), mostra um mapa do OpenStreetMap com pino que a pessoa pode arrastar para o ponto exato e preenche rua e bairro automaticamente pelo Nominatim (gratuito, sem chave).

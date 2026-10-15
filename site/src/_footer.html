@@ -34,10 +34,14 @@
         </div>
       </div>
     </div>
-    <div class="ft-end">© <?= date('Y') ?> Vereador Maicon Gonçalves. Todos os direitos reservados.</div>
+    <div class="ft-end"><span>© <?= date('Y') ?> Vereador Maicon Gonçalves. Todos os direitos reservados.</span><a href="/privacidade/">Política de privacidade</a></div>
   </div>
 </footer>
 <a class="wa" href="<?= e(wa_link()) ?>" target="_blank" rel="noopener"><b>{{i:whatsapp}}</b><span>Fale comigo!</span></a>
+<div class="ck" id="ck" role="dialog" aria-live="polite" aria-label="Aviso de cookies" hidden>
+  <p>Usamos apenas cookies essenciais para o site funcionar, sem publicidade nem rastreamento. Saiba mais na <a href="/privacidade/">Política de privacidade</a>.</p>
+  <button type="button" class="btn btn--orange btn--sm" id="ck-ok"><span>Aceitar</span><span class="btn-i">{{ib:check}}{{ib:check}}</span></button>
+</div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>

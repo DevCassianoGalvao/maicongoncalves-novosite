@@ -4,7 +4,7 @@
  * POST → registra uma nova demanda (fica "Nova" no painel até o gabinete aprovar)
  */
 require dirname(__DIR__) . '/app/bootstrap.php';
-require ROOT . '/app/tickets.php';
+require_once ROOT . '/app/tickets.php';
 require ROOT . '/app/mail.php';
 
 if (!is_post()) {
@@ -31,6 +31,7 @@ $d = [
     'category' => $f('categoria', 20),
     'name' => $f('nome', 120),
     'phone' => $f('whatsapp', 30),
+    'email' => mb_strtolower($f('email', 190)),
     'anonymous' => $anon,
     'description' => $f('descricao', 1500),
     'address' => $f('endereco', 255),
@@ -47,6 +48,7 @@ if ($lat === false || $lng === false || abs($lat + 22.28) > 0.6 || abs($lng + 42
 if ($d['description'] === '') json_out(['ok' => false, 'error' => 'Descreva rapidamente o problema.', 'field' => 'descricao'], 422);
 if (!$anon && $d['name'] === '') json_out(['ok' => false, 'error' => 'Informe seu nome (ou marque para não aparecer).', 'field' => 'nome'], 422);
 if (strlen($digits) < 10 || strlen($digits) > 13) json_out(['ok' => false, 'error' => 'Informe seu WhatsApp com DDD para o gabinete falar com você.', 'field' => 'whatsapp'], 422);
+if (!filter_var($d['email'], FILTER_VALIDATE_EMAIL)) json_out(['ok' => false, 'error' => 'Informe um e-mail válido para receber os avisos da sua demanda.', 'field' => 'email'], 422);
 if (!$d['consent']) json_out(['ok' => false, 'error' => 'Para enviar, é preciso concordar com o uso dos dados.', 'field' => 'consentimento'], 422);
 
 $photos = [];
@@ -86,6 +88,7 @@ $rows = [
     ['Tipo', e($cat)],
     ['Nome', e($d['name'] ?: 'Não informado') . ($anon ? ' <span style="color:#9A5B00">(não quer o nome no mapa)</span>' : '')],
     ['WhatsApp', e($d['phone']) . ' &nbsp;<a href="https://wa.me/' . $waNum . '" style="color:#0144C9">abrir conversa</a>'],
+    ['E-mail', '<a href="mailto:' . e($d['email']) . '" style="color:#0144C9">' . e($d['email']) . '</a>'],
     ['Local', ($place !== '' ? e($place) . '<br>' : '') . ($d['geo_address'] !== '' ? '<span style="color:#5B6884">' . e($d['geo_address']) . '</span><br>' : '') .
         '<a href="' . e($gmaps) . '" style="color:#0144C9">Ver no Google Maps</a>'],
     ['Fotos', count($attach) . ' em anexo'],
@@ -112,8 +115,8 @@ $html = '<!doctype html><html><body style="margin:0;background:#F1F4F9;font-fami
   </div>
 </div></body></html>';
 $text = "NOVA DEMANDA PELO SITE\n\nProtocolo: $code\nTipo: $cat\nNome: " . ($d['name'] ?: 'Não informado') . ($anon ? ' (não quer o nome no mapa)' : '') .
-    "\nWhatsApp: {$d['phone']}\nLocal: $place " . $d['geo_address'] . "\nMapa: $gmaps\n\n{$d['description']}\n\nAbrir no painel: $link\n";
-[$sent, $info] = brevo_send('Nova demanda: ' . $cat . ($d['neighborhood'] ? ' – ' . $d['neighborhood'] : ''), $html, $text, $attach);
+    "\nWhatsApp: {$d['phone']}\nE-mail: {$d['email']}\nLocal: $place " . $d['geo_address'] . "\nMapa: $gmaps\n\n{$d['description']}\n\nAbrir no painel: $link\n";
+[$sent, $info] = brevo_send('Nova demanda: ' . $cat . ($d['neighborhood'] ? ' – ' . $d['neighborhood'] : ''), $html, $text, $attach, ['email' => $d['email'], 'name' => $d['name'] ?: $d['email']]);
 app_log('demandas', $code . ' | ' . $cat . ' | e-mail ' . ($sent ? 'enviado ' . $info : 'falhou: ' . $info));
 
 json_out(['ok' => true, 'code' => ticket_code($id)]);

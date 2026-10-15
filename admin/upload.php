@@ -2,7 +2,7 @@
 /** Recebe as imagens coladas/enviadas dentro do editor de texto. */
 require dirname(__DIR__) . '/app/bootstrap.php';
 require ROOT . '/app/auth.php';
-require ROOT . '/app/images.php';
+require_once ROOT . '/app/images.php';
 
 if (!auth_user()) json_out(['error' => 'Sessão expirada. Entre de novo no painel.'], 401);
 if (!is_post()) json_out(['error' => 'Método não permitido.'], 405);
