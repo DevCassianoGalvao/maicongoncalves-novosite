@@ -19,7 +19,7 @@ admin_head('Painel', 'dash');
   <a class="btn btn--or" href="<?= e(url('/admin/post.php')) ?>"><?= icon('plus', 'bold') ?>Novo artigo</a>
 </div>
 <?php if (!$mailReady): ?>
-<div class="alert alert--warn"><?= icon('warning-circle') ?><span>O formulário de contato ainda não envia e-mails: preencha <code>BREVO_API_KEY</code> e <code>MAIL_FROM_EMAIL</code> no arquivo .env.</span></div>
+<div class="alert alert--warn"><?= icon('warning-circle') ?><span>As demandas ainda não chegam por e-mail: preencha <code>BREVO_API_KEY</code> e <code>MAIL_FROM_EMAIL</code> no arquivo .env.</span></div>
 <?php endif; ?>
 <div class="grid g4">
   <a class="card stat" href="<?= e(url('/admin/atendimentos.php')) ?>" style="text-decoration:none;color:inherit"><?= icon('tray') ?><div><b><?= $tkNew ?></b><span>atendimentos abertos<?= $tkMap ? ' · ' . $tkMap . ' na Prefeitura' : '' ?></span></div></a>

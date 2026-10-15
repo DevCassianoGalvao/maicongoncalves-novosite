@@ -8,8 +8,6 @@ $v = settings_all(true);
 if (is_post()) {
     csrf_check();
     $v = array_merge($v, array_map('trim', array_intersect_key($_POST, SETTINGS_DEFAULTS)));
-    $v['radar_public'] = !empty($_POST['radar_public']) ? '1' : '0';
-    if ($v['radar_name'] === '') $v['radar_name'] = SETTINGS_DEFAULTS['radar_name'];
     $digits = preg_replace('/\D+/', '', $v['whatsapp']);
     if ($digits !== '' && strlen($digits) <= 11) $digits = '55' . $digits;
     if ($digits !== '' && (strlen($digits) < 12 || strlen($digits) > 13)) $errors[] = 'WhatsApp: informe DDD + número, ex.: (22) 99801-2278.';
@@ -33,7 +31,7 @@ function wa_pretty(string $d): string
 
 admin_head('Configurações', 'settings');
 ?>
-<div class="top"><div><h1>Configurações do site</h1><p>Contato e redes sociais que aparecem no topo, no rodapé e na página de contato.</p></div></div>
+<div class="top"><div><h1>Configurações do site</h1><p>Contato e redes sociais que aparecem no topo e no rodapé do site.</p></div></div>
 <?php foreach ($errors as $err): ?>
 <div class="alert alert--err"><?= icon('warning-circle') ?><span><?= e($err) ?></span></div>
 <?php endforeach; ?>
@@ -43,10 +41,10 @@ admin_head('Configurações', 'settings');
     <div class="card">
       <h2>Contato</h2>
       <div class="fd"><label for="whatsapp">WhatsApp</label><input type="tel" id="whatsapp" name="whatsapp" value="<?= e(wa_pretty($v['whatsapp'])) ?>" placeholder="(22) 99999-9999">
-        <p class="hint">Usado no botão flutuante e no "Fale conosco" da página de contato.</p></div>
+        <p class="hint">Usado no botão flutuante do site.</p></div>
       <div class="fd"><label for="whatsapp_msg">Mensagem que já vem escrita no WhatsApp</label><input type="text" id="whatsapp_msg" name="whatsapp_msg" value="<?= e($v['whatsapp_msg']) ?>"></div>
       <div class="fd"><label for="email">E-mail exibido no site</label><input type="email" id="email" name="email" value="<?= e($v['email']) ?>">
-        <p class="hint">Os contatos do formulário chegam no e-mail definido no arquivo .env (MAIL_TO).</p></div>
+        <p class="hint">As demandas enviadas pelo site chegam no e-mail definido no arquivo .env (MAIL_TO).</p></div>
       <div class="fd"><label for="address">Endereço</label><textarea id="address" name="address" rows="2"><?= e($v['address']) ?></textarea><p class="hint">Cada linha vira uma linha no rodapé.</p></div>
       <div class="fd"><label for="office">Gabinete</label><input type="text" id="office" name="office" value="<?= e($v['office']) ?>"></div>
     </div>
@@ -57,15 +55,6 @@ admin_head('Configurações', 'settings');
       <div class="fd"><label for="<?= $k ?>"><?= $label ?></label><input type="text" inputmode="url" id="<?= $k ?>" name="<?= $k ?>" value="<?= e($v[$k]) ?>" placeholder="https://"></div>
 <?php endforeach; ?>
     </div>
-  </div>
-  <div class="card" style="margin-top:18px">
-    <h2>Mapa de demandas</h2>
-    <div class="grid g2">
-      <div class="fd"><label for="radar_name">Nome da ferramenta</label><input type="text" id="radar_name" name="radar_name" value="<?= e($v['radar_name']) ?>" maxlength="40"></div>
-      <div class="fd"><span class="lbl">Endereço</span><p style="margin:10px 0 0"><a href="<?= e(url('/radarfriburgo/')) ?>" target="_blank" rel="noopener"><?= e(abs_url('/radarfriburgo/')) ?></a></p></div>
-    </div>
-    <label class="check"><input type="checkbox" name="radar_public" value="1"<?= $v['radar_public'] === '1' ? ' checked' : '' ?>> Publicar: mostrar no menu do site e liberar para o Google</label>
-    <p class="hint muted small" style="margin:6px 0 0">Desmarcado, a página funciona só para quem tem o link (bom para aprovar antes).</p>
   </div>
   <div class="row" style="margin-top:18px"><button class="btn btn--or" type="submit"><?= icon('check', 'bold') ?>Salvar configurações</button></div>
 </form>

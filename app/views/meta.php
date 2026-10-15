@@ -19,7 +19,7 @@ $__graph = [];
 switch ($meta['page']) {
     case 'home': $__page['@type'] = ['WebPage', 'AboutPage']; $__page['mainEntity'] = ['@id' => abs_url('/#maicon')]; break;
     case 'historia': $__page['@type'] = 'ProfilePage'; $__page['mainEntity'] = ['@id' => abs_url('/#maicon')]; break;
-    case 'contato': $__page['@type'] = 'ContactPage'; break;
+    case 'demandas': $__page['@type'] = 'ContactPage'; break;
     case 'noticias':
         $__page['@type'] = 'CollectionPage';
         $__items = [];

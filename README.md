@@ -1,7 +1,7 @@
 # Site do Vereador Maicon Gonçalves
 
-Site em PHP + MySQL, com painel para as notícias e formulário de contato que envia pelo Brevo.
-Os endereços são os mesmos do WordPress antigo (`/contato/`, `/noticias/`, `/slug-da-noticia/`…), então nenhum link do Google se perde.
+Site em PHP + MySQL, com painel para as notícias e página "Enviar demanda" (mapa de acompanhamento) que avisa o gabinete pelo Brevo.
+Os endereços são os mesmos do WordPress antigo (`/noticias/`, `/slug-da-noticia/`…), então nenhum link do Google se perde.
 
 ## Subir na hospedagem (cPanel)
 
@@ -18,12 +18,12 @@ Permissões: as pastas `uploads/` e `storage/` precisam permitir escrita (755 no
 
 Fotos grandes: o arquivo `.user.ini` sobe o limite de envio para 16 MB por foto. Se a hospedagem ignorar, ajuste `upload_max_filesize` e `post_max_size` em cPanel › MultiPHP INI Editor.
 
-## Brevo (formulário de contato)
+## Brevo (aviso de nova demanda)
 
 - Gere a chave em Brevo › SMTP & API › Chaves de API e coloque em `BREVO_API_KEY`.
 - O remetente (`MAIL_FROM_EMAIL`) precisa estar validado no Brevo (ideal: um e-mail do próprio domínio, com o domínio autenticado).
-- Os contatos chegam em `MAIL_TO` com as fotos em anexo (convertidas para JPG) e, quando a pessoa compartilha, a localização com link para o Google Maps.
-- Se o envio falhar, os dados ficam registrados em `storage/logs/contato-AAAA-MM.log`.
+- As demandas chegam em `MAIL_TO` com as fotos em anexo (convertidas para JPG) e, quando a pessoa compartilha, a localização com link para o Google Maps.
+- Se o envio falhar, os dados ficam registrados em `storage/logs/demandas-AAAA-MM.log`.
 
 ## Localização no formulário
 
@@ -36,7 +36,7 @@ Usa o GPS do aparelho (precisa de **https**), mostra um mapa do OpenStreetMap co
 | `index.php` | Roteador do site (todas as páginas passam por ele) |
 | `app/` | Núcleo em PHP e páginas geradas (`app/pages/`). Bloqueada para a web |
 | `admin/` | Painel (artigos, categorias, configurações, conta) |
-| `api/` | Envio do formulário (`contato.php`) e endereço pela localização (`geocode.php`) |
+| `api/` | Envio das demandas (`demandas.php`) e endereço pela localização (`geocode.php`) |
 | `install/` | Instalador, `schema.sql` (tabelas) e `seed.json` (artigos iniciais) |
 | `uploads/` | Imagens enviadas pelo painel |
 | `storage/` | Logs, cache e trava da instalação |

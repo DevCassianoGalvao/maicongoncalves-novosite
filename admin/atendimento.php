@@ -83,7 +83,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
 ?>
 <div class="top">
   <div><h1><?= e($what) ?> <span class="muted" style="font-weight:600"><?= ticket_code($id) ?></span></h1>
-    <p><?= ticket_badge($t) ?> <span class="badge badge--src"><?= $t['source'] === 'mapa' ? e(S('radar_name')) : 'Formulário de contato' ?></span> · recebido em <?= date('d/m/Y \à\s H:i', strtotime($t['created_at'])) ?></p></div>
+    <p><?= ticket_badge($t) ?> <span class="badge badge--src"><?= $t['source'] === 'mapa' ? 'Demandas do site' : 'Formulário de contato (antigo)' ?></span> · recebido em <?= date('d/m/Y \à\s H:i', strtotime($t['created_at'])) ?></p></div>
   <a class="btn btn--ghost" href="<?= e(url('/admin/atendimentos.php')) ?>"><?= icon('arrow-left') ?>Voltar</a>
 </div>
 <div class="edit">

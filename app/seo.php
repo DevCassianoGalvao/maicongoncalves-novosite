@@ -48,7 +48,7 @@ function seo_person(): array
             'telephone' => $tel ? '+' . $tel : null,
             'areaServed' => 'Nova Friburgo, RJ',
             'availableLanguage' => 'Portuguese',
-            'url' => abs_url('/contato/'),
+            'url' => abs_url('/demandas/'),
         ]),
     ];
 }

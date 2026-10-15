@@ -13,7 +13,7 @@ const TICKET_CATS = [
     'agua'        => 'Água e esgoto',
     'arvore'      => 'Árvore e poda',
     'sinalizacao' => 'Sinalização e trânsito',
-    'outro'       => 'Outro problema',
+    'outro'       => 'Outra demanda',
 ];
 const TICKET_STATUS = [
     'novo'      => 'Novo',

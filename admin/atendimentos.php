@@ -40,8 +40,8 @@ function tqs(array $over): string
 admin_head('Atendimentos', 'tickets');
 ?>
 <div class="top">
-  <div><h1>Atendimentos</h1><p>Demandas do <?= e(S('radar_name')) ?> e mensagens do formulário de contato.</p></div>
-  <a class="btn btn--ghost" href="<?= e(url('/radarfriburgo/')) ?>" target="_blank" rel="noopener"><?= icon('map-trifold') ?>Ver o mapa</a>
+  <div><h1>Atendimentos</h1><p>Demandas enviadas pelo site, com acompanhamento no mapa.</p></div>
+  <a class="btn btn--ghost" href="<?= e(url('/demandas/')) ?>" target="_blank" rel="noopener"><?= icon('map-trifold') ?>Ver o mapa</a>
 </div>
 <nav class="tabs" aria-label="Situação">
 <?php foreach ($tabs as $k => [$label, $n]): ?>
@@ -54,8 +54,8 @@ admin_head('Atendimentos', 'tickets');
     <input type="search" name="q" value="<?= e($term) ?>" placeholder="Buscar por nome, telefone, bairro ou protocolo">
     <select name="origem" onchange="this.form.submit()">
       <option value="">Todas as origens</option>
-      <option value="mapa"<?= $source === 'mapa' ? ' selected' : '' ?>><?= e(S('radar_name')) ?></option>
-      <option value="contato"<?= $source === 'contato' ? ' selected' : '' ?>>Formulário de contato</option>
+      <option value="mapa"<?= $source === 'mapa' ? ' selected' : '' ?>>Demandas do site</option>
+      <option value="contato"<?= $source === 'contato' ? ' selected' : '' ?>>Formulário de contato (antigo)</option>
     </select>
     <button class="btn btn--ghost" type="submit"><?= icon('magnifying-glass') ?>Buscar</button>
   </form>

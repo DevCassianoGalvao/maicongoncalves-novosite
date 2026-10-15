@@ -36,7 +36,7 @@ if (ENV_FILE) {
     try { db(); $dbOk = true; } catch (Throwable $ex) { $dbError = $ex->getMessage(); }
 }
 $add('Conexão com o banco de dados' . ($dbOk ? ' (' . e(env('DB_NAME')) . ')' : ''), $dbOk, true, $dbError ? 'Erro: ' . $dbError : 'Confira DB_HOST, DB_NAME, DB_USER e DB_PASS no .env.');
-$add('Chave do Brevo (BREVO_API_KEY)', env('BREVO_API_KEY', '') !== '', false, 'Sem a chave o formulário de contato não envia. Pode preencher depois.');
+$add('Chave do Brevo (BREVO_API_KEY)', env('BREVO_API_KEY', '') !== '', false, 'Sem a chave as demandas não chegam por e-mail. Pode preencher depois.');
 $add('Remetente do e-mail (MAIL_FROM_EMAIL)', env('MAIL_FROM_EMAIL', '') !== '', false, 'Use um remetente validado no Brevo.');
 $add('Endereço do site (APP_URL)', env('APP_URL', '') !== '', false, 'Ex.: https://maicongoncalves.com.br — usado nos links de compartilhar.');
 $ready = !array_filter($checks, function ($c) { return $c['required'] && !$c['pass']; });

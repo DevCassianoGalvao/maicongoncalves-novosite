@@ -4,7 +4,7 @@ require ROOT . '/app/admin_ui.php';
 require ROOT . '/app/images.php';
 $user = admin_guard();
 
-const RESERVED_SLUGS = ['minha-historia', 'fl360', 'descobrindo-talentos', 'contato', 'noticias', 'admin', 'install', 'uploads', 'img', 'api', 'app', 'storage', 'category', 'feed', 'sitemap', 'peneira', 'blog', 'home', 'index'];
+const RESERVED_SLUGS = ['minha-historia', 'fl360', 'descobrindo-talentos', 'contato', 'demandas', 'radarfriburgo', 'radar', 'noticias', 'admin', 'install', 'uploads', 'img', 'api', 'app', 'storage', 'category', 'feed', 'sitemap', 'peneira', 'blog', 'home', 'index'];
 
 function unique_slug(string $slug, int $id): string
 {

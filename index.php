@@ -1,7 +1,7 @@
 <?php
 /**
  * Roteador do site. O .htaccess manda para cá tudo o que não é arquivo/pasta real.
- * Mantém os mesmos endereços do site antigo em WordPress (ex.: /contato/, /slug-da-noticia/).
+ * Mantém os mesmos endereços do site antigo em WordPress (ex.: /noticias/, /slug-da-noticia/).
  */
 require __DIR__ . '/app/bootstrap.php';
 
@@ -24,15 +24,14 @@ $pages = [
     'minha-historia'       => 'historia',
     'fl360'                => 'fl360',
     'descobrindo-talentos' => 'peneira',
-    'contato'              => 'contato',
     'noticias'             => 'noticias',
-    'radarfriburgo'        => 'radar',
+    'demandas'             => 'radar',
 ];
 $legacy = [ // endereços antigos ou alternativos -> endereço oficial
     'index.html' => '/', 'index.php' => '/', 'home' => '/',
     'minha-historia.html' => '/minha-historia/', 'fl360.html' => '/fl360/',
     'peneira' => '/descobrindo-talentos/', 'peneira.html' => '/descobrindo-talentos/',
-    'contato.html' => '/contato/', 'demandas' => '/radarfriburgo/', 'radar' => '/radarfriburgo/', 'noticias.html' => '/noticias/', 'blog' => '/noticias/', 'feed' => '/noticias/',
+    'contato' => '/demandas/', 'contato.html' => '/demandas/', 'radarfriburgo' => '/demandas/', 'radar' => '/demandas/', 'noticias.html' => '/noticias/', 'blog' => '/noticias/', 'feed' => '/noticias/',
 ];
 
 if (isset($legacy[$slug])) redirect(url($legacy[$slug]) . $qs, 301);
@@ -46,12 +45,11 @@ if ($slug === 'llms.txt') { require ROOT . '/app/llms.php'; exit; }
 if ($slug !== '' && substr($path, -1) !== '/' && strpos($slug, '.') === false) redirect(url('/' . $slug . '/') . $qs, 301);
 
 $meta = [];
-if ($slug === 'radarfriburgo') {
+if ($slug === 'demandas') {
     require ROOT . '/app/tickets.php';
     $meta = [
-        'title' => S('radar_name') . ' – registre problemas da cidade | Vereador Maicon Gonçalves',
-        'description' => 'Fotografe um problema da sua rua em Nova Friburgo e acompanhe no mapa quanto tempo a Prefeitura leva para resolver. Ferramenta do gabinete do vereador Maicon Gonçalves.',
-        'robots' => S('radar_public') === '1' ? '' : 'noindex, nofollow',
+        'title' => 'Enviar demanda – Vereador Maicon Gonçalves | Nova Friburgo',
+        'description' => 'Envie sua demanda ao gabinete do vereador Maicon Gonçalves: o gabinete confere, encaminha oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.',
     ];
 }
 if (isset($pages[$slug])) {

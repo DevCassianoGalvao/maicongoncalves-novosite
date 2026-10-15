@@ -60,7 +60,7 @@ def paths(t):
 
 
 HEAD, HEADER, FOOTER = read('_head.html'), read('_header.html'), read('_footer.html')
-NAV = ('home', 'hist', 'fl', 'pen', 'news', 'cont', 'radar')
+NAV = ('home', 'hist', 'fl', 'pen', 'news', 'radar')
 
 
 def page(name, title, desc, body, nav='', intro='false', ft_top='', kind=''):
@@ -97,10 +97,9 @@ page('home', 'Vereador Maicon Gonçalves | Nova Friburgo – RJ', 'Site oficial 
 page('historia', 'Minha história – Vereador Maicon Gonçalves | Nova Friburgo', 'Da escola pública à Câmara Municipal: a trajetória de Maicon Gonçalves, professor de Educação Física e vereador de Nova Friburgo (RJ) eleito em 2024.', read('minha-historia.html'), nav='hist', ft_top='on-white', kind='historia')
 page('fl360', 'FL360 – Friburgo Líder 360 | Vereador Maicon Gonçalves', 'FL360, programa de formação cidadã do vereador Maicon Gonçalves em Nova Friburgo: compreensão da gestão pública, das estruturas e dos serviços da cidade.', read('fl360.html'), nav='fl', ft_top='on-white', kind='fl360')
 page('peneira', 'Peneira Descobrindo Talentos – futebol de base em Nova Friburgo | Vereador Maicon Gonçalves', 'Peneira Descobrindo Talentos: o maior movimento de captação do futebol de base da Serra Fluminense, com avaliação de jovens atletas de Nova Friburgo e região.', read('peneira.html'), nav='pen', ft_top='on-white', kind='peneira')
-page('contato', 'Contato – fale com o Vereador Maicon Gonçalves | Nova Friburgo', 'Envie demandas do seu bairro, pedidos de fiscalização, sugestões e denúncias ao gabinete do vereador Maicon Gonçalves na Câmara Municipal de Nova Friburgo.', read('contato.html').replace('{{bairros}}', bopts), nav='cont', kind='contato')
 page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'Notícias do mandato do vereador Maicon Gonçalves: projetos, leis, fiscalização e ações na Câmara Municipal de Nova Friburgo (RJ).', read('noticias.html'), nav='news', kind='noticias')
 page('noticia', T, '', read('noticia.html'), nav='news')
-page('radar', 'Radar Friburgo – Vereador Maicon Gonçalves', '', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top='on-white', kind='radar')
+page('radar', 'Enviar demanda – Vereador Maicon Gonçalves | Nova Friburgo', 'Envie sua demanda ao gabinete do vereador Maicon Gonçalves e acompanhe em tempo real no mapa até a Prefeitura resolver.', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top='on-white', kind='demandas')
 page('404', 'Página não encontrada – ' + T, '', read('404.html'), kind='404')
 
 for f in ('site.css', 'site.js', 'radar.js'): shutil.copy(os.path.join(SRC, f), os.path.join(REPO, f))
