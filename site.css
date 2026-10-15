@@ -104,7 +104,7 @@ ul,ol{padding:0;list-style:none}
 .mm-x{position:absolute;top:calc(env(safe-area-inset-top,0px) + 19px);right:calc(var(--gut) + 8px);width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center}
 .mm-cta{justify-self:start;opacity:0;transform:translateY(20px);transition:opacity .5s .3s,transform .6s .3s var(--ease-out),box-shadow .3s}
 .mm.is-open .mm-cta{opacity:1;transform:none}
-.mm-soc{display:flex;gap:10px}
+.mm-soc{display:flex;gap:10px;margin-top:22px}
 .mm-soc a{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);display:grid;place-items:center}
 
 /* ---------- fundo azul reutilizado ---------- */
