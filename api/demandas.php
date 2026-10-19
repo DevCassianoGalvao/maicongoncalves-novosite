@@ -68,7 +68,7 @@ $d['accuracy'] = (int) round((float) ($_POST['acc'] ?? 0)) ?: null;
 $d['geo_manual'] = $f('geo_manual', 1) === '1';
 $d['photos'] = $photos;
 $id = ticket_create($d);
-ticket_note($id, 'Demanda registrada pelo site.');
+ticket_note($id, 'Demanda registrada pelo Friburgo no Mapa.');
 if ($f('novidades', 1) === '1') {
     q('UPDATE tickets SET news_optin = 1 WHERE id = ?', [$id]);
     try { subscriber_optin($d['email'], $d['name'], 'demanda'); } catch (Throwable $ex) { app_log('demandas', 'inscrição de novidades falhou: ' . $ex->getMessage()); }
@@ -105,7 +105,7 @@ foreach ($rows as [$k, $v]) {
 $html = '<!doctype html><html><body style="margin:0;background:#F1F4F9;font-family:Arial,Helvetica,sans-serif">
 <div style="max-width:640px;margin:0 auto;padding:24px 14px">
   <div style="background:#031436;color:#fff;border-radius:16px 16px 0 0;padding:20px 22px">
-    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#FF8A3D;font-weight:700">Nova demanda pelo site</div>
+    <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#FF8A3D;font-weight:700">Nova demanda no Friburgo no Mapa</div>
     <div style="font-size:20px;font-weight:700;margin-top:6px">' . e($cat) . ($d['neighborhood'] ? ' — ' . e($d['neighborhood']) : '') . '</div>
   </div>
   <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%;background:#fff;border-collapse:collapse">' . $tr . '</table>
@@ -118,7 +118,7 @@ $html = '<!doctype html><html><body style="margin:0;background:#F1F4F9;font-fami
     <p style="color:#8A96B0;font-size:12px;margin:14px 0 0">Registrado em ' . date('d/m/Y \à\s H:i') . '. Só aparece no mapa depois que o gabinete aprovar.</p>
   </div>
 </div></body></html>';
-$text = "NOVA DEMANDA PELO SITE\n\nProtocolo: $code\nTipo: $cat\nNome: " . ($d['name'] ?: 'Não informado') . ($anon ? ' (não quer o nome no mapa)' : '') .
+$text = "NOVA DEMANDA NO FRIBURGO NO MAPA\n\nProtocolo: $code\nTipo: $cat\nNome: " . ($d['name'] ?: 'Não informado') . ($anon ? ' (não quer o nome no mapa)' : '') .
     "\nWhatsApp: {$d['phone']}\nE-mail: {$d['email']}\nLocal: $place " . $d['geo_address'] . "\nMapa: $gmaps\n\n{$d['description']}\n\nAbrir no painel: $link\n";
 [$sent, $info] = brevo_send('Nova demanda: ' . $cat . ($d['neighborhood'] ? ' – ' . $d['neighborhood'] : ''), $html, $text, $attach, ['email' => $d['email'], 'name' => $d['name'] ?: $d['email']]);
 app_log('demandas', $code . ' | ' . $cat . ' | e-mail ' . ($sent ? 'enviado ' . $info : 'falhou: ' . $info));

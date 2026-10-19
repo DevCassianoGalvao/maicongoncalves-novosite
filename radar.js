@@ -1,4 +1,4 @@
-/* Radar Friburgo: mapa de demandas e registro de problemas */
+/* Friburgo no Mapa: mapa de demandas e envio de novas demandas */
 (function () {
   'use strict';
   var doc = document, BASE = doc.documentElement.getAttribute('data-base') || '';

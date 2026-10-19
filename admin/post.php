@@ -5,7 +5,7 @@ require_once ROOT . '/app/images.php';
 require_once ROOT . '/app/newsletter.php';
 $user = admin_guard(true);
 
-const RESERVED_SLUGS = ['minha-historia', 'fl360', 'descobrindo-talentos', 'contato', 'demandas', 'radarfriburgo', 'radar', 'privacidade', 'descadastrar', 'noticias', 'admin', 'install', 'uploads', 'img', 'api', 'app', 'storage', 'category', 'feed', 'sitemap', 'peneira', 'blog', 'home', 'index'];
+const RESERVED_SLUGS = ['minha-historia', 'fl360', 'descobrindo-talentos', 'contato', 'demandas', 'friburgo-no-mapa', 'friburgonomapa', 'radarfriburgo', 'radar', 'privacidade', 'descadastrar', 'noticias', 'admin', 'install', 'uploads', 'img', 'api', 'app', 'storage', 'category', 'feed', 'sitemap', 'peneira', 'blog', 'home', 'index'];
 
 function unique_slug(string $slug, int $id): string
 {

@@ -20,7 +20,7 @@ function citizen_notify(int $id, string $kind): array
     $cat = cat_label($t['category']);
     $first = first_name($t['name']);
     $place = trim(($t['address'] ?: '') . ($t['neighborhood'] ? ($t['address'] ? ' – ' : '') . $t['neighborhood'] : ''));
-    $track = abs_url('/demandas/') . '?d=' . $id . '#mapa';
+    $track = abs_url('/friburgo-no-mapa/') . '?d=' . $id . '#mapa';
     $sent = $t['published_at'] ? date('d/m/Y', strtotime($t['published_at'])) : date('d/m/Y');
     $hello = 'Olá' . ($first !== '' ? ', ' . $first : '') . '!';
 
@@ -29,8 +29,8 @@ function citizen_notify(int $id, string $kind): array
         $kicker = 'Demanda enviada à Prefeitura';
         $lead = $hello . ' O gabinete do vereador Maicon Gonçalves conferiu a sua demanda e ela foi encaminhada oficialmente à Prefeitura de Nova Friburgo' .
             ($t['department'] ? ' (' . $t['department'] . ')' : '') . '.';
-        $more = 'A partir de agora ela aparece no nosso mapa de demandas, com um contador mostrando há quantos dias a Prefeitura foi avisada. Você pode acompanhar tudo em tempo real.';
-        $btn = 'Acompanhar no mapa';
+        $more = 'A partir de agora ela aparece no Friburgo no Mapa, com um contador mostrando há quantos dias a Prefeitura foi avisada. Você pode acompanhar tudo em tempo real.';
+        $btn = 'Acompanhar no Friburgo no Mapa';
         $rows = [['Protocolo', $code], ['Tipo', $cat], ['Local', $place ?: '—'], ['Enviada à Prefeitura em', $sent]];
     } else {
         $days = $t['published_at'] && $t['resolved_at'] ? max(0, (int) round((strtotime($t['resolved_at']) - strtotime($t['published_at'])) / 86400)) : null;

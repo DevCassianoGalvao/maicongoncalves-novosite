@@ -25,7 +25,7 @@ $pages = [
     'fl360'                => 'fl360',
     'descobrindo-talentos' => 'peneira',
     'noticias'             => 'noticias',
-    'demandas'             => 'radar',
+    'friburgo-no-mapa'     => 'radar',
     'privacidade'          => 'privacidade',
     'descadastrar'         => 'descadastrar',
 ];
@@ -33,7 +33,7 @@ $legacy = [ // endereços antigos ou alternativos -> endereço oficial
     'index.html' => '/', 'index.php' => '/', 'home' => '/',
     'minha-historia.html' => '/minha-historia/', 'fl360.html' => '/fl360/',
     'peneira' => '/descobrindo-talentos/', 'peneira.html' => '/descobrindo-talentos/',
-    'contato' => '/demandas/', 'contato.html' => '/demandas/', 'radarfriburgo' => '/demandas/', 'radar' => '/demandas/', 'noticias.html' => '/noticias/', 'blog' => '/noticias/', 'feed' => '/noticias/',
+    'contato' => '/friburgo-no-mapa/', 'contato.html' => '/friburgo-no-mapa/', 'demandas' => '/friburgo-no-mapa/', 'radarfriburgo' => '/friburgo-no-mapa/', 'radar' => '/friburgo-no-mapa/', 'friburgonomapa' => '/friburgo-no-mapa/', 'noticias.html' => '/noticias/', 'blog' => '/noticias/', 'feed' => '/noticias/',
 ];
 
 if (isset($legacy[$slug])) redirect(url($legacy[$slug]) . $qs, 301);
@@ -48,11 +48,11 @@ if ($slug !== '' && substr($path, -1) !== '/' && strpos($slug, '.') === false) r
 
 $meta = [];
 if ($slug === 'descadastrar') { require_once ROOT . '/app/tickets.php'; db_migrate(); $meta = ['robots' => 'noindex, nofollow']; header('Cache-Control: no-store'); }
-if ($slug === 'demandas') {
+if ($slug === 'friburgo-no-mapa') {
     require_once ROOT . '/app/tickets.php';
     $meta = [
-        'title' => 'Enviar demanda – Vereador Maicon Gonçalves | Nova Friburgo',
-        'description' => 'Envie sua demanda ao gabinete do vereador Maicon Gonçalves: o gabinete confere, encaminha oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.',
+        'title' => 'Friburgo no Mapa – envie sua demanda | Vereador Maicon Gonçalves',
+        'description' => 'Friburgo no Mapa: envie sua demanda ao gabinete do vereador Maicon Gonçalves. Nossa equipe confere, encaminha oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.',
     ];
 }
 if (isset($pages[$slug])) {

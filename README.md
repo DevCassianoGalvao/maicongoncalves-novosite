@@ -1,6 +1,6 @@
 # Site do Vereador Maicon Gonçalves
 
-Site em PHP + MySQL, com painel para as notícias e página "Enviar demanda" (mapa de acompanhamento) que avisa o gabinete pelo Brevo.
+Site em PHP + MySQL, com painel para as notícias e o Friburgo no Mapa (envio e acompanhamento de demandas, em `/friburgo-no-mapa/`) que avisa o gabinete pelo Brevo.
 Os endereços são os mesmos do WordPress antigo (`/noticias/`, `/slug-da-noticia/`…), então nenhum link do Google se perde.
 
 ## Subir na hospedagem (cPanel)

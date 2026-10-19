@@ -16,7 +16,7 @@ $o .= "## Páginas principais\n\n";
 foreach ([['Início', '/', 'Apresentação do mandato e últimas notícias'], ['Minha história', '/minha-historia/', 'Trajetória de Maicon Gonçalves até a Câmara'],
           ['FL360 – Friburgo Líder 360', '/fl360/', 'Programa de formação cidadã e compreensão da gestão pública'],
           ['Peneira Descobrindo Talentos', '/descobrindo-talentos/', 'Captação do futebol de base na Serra Fluminense'],
-          ['Notícias', '/noticias/', 'Todas as notícias do mandato'], ['Enviar demanda', '/demandas/', 'Envio de demandas, denúncias e sugestões ao gabinete, com acompanhamento no mapa']] as [$t, $u, $d]) {
+          ['Notícias', '/noticias/', 'Todas as notícias do mandato'], ['Friburgo no Mapa', '/friburgo-no-mapa/', 'Envio de demandas da cidade ao gabinete, com acompanhamento em tempo real no mapa até a Prefeitura resolver']] as [$t, $u, $d]) {
     $o .= "- [$t](" . abs_url($u) . "): $d\n";
 }
 $o .= "\n## Notícias\n\n";

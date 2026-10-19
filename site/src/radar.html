@@ -11,7 +11,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
   <div class="hero-bg" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span></div>
   <div class="wrap ph-hero-in">
     <span class="chip" data-h><i></i>Fiscalização cidadã em Nova Friburgo</span>
-    <h1 class="h1" data-split><span class="scr">Envie sua demanda{{scr}}</span></h1>
+    <h1 class="h1" data-split><span class="scr">Friburgo no Mapa{{scr}}</span></h1>
     <p class="lead" data-h>Você envia a demanda, nosso gabinete confere e encaminha oficialmente para a Prefeitura. Depois, você acompanha tudo em&nbsp;tempo&nbsp;real!</p>
     <div class="rd-stats" data-h>
       <div><b><?= count($waiting) ?></b><span>aguardando a Prefeitura</span></div>
@@ -35,7 +35,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
       </select></label>
     </div>
     <div class="rd-mapbox">
-      <div id="rd-map" class="rd-map" role="application" aria-label="Mapa de Nova Friburgo com as demandas registradas"></div>
+      <div id="rd-map" class="rd-map" role="application" aria-label="Friburgo no Mapa: demandas registradas em Nova Friburgo"></div>
       <p class="rd-empty" id="rd-empty"<?= $items ? ' hidden' : '' ?>>Ainda não há demandas publicadas no mapa. <a href="#registrar">Envie a primeira</a>.</p>
       <article class="rd-card" id="rd-card" hidden aria-live="polite"></article>
     </div>
