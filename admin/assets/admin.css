@@ -262,3 +262,4 @@ select{-webkit-appearance:none;appearance:none;padding-right:42px!important;curs
 .icon-btn:disabled{opacity:.35;cursor:default}
 .icon-btn .ic{width:15px;height:15px}
 @media (max-width:760px){.types li{flex-wrap:wrap}.types-name{flex-basis:calc(100% - 80px)}.types-n{text-align:left;width:auto}.types-acts{width:auto;margin-left:auto}}
+.tk-video{display:block;width:100%;max-height:480px;border-radius:12px;background:#020B1F}

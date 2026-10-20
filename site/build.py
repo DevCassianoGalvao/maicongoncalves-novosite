@@ -52,13 +52,18 @@ def phps(s): return "'" + s.replace('\\', '\\\\').replace("'", "\\'") + "'"
 def version(f): return hashlib.md5(open(os.path.join(SRC, f), 'rb').read()).hexdigest()[:8]
 
 
+def version_js():
+    fs = sorted(glob.glob(os.path.join(REPO, 'js', '*.js')))
+    return hashlib.md5(b''.join(open(f, 'rb').read() for f in fs)).hexdigest()[:4] if fs else ''
+
+
 def paths(t):
     """Links e arquivos passam a respeitar a subpasta do site (constante B)."""
     t = re.sub(r'((?:href|src|data-full|action)=")/(?!/)', r'\1<?= B ?>/', t)
     t = re.sub(r'((?:src|data-full)=")img/', r'\1<?= B ?>/img/', t)
     t = t.replace('href="site.css"', f'href="<?= B ?>/site.css?v={version("site.css")}"')
     t = t.replace('src="site.js"', f'src="<?= B ?>/site.js?v={version("site.js")}"')
-    t = t.replace('src="radar.js"', f'src="<?= B ?>/radar.js?v={version("radar.js")}"')
+    t = t.replace('src="radar.js"', f'src="<?= B ?>/radar.js?v={version("radar.js")}{version_js()}"')
     return t
 
 
@@ -104,12 +109,18 @@ page('fl360', 'FL360 – Friburgo Líder 360 | Vereador Maicon Gonçalves', 'FL3
 page('peneira', 'Peneira Descobrindo Talentos – futebol de base em Nova Friburgo | Vereador Maicon Gonçalves', 'Peneira Descobrindo Talentos: o maior movimento de captação do futebol de base da Serra Fluminense, com avaliação de jovens atletas de Nova Friburgo e região.', read('peneira.html'), nav='pen', ft_top='on-white', kind='peneira')
 page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'Notícias do mandato do vereador Maicon Gonçalves: projetos, leis, fiscalização e ações na Câmara Municipal de Nova Friburgo (RJ).', read('noticias.html'), nav='news', kind='noticias')
 page('noticia', T, '', read('noticia.html'), nav='news')
-page('radar', 'Friburgo no Mapa – envie sua demanda | Vereador Maicon Gonçalves', 'Friburgo no Mapa: envie sua demanda ao gabinete do vereador Maicon Gonçalves e acompanhe em tempo real até a Prefeitura resolver.', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top='on-white', kind='demandas')
+page('radar', 'Friburgo no Mapa – envie sua demanda | Vereador Maicon Gonçalves', 'Envie sua demanda ao nosso gabinete. Nós conferimos, encaminhamos oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top='on-white', kind='demandas')
 page('privacidade', 'Política de privacidade – Vereador Maicon Gonçalves', 'Como o gabinete do vereador Maicon Gonçalves trata os dados enviados pelo site, de acordo com a LGPD.', read('privacidade.html'), ft_top='on-white', kind='privacidade')
 page('descadastrar', 'Descadastrar – Vereador Maicon Gonçalves', '', read('descadastrar.html'), kind='descadastrar')
 page('404', 'Página não encontrada – ' + T, '', read('404.html'), kind='404')
 
 for f in ('site.css', 'site.js', 'radar.js'): shutil.copy(os.path.join(SRC, f), os.path.join(REPO, f))
+# o radar.js carrega o compressor de vídeo (js/video.js, gerado por: cd tools && npm run video) só quando a pessoa escolhe um vídeo
+vjs = os.path.join(REPO, 'js', 'video.js')
+vv = hashlib.md5(b''.join(open(f, 'rb').read() for f in sorted(glob.glob(os.path.join(REPO, 'js', '*.js'))))).hexdigest()[:8] if os.path.exists(vjs) else '0'
+rp = os.path.join(REPO, 'radar.js')
+rjs = open(rp, encoding='utf-8').read().replace('__VIDEO_V__', vv)
+open(rp, 'w', encoding='utf-8').write(rjs)
 
 # ícones pedidos pelo PHP: icon('nome') ou icon('nome', 'bold'|'fill')
 need = {(n, 'i') for n in ('facebook-logo', 'instagram-logo', 'tiktok-logo', 'youtube-logo',  # redes (content.php)

@@ -10,7 +10,8 @@ $meta += [
     'robots' => '',
     'page' => '',
 ];
-if (!$meta['image']) { $meta['image'] = abs_url('/img/hero-retrato.webp'); $meta['image_w'] = 1000; $meta['image_h'] = 1339; }
+// imagem padrão para compartilhar: logo em fundo azul (1200x630). Páginas e artigos podem definir a sua.
+if (!$meta['image']) { $meta['image'] = abs_url('/img/og-padrao.jpg'); $meta['image_w'] = 1200; $meta['image_h'] = 630; $meta['image_alt'] = 'Vereador Maicon Gonçalves – Nova Friburgo'; }
 
 // dados estruturados de cada tipo de página
 $__page = ['@type' => 'WebPage', '@id' => $meta['canonical'] . '#pagina', 'url' => $meta['canonical'], 'name' => $meta['title'], 'description' => $meta['description'],

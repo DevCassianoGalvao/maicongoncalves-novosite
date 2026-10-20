@@ -52,7 +52,9 @@ if ($slug === 'friburgo-no-mapa') {
     require_once ROOT . '/app/tickets.php';
     $meta = [
         'title' => 'Friburgo no Mapa – envie sua demanda | Vereador Maicon Gonçalves',
-        'description' => 'Friburgo no Mapa: envie sua demanda ao gabinete do vereador Maicon Gonçalves. Nossa equipe confere, encaminha oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.',
+        'image' => abs_url('/img/og-friburgo-no-mapa.jpg'), 'image_w' => 1200, 'image_h' => 630,
+        'image_alt' => 'Friburgo no Mapa: envie sua demanda e acompanhe em tempo real',
+        'description' => 'Envie sua demanda ao nosso gabinete. Nós conferimos, encaminhamos oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.',
     ];
 }
 if (isset($pages[$slug])) {

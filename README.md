@@ -37,6 +37,13 @@ Fotos grandes: o arquivo `.user.ini` sobe o limite de envio para 16 MB por foto.
 - Ao publicar um artigo, a caixa "Avisar por e-mail quem aceita novidades" manda o título e o link para essa lista. Cada artigo avisa uma vez só.
 - Todo e-mail tem link de descadastro (`/descadastrar/`). Registro em `storage/logs/artigos-AAAA-MM.log`.
 
+## Vídeos nas demandas
+
+- A pessoa pode enviar 1 vídeo (além de até 3 fotos). O vídeo é comprimido **no próprio celular**, antes do envio: até 1 minuto, lado maior de 960 px, ~1 Mbps (1 min ≈ 7 MB). O site não fica mais pesado: o compressor (`js/video*.js`) só é baixado quando alguém escolhe um vídeo, e no mapa o vídeo só carrega quando a pessoa aperta play.
+- Gera MP4 (H.264 + AAC) no Chrome, Safari e Android; WebM (VP9) nos navegadores sem H.264. Navegador sem suporte: aceita o arquivo original até 25 MB.
+- Para atualizar o compressor: `cd tools && npm install && npm run video`, depois `python3 site/build.py`.
+- Limites do PHP em `.user.ini` (32 MB por arquivo, 64 MB por envio).
+
 ## Exportar dados
 
 - Painel › Demandas › Exportar dados (só administrador): planilha de pessoas (uma linha por pessoa) e de demandas.

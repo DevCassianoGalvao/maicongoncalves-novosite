@@ -50,14 +50,16 @@
     var mobile = function () { return matchMedia('(max-width: 860px)').matches; };
 
     var renderCard = function (t) {
-      var ph = t.photos || [];
+      var ph = t.photos || [], vd = t.video;
+      if (vd && ph.length && ph[0].url === vd.poster) ph = ph.slice(1); // a capa do vídeo não se repete como foto
       var timer = t.status === 'resolvido'
         ? '<div class="rd-timer rd-timer--ok">' + icons.check + '<div><small>Resolvido em</small><b>' + t.days + (t.days === 1 ? ' dia' : ' dias') + '</b><small>Solução em ' + fmtDate(t.resolvedAt) + '</small></div></div>'
         : '<div class="rd-timer">' + icons.clock + '<div><small>Aguardando a Prefeitura há</small><b data-since="' + esc(t.publishedAt) + '">' + span(t.publishedAt) + '</b></div></div>';
       card.innerHTML =
         '<button type="button" class="rd-card-x" aria-label="Fechar">' + icons.x + '</button>' +
-        (ph.length ? '<button type="button" class="rd-card-ph" data-zoom="' + esc(ph[0].url) + '"><img src="' + esc(ph[0].url) + '" alt="Foto do problema: ' + esc(t.catLabel) + '">' + (ph.length > 1 ? '<span>' + ph.length + ' fotos</span>' : '') + '</button>' : '') +
-        (ph.length > 1 ? '<div class="rd-thumbs">' + ph.map(function (p, i) { return '<button type="button" data-zoom="' + esc(p.url) + '" aria-label="Ver foto ' + (i + 1) + '"><img src="' + esc(p.url) + '" alt=""></button>'; }).join('') + '</div>' : '') +
+        (vd ? '<div class="rd-card-vid"><video controls playsinline preload="none"' + (vd.poster ? ' poster="' + esc(vd.poster) + '"' : '') + '><source src="' + esc(vd.url) + '" type="' + esc(vd.mime) + '"></video></div>' : '') +
+        (!vd && ph.length ? '<button type="button" class="rd-card-ph" data-zoom="' + esc(ph[0].url) + '"><img src="' + esc(ph[0].url) + '" alt="Foto do problema: ' + esc(t.catLabel) + '">' + (ph.length > 1 ? '<span>' + ph.length + ' fotos</span>' : '') + '</button>' : '') +
+        (ph.length > (vd ? 0 : 1) ? '<div class="rd-thumbs">' + ph.map(function (p, i) { return '<button type="button" data-zoom="' + esc(p.url) + '" aria-label="Ver foto ' + (i + 1) + '"><img src="' + esc(p.url) + '" alt=""></button>'; }).join('') + '</div>' : '') +
         '<div class="rd-card-b">' +
           '<div class="rd-card-tags"><span class="tag">' + esc(t.catLabel) + '</span><span class="rd-code">' + esc(t.code) + '</span></div>' +
           (t.place ? '<h3>' + esc(t.place) + '</h3>' : '') +
@@ -73,7 +75,7 @@
       card.classList.toggle('is-ok', t.status === 'resolvido');
       card.scrollTop = 0;
     };
-    var closeCard = function () { card.hidden = true; doc.documentElement.classList.remove('rd-sheet-open'); if (active) active.getElement() && active.getElement().classList.remove('is-on'); active = null; };
+    var closeCard = function () { var v = $('video', card); if (v) v.pause(); card.hidden = true; doc.documentElement.classList.remove('rd-sheet-open'); if (active) active.getElement() && active.getElement().classList.remove('is-on'); active = null; };
     card.addEventListener('click', function (e) {
       var z = e.target.closest('[data-zoom]'); if (z) { zoom(z.getAttribute('data-zoom')); return; }
       if (e.target.closest('.rd-card-x')) closeCard();
@@ -129,7 +131,7 @@
   var form = $('#rd-form');
   if (!form) return;
   var msg = $('#rd-msg'), send = $('#rd-send'), fileIn = $('#rd-fotos'), ups = $('#rd-ups'), drop = $('#rd-drop');
-  var photos = [], MAXF = 3;
+  var photos = [], MAXF = 3, vid = null, MAXV = 25 * 1024 * 1024;
   $('#rd-t').value = Date.now();
   var say = function (t, ok) { msg.hidden = false; msg.textContent = t; msg.classList.toggle('is-ok', !!ok); };
   var norm = function (s) { return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); };
@@ -143,7 +145,8 @@
   });
   $$('input,select,textarea', form).forEach(function (f) { f.addEventListener('input', function () { f.classList.remove('is-bad'); }); f.addEventListener('change', function () { f.classList.remove('is-bad'); var fs = f.closest('.rd-cats'); if (fs) fs.classList.remove('is-bad'); }); });
 
-  /* fotos */
+  /* fotos e vídeo */
+  var mmss = function (s) { s = Math.round(s || 0); return Math.floor(s / 60) + ':' + ('0' + (s % 60)).slice(-2); };
   var draw = function () {
     ups.innerHTML = '';
     photos.forEach(function (p, i) {
@@ -153,10 +156,55 @@
       $('button', d).addEventListener('click', function () { URL.revokeObjectURL(p.url); photos.splice(i, 1); draw(); });
       ups.appendChild(d);
     });
-    $('span', drop).textContent = photos.length ? (photos.length >= MAXF ? 'Limite de ' + MAXF + ' fotos' : 'Adicionar outra foto (' + photos.length + '/' + MAXF + ')') : 'Toque para tirar ou escolher a foto';
+    if (vid) {
+      var v = doc.createElement('div'); v.className = 'up up--video' + (vid.state === 'busy' ? ' is-busy' : '');
+      v.innerHTML = vid.state === 'busy'
+        ? '<div class="up-prog"><b>' + Math.round(vid.pct * 100) + '%</b><span>Preparando o vídeo</span><i style="width:' + Math.round(vid.pct * 100) + '%"></i></div>'
+        : (vid.poster ? '<img alt="Capa do vídeo">' : '<div class="up-vph">' + icons.video + '</div>') + '<span class="up-play">' + icons.play + '</span><span class="up-dur">' + mmss(vid.duration) + '</span>';
+      v.insertAdjacentHTML('beforeend', '<button type="button" aria-label="Remover vídeo">' + icons.x + '</button>');
+      if (vid.poster && $('img', v)) $('img', v).src = vid.posterUrl;
+      $('button', v).addEventListener('click', function () { if (vid && vid.cancel) vid.cancel(); if (vid && vid.posterUrl) URL.revokeObjectURL(vid.posterUrl); vid = null; draw(); });
+      ups.appendChild(v);
+    }
+    var parts = [];
+    if (photos.length) parts.push(photos.length + '/' + MAXF + ' fotos');
+    if (vid) parts.push('1 vídeo');
+    $('span', drop).textContent = parts.length ? 'Adicionar mais (' + parts.join(', ') + ')' : 'Toque para tirar ou escolher fotos ou vídeo';
+  };
+  var isVideo = function (f) { return /^video\//.test(f.type) || /\.(mp4|mov|m4v|webm|3gp|mkv)$/i.test(f.name || ''); };
+  var VIDEO_JS = (doc.documentElement.getAttribute('data-base') || '') + '/js/video.js?v=__VIDEO_V__';
+  var addVideo = function (f) {
+    var me = { state: 'busy', pct: 0, duration: 0 }, cancelled = false;
+    me.cancel = function () { cancelled = true; if (me.conv) me.conv.cancel(); };
+    vid = me; draw();
+    var fail = function (t) { if (vid === me) { vid = null; draw(); } toast(t); };
+    import(VIDEO_JS).then(function (m) {
+      return m.supported().then(function (ok) {
+        if (!ok) {
+          // navegador sem compressão: aceita o arquivo original se já for pequeno
+          if (f.size > MAXV) throw new Error('Este navegador não consegue diminuir o vídeo. Grave um vídeo mais curto (até 25 MB) ou envie pelo WhatsApp.');
+          return { blob: f, duration: 0, original: true };
+        }
+        return m.compress(f, function (p) { if (cancelled) return; me.pct = p; draw(); });
+      }).then(function (r) {
+        if (cancelled) return;
+        if (r.blob.size > MAXV) throw new Error('O vídeo ainda ficou grande demais. Envie um trecho mais curto.');
+        return m.poster(r.blob).then(function (pb) {
+          if (cancelled) return;
+          me.state = 'ready'; me.blob = r.blob; me.duration = r.duration; me.poster = pb; me.posterUrl = pb ? URL.createObjectURL(pb) : '';
+          draw();
+          if (r.trimmed) toast('O vídeo foi cortado para o primeiro minuto.');
+          if (r.audio === false) toast('O vídeo foi enviado sem som neste navegador.');
+        });
+      });
+    }).catch(function (e) { if (!cancelled) fail(e && e.message ? e.message : 'Não foi possível preparar o vídeo.'); });
   };
   fileIn.addEventListener('change', function () {
     Array.prototype.forEach.call(fileIn.files, function (f) {
+      if (isVideo(f)) {
+        if (vid) { toast('Só dá para enviar 1 vídeo por demanda.'); return; }
+        addVideo(f); return;
+      }
       if (photos.length >= MAXF) { toast('Máximo de ' + MAXF + ' fotos.'); return; }
       photos.push({ file: f, url: URL.createObjectURL(f) });
     });
@@ -238,7 +286,8 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
     var bad = [];
-    if (!photos.length) { drop.classList.add('is-bad'); bad.push([drop, 'a foto']); }
+    if (vid && vid.state === 'busy') { say('Aguarde o vídeo terminar de ser preparado (' + Math.round(vid.pct * 100) + '%).'); return; }
+    if (!photos.length && !vid) { drop.classList.add('is-bad'); bad.push([drop, 'uma foto ou vídeo']); }
     if (!$('#rd-lat').value) { pickEl.classList.add('is-bad'); bad.push([pickEl, 'o local no mapa']); }
     if (!$('#rd-tipo').value) { $('#rd-tipo').classList.add('is-bad'); bad.push([$('#rd-tipo'), 'o tipo da demanda']); }
     if (!$('#rd-desc').value.trim()) { $('#rd-desc').classList.add('is-bad'); bad.push([$('#rd-desc'), 'a descrição']); }
@@ -251,7 +300,20 @@
     Promise.all(photos.map(function (p) { return shrink(p.file); })).then(function (files) {
       var fd = new FormData(form);
       files.forEach(function (f, i) { fd.append('fotos[]', f, 'foto-' + (i + 1) + '.jpg'); });
-      return fetch(form.getAttribute('action'), { method: 'POST', body: fd, credentials: 'same-origin' }).then(function (r) { return r.json().catch(function () { return { ok: false, error: 'Erro no servidor (' + r.status + ').' }; }); });
+      if (vid && vid.blob) {
+        fd.append('video', vid.blob, 'video.' + (/webm/.test(vid.blob.type) ? 'webm' : /quicktime/.test(vid.blob.type) ? 'mov' : 'mp4'));
+        if (vid.poster) fd.append('video_poster', vid.poster, 'capa.jpg');
+        if (vid.duration) fd.append('video_dur', String(vid.duration));
+      }
+      // envio com porcentagem (o vídeo pode levar alguns segundos no 4G)
+      return new Promise(function (res) {
+        var x = new XMLHttpRequest();
+        x.open('POST', form.getAttribute('action'));
+        x.upload.onprogress = function (ev) { if (ev.lengthComputable && vid) $('span', send).textContent = 'ENVIANDO ' + Math.round(ev.loaded / ev.total * 100) + '%'; };
+        x.onload = function () { var j; try { j = JSON.parse(x.responseText); } catch (e) { j = { ok: false, error: x.status === 413 ? 'Os arquivos ficaram pesados demais. Tente um vídeo mais curto.' : 'Erro no servidor (' + x.status + ').' }; } res(j); };
+        x.onerror = function () { res({ ok: false, error: 'Sem conexão no momento. Verifique a internet e tente de novo.' }); };
+        x.send(fd);
+      });
     }).then(function (j) {
       if (!j.ok) { say(j.error || 'Não foi possível enviar.'); if (j.field) { var f = $('[name="' + j.field + '"]', form); if (f) f.classList.add('is-bad'); } return; }
       $('#rd-code').textContent = j.code;
@@ -261,7 +323,7 @@
       .then(function () { send.classList.remove('is-busy'); $('span', send).textContent = 'ENVIAR DEMANDA'; });
   });
   $('#rd-again').addEventListener('click', function () {
-    form.reset(); photos = []; draw(); msg.hidden = true; ruaAuto = false; $('#rd-t').value = Date.now();
+    form.reset(); photos = []; if (vid && vid.posterUrl) URL.revokeObjectURL(vid.posterUrl); vid = null; draw(); msg.hidden = true; ruaAuto = false; $('#rd-t').value = Date.now();
     $$('#rd-lat,#rd-lng,#rd-acc,#rd-addr,#rd-manual', form).forEach(function (i) { i.value = ''; });
     if (pin) { pick.removeLayer(pin); pick.removeLayer(ring); pin = ring = null; }
     pickSt.textContent = 'Use sua localização ou toque no mapa para marcar o local exato.';

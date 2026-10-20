@@ -12,7 +12,7 @@ if (!is_post()) {
     json_out(['ok' => true, 'items' => tickets_public()]);
 }
 
-if (empty($_POST) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) json_out(['ok' => false, 'error' => 'As fotos ficaram pesadas demais. Tente com menos fotos.'], 413);
+if (empty($_POST) && (int) ($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) json_out(['ok' => false, 'error' => 'Os arquivos ficaram pesados demais. Tente com menos fotos ou um vídeo mais curto.'], 413);
 $origin = $_SERVER['HTTP_ORIGIN'] ?? ($_SERVER['HTTP_REFERER'] ?? '');
 $host = $_SERVER['HTTP_HOST'] ?? '';
 if ($origin !== '' && $host !== '' && parse_url($origin, PHP_URL_HOST) !== parse_url('http://' . $host, PHP_URL_HOST)) json_out(['ok' => false, 'error' => 'Origem não permitida.'], 403);
@@ -47,7 +47,7 @@ if (!isset(ticket_cats()[$d['category']])) json_out(['ok' => false, 'error' => '
 if ($lat === false || $lng === false || abs($lat + 22.28) > 0.6 || abs($lng + 42.53) > 0.6) json_out(['ok' => false, 'error' => 'Marque no mapa onde fica o problema (dentro de Nova Friburgo).', 'field' => 'lat'], 422);
 if ($d['description'] === '') json_out(['ok' => false, 'error' => 'Descreva rapidamente o problema.', 'field' => 'descricao'], 422);
 if (!$anon && $d['name'] === '') json_out(['ok' => false, 'error' => 'Informe seu nome (ou marque para não aparecer).', 'field' => 'nome'], 422);
-if (strlen($digits) < 10 || strlen($digits) > 13) json_out(['ok' => false, 'error' => 'Informe seu WhatsApp com DDD para o gabinete falar com você.', 'field' => 'whatsapp'], 422);
+if (strlen($digits) < 10 || strlen($digits) > 13) json_out(['ok' => false, 'error' => 'Informe seu WhatsApp com DDD para nossa equipe falar com você.', 'field' => 'whatsapp'], 422);
 if (!filter_var($d['email'], FILTER_VALIDATE_EMAIL)) json_out(['ok' => false, 'error' => 'Informe um e-mail válido para receber os avisos da sua demanda.', 'field' => 'email'], 422);
 if (!$d['consent']) json_out(['ok' => false, 'error' => 'Para enviar, é preciso concordar com o uso dos dados.', 'field' => 'consentimento'], 422);
 
@@ -60,7 +60,22 @@ if ($files && is_array($files['name'])) {
         catch (Throwable $ex) { json_out(['ok' => false, 'error' => 'Foto "' . $name . '": ' . $ex->getMessage(), 'field' => 'fotos'], 422); }
     }
 }
-if (!$photos) json_out(['ok' => false, 'error' => 'Envie pelo menos uma foto do problema.', 'field' => 'fotos'], 422);
+// vídeo (opcional, 1 por demanda): chega já comprimido pelo navegador; a capa vem como imagem
+$video = null;
+$vf = $_FILES['video'] ?? null;
+if ($vf && !is_array($vf['name']) && $vf['error'] !== UPLOAD_ERR_NO_FILE) {
+    if ($vf['error'] !== UPLOAD_ERR_OK) json_out(['ok' => false, 'error' => $vf['error'] === UPLOAD_ERR_INI_SIZE ? 'O vídeo ficou grande demais. Envie um vídeo mais curto.' : 'Falha no envio do vídeo. Tente de novo.', 'field' => 'fotos'], 422);
+    try { $video = ticket_video_store($vf['tmp_name']); }
+    catch (Throwable $ex) { foreach ($photos as $p) if ($pf = ticket_photo_path($p['src'])) @unlink($pf); json_out(['ok' => false, 'error' => $ex->getMessage(), 'field' => 'fotos'], 422); }
+    $pp = $_FILES['video_poster'] ?? null;
+    if ($pp && !is_array($pp['name']) && $pp['error'] === UPLOAD_ERR_OK) {
+        try { $video['poster'] = ticket_photo_store($pp['tmp_name']); } catch (Throwable $ex) {}
+    }
+    $dur = (float) ($_POST['video_dur'] ?? 0);
+    if ($dur > 0 && $dur < 3600) $video['dur'] = round($dur, 1);
+    if (!$photos && !empty($video['poster'])) $photos[] = $video['poster']; // a capa vira a foto do card no mapa
+}
+if (!$photos && !$video) json_out(['ok' => false, 'error' => 'Envie pelo menos uma foto ou um vídeo do problema.', 'field' => 'fotos'], 422);
 
 $d['lat'] = round($lat, 7);
 $d['lng'] = round($lng, 7);
@@ -68,6 +83,7 @@ $d['accuracy'] = (int) round((float) ($_POST['acc'] ?? 0)) ?: null;
 $d['geo_manual'] = $f('geo_manual', 1) === '1';
 $d['photos'] = $photos;
 $id = ticket_create($d);
+if ($video) q('UPDATE tickets SET video = ? WHERE id = ?', [json_encode($video, JSON_UNESCAPED_SLASHES), $id]);
 ticket_note($id, 'Demanda registrada pelo Friburgo no Mapa.');
 if ($f('novidades', 1) === '1') {
     q('UPDATE tickets SET news_optin = 1 WHERE id = ?', [$id]);
@@ -82,9 +98,12 @@ $ll = sprintf('%.6f,%.6f', $d['lat'], $d['lng']);
 $gmaps = 'https://www.google.com/maps/search/?api=1&query=' . $ll;
 $waNum = strlen($digits) <= 11 ? '55' . $digits : $digits;
 $attach = [];
-foreach ($files['tmp_name'] ?? [] as $i => $tmp) {
+foreach ((is_array($files) ? (array) $files['tmp_name'] : []) as $i => $tmp) {
     if (count($attach) >= 3 || ($files['error'][$i] ?? 1) !== UPLOAD_ERR_OK) continue;
     try { $attach[] = ['name' => sprintf('foto-%d-%s.jpg', count($attach) + 1, ltrim($code, '#')), 'content' => img_to_jpeg($tmp)]; } catch (Throwable $ex) {}
+}
+if ($video && !empty($video['poster']) && count($attach) < 3 && ($pf = ticket_photo_path($video['poster']['src']))) {
+    try { $attach[] = ['name' => 'capa-do-video-' . ltrim($code, '#') . '.jpg', 'content' => img_to_jpeg($pf)]; } catch (Throwable $ex) {}
 }
 $place = trim($d['address'] . ($d['neighborhood'] ? ($d['address'] ? ' – ' : '') . $d['neighborhood'] : ''));
 $rows = [
@@ -96,6 +115,7 @@ $rows = [
     ['Local', ($place !== '' ? e($place) . '<br>' : '') . ($d['geo_address'] !== '' ? '<span style="color:#5B6884">' . e($d['geo_address']) . '</span><br>' : '') .
         '<a href="' . e($gmaps) . '" style="color:#0144C9">Ver no Google Maps</a>'],
     ['Fotos', count($attach) . ' em anexo'],
+    ...($video ? [['Vídeo', number_format($video['size'] / 1048576, 1, ',', '') . ' MB' . (!empty($video['dur']) ? ', ' . (int) round($video['dur']) . ' s' : '') . ' — <a href="' . e($link) . '" style="color:#0144C9">assistir no painel</a>']] : []),
 ];
 $tr = '';
 foreach ($rows as [$k, $v]) {

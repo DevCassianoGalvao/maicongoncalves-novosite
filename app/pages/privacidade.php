@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Política de privacidade – Vereador Maico
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=9bbea0bc">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=bf5ff8d9">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -67,7 +67,7 @@ if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.clas
 <main>
 <section class="ph-hero ph-hero--c"><div class="hero-bg" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span></div>
   <div class="wrap ph-hero-in"><h1 class="h1" data-split><span class="scr">Política de privacidade<svg viewBox="0 0 300 26" preserveAspectRatio="none" aria-hidden="true"><path d="M4 15C62 4 124 6 182 10s86 0 114 3"/><path d="M34 22c58-6 132-6 214-2"/></svg><svg class="spark" viewBox="0 0 40 40" aria-hidden="true"><path d="M8 30L4 12"/><path d="M20 28l8-22"/><path d="M30 34l8-6"/></svg></span></h1>
-    <p class="lead" data-h>Como o gabinete do vereador Maicon Gonçalves trata os seus dados, de acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p></div></section>
+    <p class="lead" data-h>Como nosso gabinete trata os seus dados, de acordo com a Lei Geral de Proteção de Dados (Lei nº 13.709/2018).</p></div></section>
 <section class="sec">
   <div class="wrap">
     <div class="prose privacy">
@@ -75,7 +75,7 @@ if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.clas
       <p>Gabinete do Vereador Maicon Gonçalves, na Câmara Municipal de Nova Friburgo (<?= e(implode(', ', address_lines())) ?>). Para qualquer assunto sobre os seus dados, escreva para <a href="mailto:<?= e(S('email')) ?>"><?= e(S('email')) ?></a>.</p>
 
       <h2>Quais dados coletamos</h2>
-      <p>Quando você envia uma demanda pelo <a href="<?= B ?>/friburgo-no-mapa/">Friburgo no Mapa</a>, recebemos: nome (ou o pedido para não aparecer), WhatsApp, e-mail, a descrição do problema, as fotos que você anexar e o local marcado no mapa. Também registramos a data e o endereço IP do envio, para segurança e para evitar abusos.</p>
+      <p>Quando você envia uma demanda pelo <a href="<?= B ?>/friburgo-no-mapa/">Friburgo no Mapa</a>, recebemos: nome (ou o pedido para não aparecer), WhatsApp, e-mail, a descrição do problema, as fotos e o vídeo que você anexar e o local marcado no mapa. Também registramos a data e o endereço IP do envio, para segurança e para evitar abusos.</p>
 
       <h2>Para que usamos</h2>
       <ul>
@@ -88,7 +88,7 @@ if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.clas
       <p>A base legal é o seu consentimento, dado ao marcar as caixas de concordância no formulário.</p>
 
       <h2>O que aparece no site</h2>
-      <p>No mapa público aparecem apenas a foto, o local, o tipo e a descrição do problema (revisada pela equipe) e o seu primeiro nome, a menos que você peça para não mostrar. <strong>Telefone e e-mail nunca são publicados.</strong></p>
+      <p>No mapa público aparecem apenas as fotos ou o vídeo, o local, o tipo e a descrição do problema (revisada pela equipe) e o seu primeiro nome, a menos que você peça para não mostrar. <strong>Telefone e e-mail nunca são publicados.</strong></p>
 
       <h2>Com quem compartilhamos</h2>
       <p>Com a Prefeitura e os órgãos responsáveis, na medida necessária para resolver a demanda. Os e-mails são enviados pelo Brevo, serviço de envio de e-mails. Não vendemos nem cedemos seus dados para fins comerciais.</p>

@@ -10,7 +10,8 @@ if (!$t) { flash('err', 'Atendimento não encontrado.'); redirect(url('/admin/at
 $self = url('/admin/atendimento.php?id=' . $id);
 $photos = json_decode((string) $t['photos'], true) ?: [];
 $after = json_decode((string) $t['after_photo'], true);
-$canPublish = $t['lat'] !== null && $photos;
+$video = json_decode((string) ($t['video'] ?? ''), true);
+$canPublish = $t['lat'] !== null && ($photos || $video);
 
 if (is_post()) {
     csrf_check();
@@ -46,7 +47,7 @@ if (is_post()) {
             flash('ok', 'Atendimento em análise.');
             break;
         case 'publish':
-            if (!$canPublish) { flash('err', 'Para ir ao mapa, o atendimento precisa de foto e localização.'); break; }
+            if (!$canPublish) { flash('err', 'Para ir ao mapa, o atendimento precisa de foto ou vídeo e localização.'); break; }
             if (!$t['category']) q('UPDATE tickets SET category = ? WHERE id = ?', [isset(ticket_cats(true)[in('category', '', 20)]) ? in('category', '', 20) : 'outro', $id]);
             if ($t['public_text'] === null || $t['public_text'] === '') q('UPDATE tickets SET public_text = description WHERE id = ?', [$id]);
             $set('publicado', ['published_at' => date('Y-m-d H:i:s'), 'resolved_at' => null]);
@@ -75,7 +76,8 @@ if (is_post()) {
             break;
         case 'delete':
             if (!is_admin($user)) { flash('err', 'Só o administrador pode excluir atendimentos.'); break; }
-            foreach (array_merge($photos, $after ? [$after] : []) as $p) if ($f = ticket_photo_path($p['src'])) @unlink($f);
+            foreach (array_merge($photos, $after ? [$after] : [], !empty($video['poster']) ? [$video['poster']] : []) as $p) if ($f = ticket_photo_path($p['src'])) @unlink($f);
+            if ($video && ($f = ticket_video_path($video['src']))) @unlink($f);
             q('DELETE FROM tickets WHERE id = ?', [$id]);
             flash('ok', 'Atendimento ' . ticket_code($id) . ' e as fotos foram apagados.');
             redirect(url('/admin/atendimentos.php'));
@@ -98,11 +100,19 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
 </div>
 <div class="edit">
   <div>
-<?php if ($photos): ?>
+<?php if ($video): ?>
+    <div class="card">
+      <h2>Vídeo <span class="small muted" style="font-weight:600"><?= number_format(($video['size'] ?? 0) / 1048576, 1, ',', '') ?> MB<?= !empty($video['dur']) ? ' · ' . (int) round($video['dur']) . ' s' : '' ?></span></h2>
+      <video class="tk-video" controls playsinline preload="metadata"<?= !empty($video['poster']) ? ' poster="' . e(ticket_photo_url($id, $video['poster']['src'])) . '"' : '' ?>><source src="<?= e(ticket_photo_url($id, $video['src'])) ?>" type="<?= e($video['mime'] ?? 'video/mp4') ?>"></video>
+      <p class="small muted" style="margin:8px 0 0"><a href="<?= e(ticket_photo_url($id, $video['src'])) ?>" download>Baixar o vídeo</a></p>
+    </div>
+<?php endif; ?>
+<?php $shown = array_values(array_filter($photos, function ($p) use ($video) { return empty($video['poster']) || $p['src'] !== $video['poster']['src']; })); ?>
+<?php if ($shown): ?>
     <div class="card">
       <h2>Fotos</h2>
       <div class="tk-photos">
-<?php foreach ($photos as $p): $u = ticket_photo_url($id, $p['src']); ?>
+<?php foreach ($shown as $p): $u = ticket_photo_url($id, $p['src']); ?>
         <a href="<?= e($u) ?>" target="_blank" rel="noopener"><img src="<?= e($u) ?>" alt="Foto enviada"></a>
 <?php endforeach; ?>
       </div>
@@ -156,7 +166,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
         <form method="post" data-confirm="Aprovar e publicar no mapa? O contador começa a contar agora."><?= csrf_field() ?><input type="hidden" name="do" value="publish">
           <?php if ($t['email']): ?><label class="check small"><input type="checkbox" name="notify" value="1" checked> Avisar <?= e($t['email']) ?> por e-mail</label><?php endif; ?>
           <button class="btn btn--or btn--block" type="submit"<?= $canPublish ? '' : ' disabled' ?>><?= icon('map-pin') ?>Aprovar e publicar no mapa</button></form>
-<?php if (!$canPublish): ?><p class="hint small muted" style="margin:0">Só vai ao mapa com foto e localização.</p><?php else: ?><p class="hint small muted" style="margin:0">Use depois de enviar o pedido à Prefeitura. O contador começa a contar no momento da aprovação.</p><?php endif; ?>
+<?php if (!$canPublish): ?><p class="hint small muted" style="margin:0">Só vai ao mapa com foto ou vídeo e localização.</p><?php else: ?><p class="hint small muted" style="margin:0">Use depois de enviar o pedido à Prefeitura. O contador começa a contar no momento da aprovação.</p><?php endif; ?>
         <form method="post"><?= csrf_field() ?><input type="hidden" name="do" value="archive"><button class="link-btn small" type="submit">Arquivar (não vai ao mapa)</button></form>
 <?php elseif ($t['status'] === 'publicado'): ?>
         <form method="post" enctype="multipart/form-data" class="tk-resolve" data-confirm="Marcar como resolvido? O contador para e o pino fica verde.">

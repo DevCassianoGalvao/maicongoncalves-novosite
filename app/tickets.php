@@ -69,7 +69,7 @@ function db_migrate(): void
     } catch (Throwable $ex) {
         return; // site ainda não instalado
     }
-    if ($v >= 5) return;
+    if ($v >= 6) return;
     if ($v < 2) {
     $pdo->exec("CREATE TABLE IF NOT EXISTS tickets (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -149,7 +149,9 @@ function db_migrate(): void
     $ins = $pdo->prepare('INSERT IGNORE INTO ticket_categories (slug, name, sort) VALUES (?, ?, ?)');
     $i = 0;
     foreach (TICKET_CATS_DEFAULT as $slug => $name) { $i += 10; $ins->execute([$slug, $name, $slug === 'outro' ? 9999 : $i]); }
-    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '5') ON DUPLICATE KEY UPDATE value = '5'");
+    // v6: um vídeo por demanda (comprimido no aparelho de quem envia)
+    if (!$has('tickets', 'video')) $pdo->exec('ALTER TABLE tickets ADD COLUMN video TEXT NULL AFTER photos');
+    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '6') ON DUPLICATE KEY UPDATE value = '6'");
 }
 
 /* ---------- fotos (ficam fora da web; só aparecem pelo api/foto.php) ---------- */
@@ -171,6 +173,37 @@ function ticket_photo_store_bytes(string $jpg): ?array
     file_put_contents($tmp, $jpg);
     try { return ticket_photo_store($tmp); } catch (Throwable $ex) { return null; } finally { @unlink($tmp); }
 }
+/** Tipos de vídeo aceitos (o navegador normalmente já envia MP4 comprimido). */
+const VIDEO_TYPES = ['video/mp4' => 'mp4', 'video/quicktime' => 'mov', 'video/webm' => 'webm', 'video/3gpp' => '3gp', 'video/x-m4v' => 'mp4'];
+const VIDEO_MAX_BYTES = 25 * 1024 * 1024;
+
+/** Guarda o vídeo enviado (fora da web). Lança exceção se não for vídeo válido. */
+function ticket_video_store(string $tmp): array
+{
+    $size = (int) @filesize($tmp);
+    if ($size <= 0) throw new RuntimeException('Vídeo vazio.');
+    if ($size > VIDEO_MAX_BYTES) throw new RuntimeException('Vídeo grande demais (máximo de 25 MB).');
+    $mime = function_exists('finfo_open') ? (string) finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmp) : '';
+    $head = (string) file_get_contents($tmp, false, null, 0, 16);
+    $isMp4 = substr($head, 4, 4) === 'ftyp';
+    $isWebm = substr($head, 0, 4) === "\x1A\x45\xDF\xA3";
+    if (!isset(VIDEO_TYPES[$mime]) && !$isMp4 && !$isWebm) throw new RuntimeException('Formato de vídeo não aceito. Envie em MP4, MOV ou WEBM.');
+    if (!$isMp4 && !$isWebm) throw new RuntimeException('Arquivo de vídeo inválido.');
+    $ext = $isWebm ? 'webm' : (VIDEO_TYPES[$mime] ?? 'mp4');
+    if ($ext === '3gp') $ext = 'mp4';
+    $rel = date('Y/m');
+    storage('demandas/' . $rel);
+    $file = $rel . '/' . date('dHis') . '-' . bin2hex(random_bytes(6)) . '.' . $ext;
+    if (!@move_uploaded_file($tmp, storage('demandas') . '/' . $file) && !@rename($tmp, storage('demandas') . '/' . $file)) throw new RuntimeException('Não foi possível salvar o vídeo.');
+    return ['src' => $file, 'size' => $size, 'mime' => $ext === 'webm' ? 'video/webm' : ($ext === 'mov' ? 'video/quicktime' : 'video/mp4')];
+}
+function ticket_video_path(string $src): ?string
+{
+    if (!preg_match('#^\d{4}/\d{2}/[\w-]+\.(mp4|mov|webm)$#', $src)) return null;
+    $f = storage('demandas') . '/' . $src;
+    return is_file($f) ? $f : null;
+}
+
 function ticket_photo_url(int $id, string $src): string { return url('/api/foto.php') . '?t=' . $id . '&f=' . rawurlencode($src); }
 function ticket_photo_path(string $src): ?string
 {
@@ -261,6 +294,7 @@ function tickets_public(): array
             'resolvedAt' => $end ? date('c', $end) : null,
             'days' => $end ? max(0, (int) round(($end - $start) / 86400)) : null,
             'photos' => array_map(function ($p) use ($t) { return ['url' => ticket_photo_url((int) $t['id'], $p['src']), 'w' => $p['w'] ?? null, 'h' => $p['h'] ?? null]; }, $photos),
+            'video' => ($vd = json_decode((string) ($t['video'] ?? ''), true)) ? ['url' => ticket_photo_url((int) $t['id'], $vd['src']), 'mime' => $vd['mime'] ?? 'video/mp4', 'poster' => !empty($vd['poster']) ? ticket_photo_url((int) $t['id'], $vd['poster']['src']) : ($photos ? ticket_photo_url((int) $t['id'], $photos[0]['src']) : null)] : null,
             'after' => $after ? ['url' => ticket_photo_url((int) $t['id'], $after['src']), 'w' => $after['w'] ?? null, 'h' => $after['h'] ?? null] : null,
         ];
     }
