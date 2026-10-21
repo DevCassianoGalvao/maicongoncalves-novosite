@@ -69,7 +69,8 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
       <div class="fd fd--full"><span class="rd-n">2</span><span class="lbl" id="rd-where">Onde fica?</span>
         <button type="button" class="geo" id="rd-geo">{{ib:navigation-arrow}}<span>Usar minha localização atual</span></button>
         <div class="rd-pick" id="rd-pick" role="application" aria-labelledby="rd-where"></div>
-        <p class="rd-pick-st" id="rd-pick-st">Use sua localização ou toque no mapa para marcar o local exato.</p></div>
+        <p class="rd-pick-st" id="rd-pick-st">Use sua localização ou toque no mapa para marcar o local exato.</p>
+        <div class="rd-near" id="rd-near" role="status" aria-live="polite" hidden></div></div>
       <div class="fd"><label for="rd-rua">Rua e número</label><input id="rd-rua" name="endereco" type="text" maxlength="255" placeholder="Ex.: Rua Farinha Filho, 50"></div>
       <div class="fd"><label for="rd-bairro">Bairro / Localidade</label><select id="rd-bairro" name="bairro">{{bairros}}</select></div>
 

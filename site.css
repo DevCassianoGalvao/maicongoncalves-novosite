@@ -602,6 +602,23 @@ ul,ol{padding:0;list-style:none}
 .lb .lb-p[hidden],.lb .lb-n[hidden],.lb .lb-c[hidden]{display:none}
 .lb .lb-c{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);translate:-50% 0;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:700}
 .rd-card-ph span .ic{width:12px;height:12px;vertical-align:-1px}
+/* aviso de demandas próximas (formulário) */
+.rd-near{margin-top:12px;border-radius:16px;background:#FFF6EE;box-shadow:inset 0 0 0 1.5px #FFD3B0;padding:14px 14px 8px}
+.rd-near[hidden]{display:none}
+.rd-near-hd{display:flex;gap:10px;align-items:flex-start;margin-bottom:8px}
+.rd-near-hd>.ic{flex:none;width:22px;height:22px;color:var(--orange);margin-top:2px}
+.rd-near-hd b{display:block;color:var(--navy);font-size:15.5px;line-height:1.3}
+.rd-near-hd span{display:block;color:#7A4A1E;font-size:13.5px;line-height:1.45;margin-top:3px}
+.rd-near ul{list-style:none;margin:0;padding:0}
+.rd-near li{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #FFE2CC}
+.rd-near li img,.rd-near-i{flex:none;width:44px;height:44px;border-radius:10px;object-fit:cover;background:#fff;display:grid;place-items:center;color:var(--orange)}
+.rd-near-i .ic{width:20px;height:20px}.rd-near-i--wait{color:#5B6884}
+.rd-near li>div{flex:1;min-width:0}
+.rd-near li b{display:block;color:var(--navy);font-size:14.5px;line-height:1.3}
+.rd-near li b em{font-style:normal;font-size:11.5px;font-weight:800;color:#fff;background:var(--orange);border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:1px}
+.rd-near li span{display:block;color:var(--muted);font-size:13px;line-height:1.4;overflow-wrap:anywhere}
+.rd-near-go{flex:none;font:inherit;font-weight:700;font-size:13.5px;color:var(--navy);background:#fff;border:0;border-radius:999px;padding:7px 14px;box-shadow:inset 0 0 0 1.5px var(--mist-2);cursor:pointer}
+.rd-near-go:hover{box-shadow:inset 0 0 0 1.5px var(--navy)}
 /* vídeo do Instagram no card */
 .rd-ig{position:relative;display:block;aspect-ratio:4/5;max-height:52vh;width:100%;overflow:hidden;background:linear-gradient(135deg,#F58529,#DD2A7B 50%,#8134AF);color:#fff}
 .rd-ig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}

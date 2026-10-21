@@ -56,6 +56,7 @@
 
   /* ---------------- mapa público ---------------- */
   var mapEl = $('#rd-map'), card = $('#rd-card');
+  var openById = null; // abre o card de uma demanda no mapa (usado pelo aviso de demandas próximas)
   if (mapEl && window.L) {
     var map = L.map(mapEl, { scrollWheelZoom: false, zoomControl: true, tap: true }).setView(CENTER, 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
@@ -141,6 +142,12 @@
     });
     $('#rd-cat').addEventListener('change', function () { cat = this.value; apply(); });
     apply();
+    openById = function (id) {
+      var m = markers.filter(function (x) { return x.item.id === id; })[0]; if (!m) return;
+      if (st || cat) { st = ''; cat = ''; $('#rd-cat').value = ''; $$('.rd-tools .fl').forEach(function (x) { x.setAttribute('aria-pressed', x.getAttribute('data-st') === '' ? 'true' : 'false'); }); apply(); }
+      mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(function () { cluster.zoomToShowLayer(m, function () { map.setView(m.getLatLng(), Math.max(map.getZoom(), 17)); m.fire('click'); }); }, 350);
+    };
     // link direto para uma demanda (?d=123), usado nos e-mails de acompanhamento
     var want = parseInt(new URLSearchParams(location.search).get('d'), 10);
     var target = want && markers.filter(function (m) { return m.item.id === want; })[0];
@@ -254,8 +261,51 @@
   /* local: mapa para marcar + GPS */
   var pickEl = $('#rd-pick'), pickSt = $('#rd-pick-st'), rua = $('#rd-rua'), bairro = $('#rd-bairro'), geoBtn = $('#rd-geo');
   var pick, pin, ring, watch, best, timer, ruaAuto = false;
+  /* aviso de demandas parecidas num raio de 200 m */
+  var NEAR = 200, nearEl = $('#rd-near'), nearT, nearLayer;
+  var dist = function (a, b, c, d) { var R = 6371000, r = Math.PI / 180, x = Math.sin((c - a) * r / 2), y = Math.sin((d - b) * r / 2); return 2 * R * Math.asin(Math.min(1, Math.sqrt(x * x + Math.cos(a * r) * Math.cos(c * r) * y * y))); };
+  var near = function (lat, lng) {
+    clearTimeout(nearT);
+    nearT = setTimeout(function () {
+      var pub = (window.RD_ITEMS || []).map(function (t) { return { t: t, d: dist(lat, lng, t.lat, t.lng) }; })
+        .filter(function (x) { return x.d <= NEAR && x.t.status !== 'resolvido'; }).sort(function (a, b) { return a.d - b.d; });
+      fetch(BASE + '/api/demandas.php?near=' + lat.toFixed(6) + ',' + lng.toFixed(6), { credentials: 'same-origin' })
+        .then(function (r) { return r.json(); }).catch(function () { return { items: [] }; })
+        .then(function (j) { drawNear(lat, lng, pub, (j && j.items) || []); });
+    }, 350);
+  };
+  var drawNear = function (lat, lng, pub, pend) {
+    if (pick) { if (nearLayer) pick.removeLayer(nearLayer); nearLayer = null; }
+    if (!pub.length && !pend.length) { nearEl.hidden = true; nearEl.innerHTML = ''; return; }
+    var chosen = ($('#rd-tipo') || {}).value || '';
+    var same = function (c) { return chosen && c === chosen ? ' <em>mesmo tipo</em>' : ''; };
+    var n = pub.length + pend.length;
+    var html = '<div class="rd-near-hd">' + icons.pin + '<div><b>' + (n === 1 ? 'Já existe 1 demanda' : 'Já existem ' + n + ' demandas') + ' a até ' + NEAR + ' m daqui</b>' +
+      '<span>Confira se não é o mesmo problema. Se for, não precisa enviar de novo: nossa equipe já está acompanhando. Se for outro, pode continuar.</span></div></div><ul>';
+    pub.forEach(function (x) {
+      var t = x.t, th = t.photos && t.photos[0] ? '<img src="' + esc(t.photos[0].url) + '" alt="">' : '<span class="rd-near-i">' + icons.pin + '</span>';
+      html += '<li>' + th + '<div><b>' + esc(t.catLabel) + same(t.cat) + '</b><span>' + Math.round(x.d) + ' m · ' +
+        'aguardando a Prefeitura há ' + span(t.publishedAt) + (t.place ? ' · ' + esc(t.place) : '') + '</span></div>' +
+        (openById ? '<button type="button" class="rd-near-go" data-id="' + t.id + '">Ver</button>' : '') + '</li>';
+    });
+    pend.forEach(function (x) {
+      html += '<li><span class="rd-near-i rd-near-i--wait">' + icons.clock + '</span><div><b>' + esc(x.catLabel) + same(x.cat) + '</b><span>' + x.dist + ' m · em análise pela nossa equipe' +
+        (x.days ? ' (enviada há ' + x.days + (x.days === 1 ? ' dia' : ' dias') + ')' : ' (enviada hoje)') + '</span></div></li>';
+    });
+    nearEl.innerHTML = html + '</ul>';
+    nearEl.hidden = false;
+    if (pick && window.L) {
+      nearLayer = L.layerGroup().addTo(pick);
+      L.circle([lat, lng], { radius: NEAR, color: '#FE6500', weight: 1.5, dashArray: '5 6', fillOpacity: .05, interactive: false }).addTo(nearLayer);
+      pub.forEach(function (x) { L.circleMarker([x.t.lat, x.t.lng], { radius: 7, color: '#fff', weight: 2, fillColor: '#FE6500', fillOpacity: 1, interactive: false }).addTo(nearLayer); });
+    }
+  };
+  nearEl && nearEl.addEventListener('click', function (e) { var b = e.target.closest('.rd-near-go'); if (b && openById) openById(parseInt(b.getAttribute('data-id'), 10)); });
+  $('#rd-tipo') && $('#rd-tipo').addEventListener('change', function () { var la = parseFloat($('#rd-lat').value), lo = parseFloat($('#rd-lng').value); if (!isNaN(la)) near(la, lo); });
+
   var setLoc = function (lat, lng, acc, manual) {
     $('#rd-lat').value = lat.toFixed(7); $('#rd-lng').value = lng.toFixed(7);
+    if (nearEl) near(lat, lng);
     $('#rd-acc').value = acc ? Math.round(acc) : ''; $('#rd-manual').value = manual ? '1' : '';
     pickEl.classList.remove('is-bad');
     if (!pick) return;
@@ -354,6 +404,7 @@
     $$('#rd-lat,#rd-lng,#rd-acc,#rd-addr,#rd-manual', form).forEach(function (i) { i.value = ''; });
     if (pin) { pick.removeLayer(pin); pick.removeLayer(ring); pin = ring = null; }
     pickSt.textContent = 'Use sua localização ou toque no mapa para marcar o local exato.';
+    if (nearEl) { nearEl.hidden = true; nearEl.innerHTML = ''; } if (nearLayer && pick) { pick.removeLayer(nearLayer); nearLayer = null; }
     $('#rd-done').hidden = true; form.hidden = false; form.scrollIntoView({ behavior: 'smooth' });
   });
 })();

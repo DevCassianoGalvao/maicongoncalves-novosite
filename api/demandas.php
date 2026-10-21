@@ -8,6 +8,23 @@ require_once ROOT . '/app/tickets.php';
 require ROOT . '/app/mail.php';
 
 if (!is_post()) {
+    // ?near=lat,lng → demandas ainda em análise num raio de 200 m (só tipo e há quantos dias; nada pessoal)
+    if (isset($_GET['near'])) {
+        header('Cache-Control: no-store');
+        if (!rate_ok('near', 60, 600)) json_out(['ok' => true, 'items' => []]);
+        $p = array_map('floatval', explode(',', (string) $_GET['near']));
+        if (count($p) !== 2 || abs($p[0] + 22.28) > 0.6 || abs($p[1] + 42.53) > 0.6) json_out(['ok' => true, 'items' => []]);
+        [$la, $lo] = $p;
+        $rows = q("SELECT id, category, lat, lng, created_at FROM tickets WHERE status IN ('novo','analise') AND source <> 'contato' AND category IS NOT NULL AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ? ORDER BY created_at DESC LIMIT 60",
+            [$la - 0.0025, $la + 0.0025, $lo - 0.0027, $lo + 0.0027])->fetchAll();
+        $out = [];
+        foreach ($rows as $r) {
+            $d = geo_distance($la, $lo, (float) $r['lat'], (float) $r['lng']);
+            if ($d <= 200) $out[] = ['cat' => (string) $r['category'], 'catLabel' => cat_label($r['category']), 'dist' => (int) round($d), 'days' => max(0, (int) floor((time() - strtotime($r['created_at'])) / 86400))];
+        }
+        usort($out, function ($x, $y) { return $x['dist'] <=> $y['dist']; });
+        json_out(['ok' => true, 'items' => array_slice($out, 0, 8)]);
+    }
     header('Cache-Control: public, max-age=60');
     json_out(['ok' => true, 'items' => tickets_public()]);
 }
