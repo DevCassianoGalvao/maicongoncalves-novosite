@@ -24,6 +24,16 @@ DirectoryIndex index.php index.html
   RewriteRule ^(README\.md|vercel\.json|package(-lock)?\.json|composer\.(json|lock))$ - [F,L]
   RewriteRule ^install/(schema\.sql|seed\.json)$ - [F,L]
 
+  # Resto do WordPress antigo: não existe mais (410 Gone)
+  RewriteRule ^(wp-admin|wp-login\.php|xmlrpc\.php|wp-content|wp-includes|wp-json|wp-cron\.php|wp-config\.php|wp-trackback\.php|wp-comments-post\.php)(/|$) - [G,L]
+
+  # Endereço sem barra no final -> mesmo endereço com barra (301), igual ao canonical
+  RewriteCond %{REQUEST_METHOD} ^(GET|HEAD)$
+  RewriteCond %{REQUEST_URI} !\.[A-Za-z0-9]+$
+  RewriteCond %{REQUEST_URI} !/$
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^ %{REQUEST_URI}/ [R=301,L]
+
   # Todo o resto que não for arquivo ou pasta real vai para o roteador (index.php)
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d

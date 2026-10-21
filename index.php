@@ -39,6 +39,10 @@ $legacy = [ // endereços antigos ou alternativos -> endereço oficial
 if (isset($legacy[$slug])) redirect(url($legacy[$slug]) . $qs, 301);
 if (preg_match('#^category/([a-z0-9-]+)$#', $slug, $m)) redirect(url('/noticias/') . '?cat=' . $m[1], 301);
 if (preg_match('#^\d{4}(/\d{2}){0,2}$#', $slug)) redirect(url('/noticias/'), 301);
+// MCP (publicação de artigos pelo Claude): rotas próprias, sem redirecionamento de barra
+if (preg_match('#^mcp/([^/]+)/?$#', $slug, $m)) { require ROOT . '/app/mcp.php'; mcp_handle($m[1]); }
+if (preg_match('#^api/mcp-upload/([a-f0-9]{64})$#', $slug, $m)) { require ROOT . '/app/mcp.php'; mcp_handle_upload($m[1]); }
+if ($slug === 'mcp') render_404();
 if ($slug === 'sitemap.xml') { require ROOT . '/app/sitemap.php'; exit; }
 if ($slug === 'robots.txt') { require ROOT . '/app/robots.php'; exit; }
 if ($slug === 'llms.txt') { require ROOT . '/app/llms.php'; exit; }
@@ -64,8 +68,15 @@ if (isset($pages[$slug])) {
 
 if (preg_match('#^[a-z0-9][a-z0-9-]*$#', $slug)) {
     $preview = isset($_GET['preview']);
-    if ($preview) { require ROOT . '/app/auth.php'; $preview = auth_user() !== null && is_admin(); }
+    $signed = false;
+    if ($preview && preg_match('/^\d{9,11}\.[a-f0-9]{64}$/', (string) $_GET['preview'])) { // link assinado (7 dias) gerado pelo MCP
+        require_once ROOT . '/app/mcp.php';
+        $pp = post_by_slug($slug, true);
+        $signed = $pp && mcp_preview_valid((int) $pp['id'], (string) $_GET['preview']);
+        $preview = $signed;
+    } elseif ($preview) { require ROOT . '/app/auth.php'; $preview = auth_user() !== null && is_admin(); }
     $post = post_by_slug($slug, $preview);
+    if ($post && $preview) { header('Cache-Control: no-store'); header('X-Robots-Tag: noindex'); }
     if ($post) {
         $meta = [
             'title' => $post['title'] . ' | Vereador Maicon Gonçalves',

@@ -80,3 +80,17 @@ As páginas em `app/pages/` são geradas. Para mudar layout ou textos fixos:
 cd tools && npm install   # uma vez (ícones)
 python3 site/build.py     # edita site/src/* e roda isto
 ```
+
+## Publicar artigos pelo Claude (MCP)
+
+O site tem um servidor MCP em `/mcp/<MCP_SECRET>` (Streamable HTTP). O projeto "Gerador de Artigos" usa as ferramentas
+`listar_categorias`, `listar_posts`, `obter_post`, `solicitar_upload_imagem`, `importar_imagem_url`, `criar_post`,
+`atualizar_post` e `publicar_post`. Não existe ferramenta de excluir (só no painel).
+
+1. No `.env` do servidor, crie `MCP_SECRET=` com 48+ caracteres aleatórios (`openssl rand -hex 32`). Vazio = MCP desligado (404).
+2. No Claude: Configurações > Conectores > Adicionar conector personalizado, com a URL `https://maicongoncalves.com.br/mcp/<MCP_SECRET>`.
+3. Ative o conector no projeto "Gerador de Artigos".
+
+Foto: o Claude pede um link de upload (15 min, uso único), envia a foto com `curl -X PUT` e usa o `media_id` em `criar_post`.
+A foto é salva sem EXIF/GPS, com 1688 px de largura, em WebP. Artigos nascem como **rascunho**, com um `url_preview` (7 dias, sem login).
+Auditoria: tabela `mcp_log` (ferramenta, parâmetros sem texto do corpo, IP, resultado, id do artigo). Limites: 60 chamadas/min e 10 imagens/hora por IP.

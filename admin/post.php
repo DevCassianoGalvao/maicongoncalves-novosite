@@ -5,16 +5,7 @@ require_once ROOT . '/app/images.php';
 require_once ROOT . '/app/newsletter.php';
 $user = admin_guard(true);
 
-const RESERVED_SLUGS = ['minha-historia', 'fl360', 'descobrindo-talentos', 'contato', 'demandas', 'friburgo-no-mapa', 'friburgonomapa', 'radarfriburgo', 'radar', 'privacidade', 'descadastrar', 'noticias', 'admin', 'install', 'uploads', 'img', 'api', 'app', 'storage', 'category', 'feed', 'sitemap', 'peneira', 'blog', 'home', 'index'];
-
-function unique_slug(string $slug, int $id): string
-{
-    $base = $slug !== '' ? $slug : 'artigo';
-    $slug = in_array($base, RESERVED_SLUGS, true) ? $base . '-1' : $base;
-    $n = 1;
-    while (q('SELECT COUNT(*) FROM posts WHERE slug = ? AND id <> ?', [$slug, $id])->fetchColumn()) $slug = $base . '-' . (++$n);
-    return $slug;
-}
+require_once ROOT . '/app/post_save.php';
 
 /** Arquivos enviados num campo múltiplo, normalizados. */
 function uploaded_files(string $field): array
