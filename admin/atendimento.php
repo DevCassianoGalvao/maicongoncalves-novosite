@@ -89,6 +89,7 @@ if (is_post()) {
             foreach (array_merge($photos, $after ? [$after] : [], !empty($video['poster']) ? [$video['poster']] : []) as $p) if ($f = ticket_photo_path($p['src'])) @unlink($f);
             if ($video && ($f = ticket_video_path($video['src']))) @unlink($f);
             if (($it = json_decode((string) ($t['instagram_thumb'] ?? ''), true)) && ($f = ticket_photo_path($it['src']))) @unlink($f);
+            app_log('exclusoes', ticket_code($id) . ' | ' . $t['name'] . ' | ' . $t['category'] . ' | ' . $t['status'] . ' | por ' . $user['email']);
             q('DELETE FROM tickets WHERE id = ?', [$id]);
             flash('ok', 'Atendimento ' . ticket_code($id) . ' e as fotos foram apagados.');
             redirect(url('/admin/atendimentos.php'));
@@ -223,7 +224,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
       <button class="btn btn--block" type="submit"><?= icon('check', 'bold') ?>Salvar</button>
     </form>
 <?php if (is_admin($user)): ?>
-    <form method="post" class="card" data-confirm="Apagar este atendimento e as fotos para sempre? Use quando a pessoa pedir a exclusão dos dados.">
+    <form method="post" class="card" style="margin-top:34px" data-confirm="EXCLUIR DE VEZ o atendimento <?= e(ticket_code($id)) ?> e as fotos? Não dá para desfazer. Para só tirar da lista, use Arquivar.">
       <?= csrf_field() ?><input type="hidden" name="do" value="delete">
       <button class="btn btn--danger btn--block" type="submit">Excluir atendimento</button>
     </form>
