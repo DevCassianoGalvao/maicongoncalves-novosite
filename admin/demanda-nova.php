@@ -61,6 +61,7 @@ if (is_post()) {
             try { $photos[] = ticket_photo_store($files['tmp_name'][$i]); } catch (Throwable $ex) { $errors[] = 'Foto "' . $name . '": ' . $ex->getMessage(); }
         }
     }
+    if (!is_admin($user)) $v['instagram'] = ''; // só o administrador vincula vídeo do Instagram
     $insta = $v['instagram'] !== '' ? instagram_normalize($v['instagram']) : null;
     if ($v['instagram'] !== '' && !$insta) $errors[] = 'O link do Instagram não parece ser de um post ou reel (ex.: https://www.instagram.com/reel/...).';
     if (!$errors && in_array($v['status'], ['publicado', 'resolvido'], true) && !$photos && !$insta) $errors[] = 'Para ir ao mapa, envie pelo menos uma foto ou o link do vídeo do Instagram.';
@@ -110,8 +111,10 @@ admin_head('Cadastrar demanda', 'tnew', $leaflet);
 <?php foreach (ticket_cats() as $k => $label): ?><option value="<?= $k ?>"<?= $v['category'] === $k ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?></select></div>
         <div class="fd"><label for="description">Relato</label><textarea id="description" name="description" rows="4" required placeholder="O que está acontecendo, desde quando, o que já foi feito."><?= e($v['description']) ?></textarea></div>
         <div class="fd"><label for="public_text">Texto que aparece no mapa <small class="muted">(opcional)</small></label><textarea id="public_text" name="public_text" rows="3" placeholder="Se vazio, usa o relato. Tire dados pessoais."><?= e($v['public_text']) ?></textarea></div>
-        <div class="fd"><label for="instagram">Vídeo do Instagram <small class="muted">(link do post ou reel, opcional)</small></label><input type="url" id="instagram" name="instagram" value="<?= e($v['instagram']) ?>" placeholder="https://www.instagram.com/reel/..." inputmode="url">
+<?php if (is_admin($user)): ?>
+        <div class="fd"><label for="instagram">Vídeo do Instagram <small class="muted">(só administrador; link do post ou reel, opcional)</small></label><input type="url" id="instagram" name="instagram" value="<?= e($v['instagram']) ?>" placeholder="https://www.instagram.com/reel/..." inputmode="url">
           <p class="hint">No mapa aparece a prévia com o botão de play; ao tocar, abre o vídeo no Instagram.</p></div>
+<?php endif; ?>
         <div class="fd"><span class="lbl">Fotos <small class="muted">(até 3; para ir ao mapa precisa de foto ou do vídeo do Instagram)</small></span>
           <label class="drop"><input type="file" name="fotos[]" accept="image/*" multiple id="fotos"><span id="fotosTxt">Escolher fotos</span></label></div>
       </div>

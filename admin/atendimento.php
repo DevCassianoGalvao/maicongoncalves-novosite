@@ -34,7 +34,7 @@ if (is_post()) {
         case 'save':
             $cat = in('category', '', 20);
             $mail = mb_strtolower(in('email', '', 190));
-            $igIn = in('instagram', '', 255);
+            $igIn = is_admin($user) ? in('instagram', '', 255) : (string) ($t['instagram'] ?? ''); // só o administrador mexe no vídeo do Instagram
             $ig = $igIn !== '' ? instagram_normalize($igIn) : null;
             if ($igIn !== '' && !$ig) { flash('err', 'O link do Instagram não parece ser de um post ou reel. O restante foi salvo.'); }
             if (($ig ?? '') !== (string) ($t['instagram'] ?? '')) {
@@ -212,7 +212,9 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
 <?php $cats = ticket_cats(); if ($t['category'] && !isset($cats[$t['category']])) $cats[$t['category']] = cat_label($t['category']) . ' (desativado)'; foreach ($cats as $k => $v): ?><option value="<?= $k ?>"<?= $t['category'] === $k ? ' selected' : '' ?>><?= e($v) ?></option><?php endforeach; ?></select></div>
       <div class="fd"><label for="department">Secretaria / órgão</label><input type="text" id="department" name="department" value="<?= e($t['department']) ?>" placeholder="Ex.: Secretaria de Obras"></div>
       <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($t['protocol']) ?>"><p class="hint">Uso interno, não aparece no site.</p></div>
-      <div class="fd"><label for="instagram">Vídeo do Instagram</label><input type="url" id="instagram" name="instagram" value="<?= e($t['instagram'] ?? '') ?>" placeholder="https://www.instagram.com/reel/..." inputmode="url"><p class="hint">Aparece no card do mapa com play; ao tocar, abre no Instagram.</p></div>
+<?php if (is_admin($user)): ?>
+      <div class="fd"><label for="instagram">Vídeo do Instagram <small class="muted">(só administrador)</small></label><input type="url" id="instagram" name="instagram" value="<?= e($t['instagram'] ?? '') ?>" placeholder="https://www.instagram.com/reel/..." inputmode="url"><p class="hint">Aparece no card do mapa com play; ao tocar, abre no Instagram.</p></div>
+<?php endif; ?>
       <div class="fd"><label for="email">E-mail da pessoa</label><input type="email" id="email" name="email" value="<?= e($t['email'] ?? '') ?>"><p class="hint">Recebe os avisos quando for à Prefeitura e quando for resolvida.</p></div>
       <div class="fd"><label for="address">Rua e número</label><input type="text" id="address" name="address" value="<?= e($t['address']) ?>"></div>
       <div class="fd"><label for="neighborhood">Bairro</label><input type="text" id="neighborhood" name="neighborhood" value="<?= e($t['neighborhood']) ?>"></div>
