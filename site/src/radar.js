@@ -25,10 +25,33 @@
 
   /* ---------------- lightbox ---------------- */
   var lb = $('#rd-lb');
-  var zoom = function (src, alt) { if (!lb || !lb.showModal) { window.open(src, '_blank'); return; } $('img', lb).src = src; $('img', lb).alt = alt || ''; lb.showModal(); };
+  // galeria: setas, teclado e arrastar para o lado
+  var gallery = [], gi = 0;
+  var lbShow = function () {
+    var img = $('img', lb), many = gallery.length > 1;
+    img.src = gallery[gi]; img.alt = 'Foto ' + (gi + 1) + ' de ' + gallery.length;
+    $('.lb-p', lb).hidden = $('.lb-n', lb).hidden = $('.lb-c', lb).hidden = !many;
+    $('.lb-c', lb).textContent = (gi + 1) + ' / ' + gallery.length;
+  };
+  var lbGo = function (d) { if (gallery.length < 2) return; gi = (gi + d + gallery.length) % gallery.length; lbShow(); };
+  var zoom = function (src) {
+    if (!lb || !lb.showModal) { window.open(src, '_blank'); return; }
+    gi = gallery.indexOf(src); if (gi < 0) { gallery = [src]; gi = 0; }
+    lbShow(); if (!lb.open) lb.showModal();
+  };
   if (lb) {
     $('.lb-x', lb).addEventListener('click', function () { lb.close(); });
+    $('.lb-p', lb).addEventListener('click', function (e) { e.stopPropagation(); lbGo(-1); });
+    $('.lb-n', lb).addEventListener('click', function (e) { e.stopPropagation(); lbGo(1); });
     lb.addEventListener('click', function (e) { if (e.target === lb || e.target.classList.contains('lb-in')) lb.close(); });
+    lb.addEventListener('keydown', function (e) { if (e.key === 'ArrowLeft') lbGo(-1); else if (e.key === 'ArrowRight') lbGo(1); });
+    var sx = null, sy = 0;
+    lb.addEventListener('touchstart', function (e) { sx = e.touches[0].clientX; sy = e.touches[0].clientY; }, { passive: true });
+    lb.addEventListener('touchend', function (e) {
+      if (sx === null) return;
+      var dx = e.changedTouches[0].clientX - sx, dy = e.changedTouches[0].clientY - sy; sx = null;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) lbGo(dx < 0 ? 1 : -1);
+    }, { passive: true });
   }
 
   /* ---------------- mapa público ---------------- */
@@ -50,16 +73,20 @@
     var mobile = function () { return matchMedia('(max-width: 860px)').matches; };
 
     var renderCard = function (t) {
-      var ph = t.photos || [], vd = t.video;
+      var ph = t.photos || [], vd = t.video, ig = t.insta;
       if (vd && ph.length && ph[0].url === vd.poster) ph = ph.slice(1); // a capa do vídeo não se repete como foto
+      var top = ig ? 'ig' : vd ? 'video' : ph.length ? 'photo' : '';
+      gallery = ph.map(function (p) { return p.url; }).concat(t.after ? [t.after.url] : []);
       var timer = t.status === 'resolvido'
         ? '<div class="rd-timer rd-timer--ok">' + icons.check + '<div><small>Resolvido em</small><b>' + t.days + (t.days === 1 ? ' dia' : ' dias') + '</b><small>Solução em ' + fmtDate(t.resolvedAt) + '</small></div></div>'
         : '<div class="rd-timer">' + icons.clock + '<div><small>Aguardando a Prefeitura há</small><b data-since="' + esc(t.publishedAt) + '">' + span(t.publishedAt) + '</b></div></div>';
       card.innerHTML =
         '<button type="button" class="rd-card-x" aria-label="Fechar">' + icons.x + '</button>' +
+        (ig ? '<a class="rd-ig" href="' + esc(ig.url) + '" target="_blank" rel="noopener" aria-label="Assistir ao vídeo no Instagram">' + (ig.thumb ? '<img src="' + esc(ig.thumb) + '" alt="" loading="lazy">' : '') +
+          '<span class="rd-ig-play">' + icons.play + '</span><span class="rd-ig-tag">' + icons.ig + 'Assistir no Instagram</span></a>' : '') +
         (vd ? '<div class="rd-card-vid"><video controls playsinline preload="none"' + (vd.poster ? ' poster="' + esc(vd.poster) + '"' : '') + '><source src="' + esc(vd.url) + '" type="' + esc(vd.mime) + '"></video></div>' : '') +
-        (!vd && ph.length ? '<button type="button" class="rd-card-ph" data-zoom="' + esc(ph[0].url) + '"><img src="' + esc(ph[0].url) + '" alt="Foto do problema: ' + esc(t.catLabel) + '">' + (ph.length > 1 ? '<span>' + ph.length + ' fotos</span>' : '') + '</button>' : '') +
-        (ph.length > (vd ? 0 : 1) ? '<div class="rd-thumbs">' + ph.map(function (p, i) { return '<button type="button" data-zoom="' + esc(p.url) + '" aria-label="Ver foto ' + (i + 1) + '"><img src="' + esc(p.url) + '" alt=""></button>'; }).join('') + '</div>' : '') +
+        (top === 'photo' ? '<button type="button" class="rd-card-ph" data-zoom="' + esc(ph[0].url) + '"><img src="' + esc(ph[0].url) + '" alt="Foto do problema: ' + esc(t.catLabel) + '">' + (ph.length > 1 ? '<span>' + ph.length + ' fotos ' + icons.next + '</span>' : '') + '</button>' : '') +
+        (ph.length > (top === 'photo' ? 1 : 0) ? '<div class="rd-thumbs">' + ph.map(function (p, i) { return '<button type="button" data-zoom="' + esc(p.url) + '" aria-label="Ver foto ' + (i + 1) + '"><img src="' + esc(p.url) + '" alt=""></button>'; }).join('') + '</div>' : '') +
         '<div class="rd-card-b">' +
           '<div class="rd-card-tags"><span class="tag">' + esc(t.catLabel) + '</span><span class="rd-code">' + esc(t.code) + '</span></div>' +
           (t.place ? '<h3>' + esc(t.place) + '</h3>' : '') +

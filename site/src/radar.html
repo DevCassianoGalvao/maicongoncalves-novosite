@@ -102,8 +102,8 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
   </div>
 </section>
 </main>
-<dialog class="lb" id="rd-lb" aria-label="Foto ampliada"><div class="lb-in"><img src="" alt=""></div><button class="lb-x" aria-label="Fechar">{{ib:x}}</button></dialog>
-<template id="rd-icons"><span data-i="clock">{{ib:clock}}</span><span data-i="check">{{if:check-circle}}</span><span data-i="pin">{{ib:map-pin}}</span><span data-i="user">{{ib:user}}</span><span data-i="bank">{{ib:bank}}</span><span data-i="x">{{ib:x}}</span><span data-i="cal">{{ib:calendar-blank}}</span><span data-i="play">{{if:play}}</span><span data-i="video">{{ib:video-camera}}</span></template>
+<dialog class="lb" id="rd-lb" aria-label="Foto ampliada"><div class="lb-in"><img src="" alt=""></div><button class="lb-x" aria-label="Fechar">{{ib:x}}</button><button class="lb-p" aria-label="Foto anterior">{{ib:caret-left}}</button><button class="lb-n" aria-label="Próxima foto">{{ib:caret-right}}</button><span class="lb-c" aria-live="polite"></span></dialog>
+<template id="rd-icons"><span data-i="clock">{{ib:clock}}</span><span data-i="check">{{if:check-circle}}</span><span data-i="pin">{{ib:map-pin}}</span><span data-i="user">{{ib:user}}</span><span data-i="bank">{{ib:bank}}</span><span data-i="x">{{ib:x}}</span><span data-i="cal">{{ib:calendar-blank}}</span><span data-i="play">{{if:play}}</span><span data-i="ig">{{ib:instagram-logo}}</span><span data-i="prev">{{ib:caret-left}}</span><span data-i="next">{{ib:caret-right}}</span><span data-i="video">{{ib:video-camera}}</span></template>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>window.RD_ITEMS = <?= json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>

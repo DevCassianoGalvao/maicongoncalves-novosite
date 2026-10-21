@@ -8,7 +8,7 @@ require ROOT . '/app/admin_ui.php';
 $user = admin_guard();
 $bairros = require ROOT . '/app/bairros.php';
 
-$v = ['category' => '', 'description' => '', 'public_text' => '', 'name' => '', 'phone' => '', 'email' => '', 'anonymous' => '1',
+$v = ['category' => '', 'description' => '', 'public_text' => '', 'instagram' => '', 'name' => '', 'phone' => '', 'email' => '', 'anonymous' => '1',
     'address' => '', 'neighborhood' => '', 'lat' => '', 'lng' => '', 'status' => 'publicado', 'department' => '', 'protocol' => '',
     'created_at' => date('Y-m-d'), 'published_at' => date('Y-m-d'), 'resolved_at' => ''];
 $errors = [];
@@ -24,7 +24,7 @@ function form_date(string $s, string $time = '09:00:00'): ?string
 if (is_post()) {
     csrf_check();
     $max = ['category' => 20, 'description' => 3000, 'public_text' => 3000, 'name' => 120, 'phone' => 30, 'email' => 190, 'address' => 255,
-        'neighborhood' => 120, 'lat' => 20, 'lng' => 20, 'status' => 12, 'department' => 160, 'protocol' => 80, 'created_at' => 16, 'published_at' => 16, 'resolved_at' => 16];
+        'neighborhood' => 120, 'lat' => 20, 'lng' => 20, 'status' => 12, 'department' => 160, 'protocol' => 80, 'instagram' => 255, 'created_at' => 16, 'published_at' => 16, 'resolved_at' => 16];
     foreach ($v as $k => $_) if ($k !== 'anonymous') $v[$k] = in($k, '', $max[$k] ?? 255);
     $v['anonymous'] = !empty($_POST['anonymous']) ? '1' : '';
     $v['email'] = mb_strtolower($v['email']);
@@ -61,7 +61,9 @@ if (is_post()) {
             try { $photos[] = ticket_photo_store($files['tmp_name'][$i]); } catch (Throwable $ex) { $errors[] = 'Foto "' . $name . '": ' . $ex->getMessage(); }
         }
     }
-    if (!$errors && in_array($v['status'], ['publicado', 'resolvido'], true) && !$photos) $errors[] = 'Para ir ao mapa, envie pelo menos uma foto.';
+    $insta = $v['instagram'] !== '' ? instagram_normalize($v['instagram']) : null;
+    if ($v['instagram'] !== '' && !$insta) $errors[] = 'O link do Instagram não parece ser de um post ou reel (ex.: https://www.instagram.com/reel/...).';
+    if (!$errors && in_array($v['status'], ['publicado', 'resolvido'], true) && !$photos && !$insta) $errors[] = 'Para ir ao mapa, envie pelo menos uma foto ou o link do vídeo do Instagram.';
 
     if ($errors) {
         foreach ($photos as $p) if ($f = ticket_photo_path($p['src'])) @unlink($f);
@@ -70,12 +72,14 @@ if (is_post()) {
         if ($v['status'] === 'resolvido' && !empty($_FILES['after']['tmp_name']) && $_FILES['after']['error'] === UPLOAD_ERR_OK) {
             try { $after = json_encode(ticket_photo_store($_FILES['after']['tmp_name']), JSON_UNESCAPED_SLASHES); } catch (Throwable $ex) {}
         }
+        $instaThumb = $insta ? instagram_fetch_thumb($insta) : null;
         $id = ticket_create([
             'source' => 'painel', 'category' => $v['category'], 'name' => $v['name'], 'phone' => $v['phone'], 'email' => $v['email'],
             'anonymous' => $v['anonymous'] === '1', 'description' => $v['description'], 'address' => $v['address'], 'neighborhood' => $v['neighborhood'],
             'lat' => $lat !== false ? round($lat, 7) : null, 'lng' => $lng !== false ? round($lng, 7) : null, 'geo_manual' => true,
             'photos' => $photos, 'consent' => true,
         ]);
+        if ($insta) q('UPDATE tickets SET instagram = ?, instagram_thumb = ? WHERE id = ?', [$insta, $instaThumb ? json_encode($instaThumb, JSON_UNESCAPED_SLASHES) : null, $id]);
         q('UPDATE tickets SET status = ?, public_text = ?, department = ?, protocol = ?, after_photo = ?, published_at = ?, resolved_at = ?, created_at = ?, created_by = ?, ip = NULL WHERE id = ?', [
             $v['status'], $v['public_text'] !== '' ? $v['public_text'] : ($published ? $v['description'] : null), $v['department'] ?: null, $v['protocol'] ?: null,
             $after, $published, $resolved, $created, (int) $user['id'], $id]);
@@ -106,7 +110,9 @@ admin_head('Cadastrar demanda', 'tnew', $leaflet);
 <?php foreach (ticket_cats() as $k => $label): ?><option value="<?= $k ?>"<?= $v['category'] === $k ? ' selected' : '' ?>><?= e($label) ?></option><?php endforeach; ?></select></div>
         <div class="fd"><label for="description">Relato</label><textarea id="description" name="description" rows="4" required placeholder="O que está acontecendo, desde quando, o que já foi feito."><?= e($v['description']) ?></textarea></div>
         <div class="fd"><label for="public_text">Texto que aparece no mapa <small class="muted">(opcional)</small></label><textarea id="public_text" name="public_text" rows="3" placeholder="Se vazio, usa o relato. Tire dados pessoais."><?= e($v['public_text']) ?></textarea></div>
-        <div class="fd"><span class="lbl">Fotos <small class="muted">(até 3; obrigatório para ir ao mapa)</small></span>
+        <div class="fd"><label for="instagram">Vídeo do Instagram <small class="muted">(link do post ou reel, opcional)</small></label><input type="url" id="instagram" name="instagram" value="<?= e($v['instagram']) ?>" placeholder="https://www.instagram.com/reel/..." inputmode="url">
+          <p class="hint">No mapa aparece a prévia com o botão de play; ao tocar, abre o vídeo no Instagram.</p></div>
+        <div class="fd"><span class="lbl">Fotos <small class="muted">(até 3; para ir ao mapa precisa de foto ou do vídeo do Instagram)</small></span>
           <label class="drop"><input type="file" name="fotos[]" accept="image/*" multiple id="fotos"><span id="fotosTxt">Escolher fotos</span></label></div>
       </div>
       <div class="card">

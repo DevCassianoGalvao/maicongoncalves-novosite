@@ -13,7 +13,7 @@ $isVideo = (bool) preg_match('#\.(mp4|mov|webm)$#', $src);
 $file = $isVideo ? ticket_video_path($src) : ticket_photo_path($src);
 $t = $id && $file ? q('SELECT * FROM tickets WHERE id = ?', [$id])->fetch() : null;
 $needle = json_encode($src, JSON_UNESCAPED_SLASHES);
-$belongs = $t && (strpos((string) $t['photos'], $needle) !== false || strpos((string) $t['after_photo'], $needle) !== false || strpos((string) ($t['video'] ?? ''), $needle) !== false);
+$belongs = $t && (strpos((string) $t['photos'], $needle) !== false || strpos((string) $t['after_photo'], $needle) !== false || strpos((string) ($t['video'] ?? ''), $needle) !== false || strpos((string) ($t['instagram_thumb'] ?? ''), $needle) !== false);
 $public = $t && in_array($t['status'], ['publicado', 'resolvido'], true);
 if (!$belongs || (!$public && !auth_user())) { http_response_code(404); exit; }
 

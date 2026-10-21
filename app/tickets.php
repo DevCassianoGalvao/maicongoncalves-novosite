@@ -69,7 +69,7 @@ function db_migrate(): void
     } catch (Throwable $ex) {
         return; // site ainda não instalado
     }
-    if ($v >= 6) return;
+    if ($v >= 7) return;
     if ($v < 2) {
     $pdo->exec("CREATE TABLE IF NOT EXISTS tickets (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -151,7 +151,9 @@ function db_migrate(): void
     foreach (TICKET_CATS_DEFAULT as $slug => $name) { $i += 10; $ins->execute([$slug, $name, $slug === 'outro' ? 9999 : $i]); }
     // v6: um vídeo por demanda (comprimido no aparelho de quem envia)
     if (!$has('tickets', 'video')) $pdo->exec('ALTER TABLE tickets ADD COLUMN video TEXT NULL AFTER photos');
-    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '6') ON DUPLICATE KEY UPDATE value = '6'");
+    // v7: vídeo do Instagram (link) com capa
+    if (!$has('tickets', 'instagram')) $pdo->exec('ALTER TABLE tickets ADD COLUMN instagram VARCHAR(255) NULL AFTER video, ADD COLUMN instagram_thumb TEXT NULL AFTER instagram');
+    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '7') ON DUPLICATE KEY UPDATE value = '7'");
 }
 
 /* ---------- fotos (ficam fora da web; só aparecem pelo api/foto.php) ---------- */
@@ -202,6 +204,40 @@ function ticket_video_path(string $src): ?string
     if (!preg_match('#^\d{4}/\d{2}/[\w-]+\.(mp4|mov|webm)$#', $src)) return null;
     $f = storage('demandas') . '/' . $src;
     return is_file($f) ? $f : null;
+}
+
+/** Link de post/reel do Instagram no formato padrão, ou null se não for um link válido. */
+function instagram_normalize(string $url): ?string
+{
+    $url = trim($url);
+    if (!preg_match('#^(?:https?://)?(?:www\.|m\.)?instagram\.com/(?:[\w.]+/)?(p|reel|reels|tv)/([\w-]{5,40})#i', $url, $m)) return null;
+    return 'https://www.instagram.com/' . (strtolower($m[1]) === 'p' ? 'p' : 'reel') . '/' . $m[2] . '/';
+}
+
+/**
+ * Tenta baixar a capa do post (og:image) para mostrar no card. O Instagram nem sempre entrega:
+ * nesse caso o card usa a foto da demanda. Retorna a foto guardada ou null.
+ */
+function instagram_fetch_thumb(string $url): ?array
+{
+    if (!function_exists('curl_init')) return null;
+    $get = function (string $u, int $max) {
+        $ch = curl_init($u);
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 3, CURLOPT_TIMEOUT => 10, CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_USERAGENT => 'facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)', CURLOPT_HTTPHEADER => ['Accept-Language: pt-BR,pt;q=0.9'],
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS, CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTPS]);
+        $body = curl_exec($ch);
+        $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        return $code === 200 && is_string($body) && strlen($body) <= $max ? $body : null;
+    };
+    $html = $get($url, 3000000);
+    if (!$html || !preg_match('#<meta[^>]+property=["\']og:image["\'][^>]+content=["\']([^"\']+)#i', $html, $m)) { app_log('instagram', 'sem capa: ' . $url); return null; }
+    $img = html_entity_decode($m[1], ENT_QUOTES | ENT_HTML5);
+    $host = (string) parse_url($img, PHP_URL_HOST);
+    if (!preg_match('#(^|\.)(cdninstagram\.com|fbcdn\.net)$#', $host)) return null;
+    $bytes = $get($img, 8000000);
+    return $bytes ? ticket_photo_store_bytes($bytes) : null;
 }
 
 function ticket_photo_url(int $id, string $src): string { return url('/api/foto.php') . '?t=' . $id . '&f=' . rawurlencode($src); }
@@ -294,6 +330,7 @@ function tickets_public(): array
             'resolvedAt' => $end ? date('c', $end) : null,
             'days' => $end ? max(0, (int) round(($end - $start) / 86400)) : null,
             'photos' => array_map(function ($p) use ($t) { return ['url' => ticket_photo_url((int) $t['id'], $p['src']), 'w' => $p['w'] ?? null, 'h' => $p['h'] ?? null]; }, $photos),
+            'insta' => !empty($t['instagram']) ? ['url' => $t['instagram'], 'thumb' => ($it = json_decode((string) ($t['instagram_thumb'] ?? ''), true)) ? ticket_photo_url((int) $t['id'], $it['src']) : ($photos ? ticket_photo_url((int) $t['id'], $photos[0]['src']) : null)] : null,
             'video' => ($vd = json_decode((string) ($t['video'] ?? ''), true)) ? ['url' => ticket_photo_url((int) $t['id'], $vd['src']), 'mime' => $vd['mime'] ?? 'video/mp4', 'poster' => !empty($vd['poster']) ? ticket_photo_url((int) $t['id'], $vd['poster']['src']) : ($photos ? ticket_photo_url((int) $t['id'], $photos[0]['src']) : null)] : null,
             'after' => $after ? ['url' => ticket_photo_url((int) $t['id'], $after['src']), 'w' => $after['w'] ?? null, 'h' => $after['h'] ?? null] : null,
         ];

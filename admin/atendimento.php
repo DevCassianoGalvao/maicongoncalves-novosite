@@ -11,7 +11,7 @@ $self = url('/admin/atendimento.php?id=' . $id);
 $photos = json_decode((string) $t['photos'], true) ?: [];
 $after = json_decode((string) $t['after_photo'], true);
 $video = json_decode((string) ($t['video'] ?? ''), true);
-$canPublish = $t['lat'] !== null && ($photos || $video);
+$canPublish = $t['lat'] !== null && ($photos || $video || !empty($t['instagram']));
 
 if (is_post()) {
     csrf_check();
@@ -34,6 +34,16 @@ if (is_post()) {
         case 'save':
             $cat = in('category', '', 20);
             $mail = mb_strtolower(in('email', '', 190));
+            $igIn = in('instagram', '', 255);
+            $ig = $igIn !== '' ? instagram_normalize($igIn) : null;
+            if ($igIn !== '' && !$ig) { flash('err', 'O link do Instagram não parece ser de um post ou reel. O restante foi salvo.'); }
+            if (($ig ?? '') !== (string) ($t['instagram'] ?? '')) {
+                $old = json_decode((string) ($t['instagram_thumb'] ?? ''), true);
+                if ($old && ($of = ticket_photo_path($old['src']))) @unlink($of);
+                $th = $ig ? instagram_fetch_thumb($ig) : null;
+                q('UPDATE tickets SET instagram = ?, instagram_thumb = ? WHERE id = ?', [$ig, $th ? json_encode($th, JSON_UNESCAPED_SLASHES) : null, $id]);
+                ticket_note($id, $ig ? 'Vídeo do Instagram vinculado' . ($th ? ' (capa baixada).' : ' (sem capa: o card usa a foto da demanda).') : 'Vídeo do Instagram removido.', (int) $user['id']);
+            }
             q('UPDATE tickets SET category = ?, department = ?, protocol = ?, public_text = ?, anonymous = ?, address = ?, neighborhood = ?, email = ?, updated_at = NOW() WHERE id = ?', [
                 isset(ticket_cats(true)[$cat]) ? $cat : null, in('department', '', 160) ?: null, in('protocol', '', 80) ?: null, in('public_text', '', 3000) ?: null,
                 !empty($_POST['anonymous']) ? 1 : 0, in('address', '', 255) ?: null, in('neighborhood', '', 120) ?: null, filter_var($mail, FILTER_VALIDATE_EMAIL) ? $mail : null, $id]);
@@ -78,6 +88,7 @@ if (is_post()) {
             if (!is_admin($user)) { flash('err', 'Só o administrador pode excluir atendimentos.'); break; }
             foreach (array_merge($photos, $after ? [$after] : [], !empty($video['poster']) ? [$video['poster']] : []) as $p) if ($f = ticket_photo_path($p['src'])) @unlink($f);
             if ($video && ($f = ticket_video_path($video['src']))) @unlink($f);
+            if (($it = json_decode((string) ($t['instagram_thumb'] ?? ''), true)) && ($f = ticket_photo_path($it['src']))) @unlink($f);
             q('DELETE FROM tickets WHERE id = ?', [$id]);
             flash('ok', 'Atendimento ' . ticket_code($id) . ' e as fotos foram apagados.');
             redirect(url('/admin/atendimentos.php'));
@@ -105,6 +116,13 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
       <h2>Vídeo <span class="small muted" style="font-weight:600"><?= number_format(($video['size'] ?? 0) / 1048576, 1, ',', '') ?> MB<?= !empty($video['dur']) ? ' · ' . (int) round($video['dur']) . ' s' : '' ?></span></h2>
       <video class="tk-video" controls playsinline preload="metadata"<?= !empty($video['poster']) ? ' poster="' . e(ticket_photo_url($id, $video['poster']['src'])) . '"' : '' ?>><source src="<?= e(ticket_photo_url($id, $video['src'])) ?>" type="<?= e($video['mime'] ?? 'video/mp4') ?>"></video>
       <p class="small muted" style="margin:8px 0 0"><a href="<?= e(ticket_photo_url($id, $video['src'])) ?>" download>Baixar o vídeo</a></p>
+    </div>
+<?php endif; ?>
+<?php if (!empty($t['instagram'])): $it = json_decode((string) ($t['instagram_thumb'] ?? ''), true); ?>
+    <div class="card">
+      <h2>Vídeo do Instagram</h2>
+      <a class="tk-ig" href="<?= e($t['instagram']) ?>" target="_blank" rel="noopener"><?php if ($it): ?><img src="<?= e(ticket_photo_url($id, $it['src'])) ?>" alt=""><?php endif; ?><span><?= icon('instagram-logo') ?>Abrir no Instagram</span></a>
+      <p class="small muted" style="margin:8px 0 0"><?= e($t['instagram']) ?><?= $it ? '' : ' · sem capa do Instagram: no mapa aparece a foto da demanda' ?></p>
     </div>
 <?php endif; ?>
 <?php $shown = array_values(array_filter($photos, function ($p) use ($video) { return empty($video['poster']) || $p['src'] !== $video['poster']['src']; })); ?>
@@ -166,7 +184,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
         <form method="post" data-confirm="Aprovar e publicar no mapa? O contador começa a contar agora."><?= csrf_field() ?><input type="hidden" name="do" value="publish">
           <?php if ($t['email']): ?><label class="check small"><input type="checkbox" name="notify" value="1" checked> Avisar <?= e($t['email']) ?> por e-mail</label><?php endif; ?>
           <button class="btn btn--or btn--block" type="submit"<?= $canPublish ? '' : ' disabled' ?>><?= icon('map-pin') ?>Aprovar e publicar no mapa</button></form>
-<?php if (!$canPublish): ?><p class="hint small muted" style="margin:0">Só vai ao mapa com foto ou vídeo e localização.</p><?php else: ?><p class="hint small muted" style="margin:0">Use depois de enviar o pedido à Prefeitura. O contador começa a contar no momento da aprovação.</p><?php endif; ?>
+<?php if (!$canPublish): ?><p class="hint small muted" style="margin:0">Só vai ao mapa com foto, vídeo ou Instagram, e localização.</p><?php else: ?><p class="hint small muted" style="margin:0">Use depois de enviar o pedido à Prefeitura. O contador começa a contar no momento da aprovação.</p><?php endif; ?>
         <form method="post"><?= csrf_field() ?><input type="hidden" name="do" value="archive"><button class="link-btn small" type="submit">Arquivar (não vai ao mapa)</button></form>
 <?php elseif ($t['status'] === 'publicado'): ?>
         <form method="post" enctype="multipart/form-data" class="tk-resolve" data-confirm="Marcar como resolvido? O contador para e o pino fica verde.">
@@ -194,6 +212,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
 <?php $cats = ticket_cats(); if ($t['category'] && !isset($cats[$t['category']])) $cats[$t['category']] = cat_label($t['category']) . ' (desativado)'; foreach ($cats as $k => $v): ?><option value="<?= $k ?>"<?= $t['category'] === $k ? ' selected' : '' ?>><?= e($v) ?></option><?php endforeach; ?></select></div>
       <div class="fd"><label for="department">Secretaria / órgão</label><input type="text" id="department" name="department" value="<?= e($t['department']) ?>" placeholder="Ex.: Secretaria de Obras"></div>
       <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($t['protocol']) ?>"><p class="hint">Uso interno, não aparece no site.</p></div>
+      <div class="fd"><label for="instagram">Vídeo do Instagram</label><input type="url" id="instagram" name="instagram" value="<?= e($t['instagram'] ?? '') ?>" placeholder="https://www.instagram.com/reel/..." inputmode="url"><p class="hint">Aparece no card do mapa com play; ao tocar, abre no Instagram.</p></div>
       <div class="fd"><label for="email">E-mail da pessoa</label><input type="email" id="email" name="email" value="<?= e($t['email'] ?? '') ?>"><p class="hint">Recebe os avisos quando for à Prefeitura e quando for resolvida.</p></div>
       <div class="fd"><label for="address">Rua e número</label><input type="text" id="address" name="address" value="<?= e($t['address']) ?>"></div>
       <div class="fd"><label for="neighborhood">Bairro</label><input type="text" id="neighborhood" name="neighborhood" value="<?= e($t['neighborhood']) ?>"></div>

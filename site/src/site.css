@@ -13,9 +13,11 @@
   color-scheme:light;
 }
 *,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
+@supports (overflow:clip){html{overflow-x:clip}}
 body{margin:0;background:var(--paper);color:var(--text);font-family:var(--body);font-size:16px;line-height:1.6;
-  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:clip}
+  -webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+@supports (overflow:clip){body{overflow-x:clip}}
 img{max-width:100%;display:block;height:auto}
 a{color:inherit;text-decoration:none}
 button{font:inherit;color:inherit;background:none;border:0;padding:0;cursor:pointer}
@@ -595,6 +597,20 @@ ul,ol{padding:0;list-style:none}
 .lb button{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;display:grid;place-items:center}
 .lb .lb-x{top:calc(env(safe-area-inset-top,0px) + 14px);right:16px}.lb .lb-p{left:16px;top:50%;translate:0 -50%}.lb .lb-n{right:16px;top:50%;translate:0 -50%}
 .lb .ic{width:20px;height:20px}
+.lb .lb-p,.lb .lb-n{width:52px;height:52px;background:rgba(255,255,255,.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.lb .lb-p:hover,.lb .lb-n:hover{background:rgba(255,255,255,.3)}
+.lb .lb-p[hidden],.lb .lb-n[hidden],.lb .lb-c[hidden]{display:none}
+.lb .lb-c{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);translate:-50% 0;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:14px;font-weight:700}
+.rd-card-ph span .ic{width:12px;height:12px;vertical-align:-1px}
+/* vídeo do Instagram no card */
+.rd-ig{position:relative;display:block;aspect-ratio:4/5;max-height:52vh;width:100%;overflow:hidden;background:linear-gradient(135deg,#F58529,#DD2A7B 50%,#8134AF);color:#fff}
+.rd-ig img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.rd-ig::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,11,31,0) 45%,rgba(2,11,31,.7))}
+.rd-ig-play{position:absolute;left:50%;top:50%;translate:-50% -50%;z-index:1;width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.94);color:#DD2A7B;display:grid;place-items:center;box-shadow:0 10px 30px -8px rgba(0,0,0,.5);transition:transform .3s var(--ease-out)}
+.rd-ig-play .ic{width:26px;height:26px;margin-left:4px}
+.rd-ig:hover .rd-ig-play{transform:scale(1.08)}
+.rd-ig-tag{position:absolute;left:12px;bottom:12px;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:linear-gradient(135deg,#F58529,#DD2A7B 55%,#8134AF);font-weight:700;font-size:14px}
+.rd-ig-tag .ic{width:18px;height:18px}
 
 /* ---------- rodada 3: heroes internos, ilustrações extras ---------- */
 .orbit{position:absolute;left:50%;top:50%;border-radius:50%;border:1.5px dashed rgba(255,255,255,.18);translate:-50% -50%;animation:spin 30s linear infinite;pointer-events:none}
@@ -771,6 +787,8 @@ ul,ol{padding:0;list-style:none}
 /* política de privacidade */
 .privacy{max-width:760px;margin-inline:auto}
 .privacy-upd{color:var(--muted);font-size:14px}
+/* iPhone: campos com 16px evitam o zoom automático ao digitar (que deixava a página arrastando para os lados) */
+@media (max-width:860px){.fd input,.fd select,.fd textarea,.rd-sel select,.search input,input,select,textarea{font-size:16px}}
 /* ---------- responsivo ---------- */
 @media (max-width:1060px){
   .hd-nav,.hd-soc,.hd-cta{display:none}
@@ -792,6 +810,8 @@ ul,ol{padding:0;list-style:none}
   .rd-card-ph{aspect-ratio:auto;max-height:36vh}
   .rd-card-ph{aspect-ratio:16/9}
   .rd-card-vid video{max-height:40vh}
+  .rd-ig{max-height:40vh}
+  .lb .lb-p,.lb .lb-n{top:auto;bottom:calc(env(safe-area-inset-bottom,0px) + 8px);translate:none}
   .rd-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
   .rd-map{height:58vh;min-height:360px}
   .rd-tools .filters{width:100%}
