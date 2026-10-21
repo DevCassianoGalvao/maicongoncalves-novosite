@@ -49,6 +49,35 @@ if (is_post()) {
                 !empty($_POST['anonymous']) ? 1 : 0, in('address', '', 255) ?: null, in('neighborhood', '', 120) ?: null, filter_var($mail, FILTER_VALIDATE_EMAIL) ? $mail : null, $id]);
             flash('ok', 'Dados do atendimento salvos.');
             break;
+        case 'photo_add':
+            $room = 3 - count(array_filter($photos, function ($p) use ($video) { return empty($video['poster']) || $p['src'] !== $video['poster']['src']; }));
+            $files = $_FILES['fotos'] ?? null; $added = 0; $errs = [];
+            if ($files && is_array($files['name'])) {
+                foreach ($files['name'] as $i => $name) {
+                    if ($files['error'][$i] === UPLOAD_ERR_NO_FILE) continue;
+                    if ($added >= $room) { $errs[] = 'o limite é de 3 fotos'; break; }
+                    if ($files['error'][$i] !== UPLOAD_ERR_OK) { $errs[] = '"' . $name . '": falha no envio'; continue; }
+                    try { $photos[] = ticket_photo_store($files['tmp_name'][$i]); $added++; } catch (Throwable $ex) { $errs[] = '"' . $name . '": ' . $ex->getMessage(); }
+                }
+            }
+            if ($added) {
+                q('UPDATE tickets SET photos = ?, updated_at = NOW() WHERE id = ?', [json_encode(array_values($photos), JSON_UNESCAPED_SLASHES), $id]);
+                ticket_note($id, $added . ($added === 1 ? ' foto adicionada.' : ' fotos adicionadas.'), (int) $user['id']);
+            }
+            if ($added) flash('ok', $added . ($added === 1 ? ' foto adicionada.' : ' fotos adicionadas.') . ($errs ? ' Mas: ' . implode('; ', $errs) . '.' : ''));
+            else flash('err', $errs ? 'Não foi possível adicionar: ' . implode('; ', $errs) . '.' : 'Escolha uma foto para enviar.');
+            break;
+        case 'photo_del':
+            $src = in('src', '', 120);
+            if (!empty($video['poster']) && $video['poster']['src'] === $src) { flash('err', 'Essa imagem é a capa do vídeo.'); break; }
+            $keep = array_values(array_filter($photos, function ($p) use ($src) { return $p['src'] !== $src; }));
+            if (count($keep) === count($photos)) break;
+            if (!$keep && !$video && empty($t['instagram']) && in_array($t['status'], ['publicado', 'resolvido'], true)) { flash('err', 'Esta demanda está no mapa e precisa de ao menos uma foto, vídeo ou Instagram.'); break; }
+            if ($f = ticket_photo_path($src)) @unlink($f);
+            q('UPDATE tickets SET photos = ?, updated_at = NOW() WHERE id = ?', [json_encode($keep, JSON_UNESCAPED_SLASHES), $id]);
+            ticket_note($id, 'Foto removida.', (int) $user['id']);
+            flash('ok', 'Foto removida.');
+            break;
         case 'note':
             if (in('body', '', 3000) !== '') { ticket_note($id, in('body', '', 3000), (int) $user['id']); flash('ok', 'Anotação registrada.'); }
             break;
@@ -127,16 +156,23 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
     </div>
 <?php endif; ?>
 <?php $shown = array_values(array_filter($photos, function ($p) use ($video) { return empty($video['poster']) || $p['src'] !== $video['poster']['src']; })); ?>
-<?php if ($shown): ?>
     <div class="card">
       <h2>Fotos</h2>
+<?php if ($shown): ?>
       <div class="tk-photos">
 <?php foreach ($shown as $p): $u = ticket_photo_url($id, $p['src']); ?>
-        <a href="<?= e($u) ?>" target="_blank" rel="noopener"><img src="<?= e($u) ?>" alt="Foto enviada"></a>
+        <div style="position:relative"><a href="<?= e($u) ?>" target="_blank" rel="noopener"><img src="<?= e($u) ?>" alt="Foto enviada"></a>
+          <form method="post" data-confirm="Remover esta foto?" style="margin:6px 0 0"><?= csrf_field() ?><input type="hidden" name="do" value="photo_del"><input type="hidden" name="src" value="<?= e($p['src']) ?>"><button class="link-btn small danger" type="submit">Remover</button></form></div>
 <?php endforeach; ?>
       </div>
-    </div>
+<?php else: ?><p class="small muted" style="margin:0 0 10px">Nenhuma foto ainda.</p><?php endif; ?>
+<?php if (count($shown) < 3): ?>
+      <form method="post" enctype="multipart/form-data" style="margin-top:12px"><?= csrf_field() ?><input type="hidden" name="do" value="photo_add">
+        <label class="drop"><input type="file" name="fotos[]" accept="image/*" multiple required><span>Adicionar foto (até <?= 3 - count($shown) ?>)</span></label>
+        <button class="btn btn--ghost btn--sm" type="submit" style="margin-top:8px"><?= icon('plus', 'bold') ?>Enviar</button>
+      </form>
 <?php endif; ?>
+    </div>
     <div class="card">
       <h2><?= $t['source'] !== 'contato' ? 'Relato' : 'Mensagem' ?></h2>
       <p class="tk-text"><?= nl2br(e($t['description'])) ?></p>
