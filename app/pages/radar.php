@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Friburgo no Mapa – envie sua demanda | Ve
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=334dcb33">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=8d850686">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -111,11 +111,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 
 <section class="sec sec--mist" id="como-funciona">
   <div class="wrap rd-how">
-    <div class="rd-how-tx">
-      <h2 class="h2">Como funciona</h2>
-      <p class="lead">Assista ao vídeo e veja como enviar sua demanda e acompanhar tudo em tempo real, até a Prefeitura resolver.</p>
-      <p class="small rd-how-note">O vídeo está no Instagram do vereador e só carrega quando você tocar nele. <a href="https://www.instagram.com/p/DeuvER1M_F4/" target="_blank" rel="noopener">Abrir no Instagram</a></p>
-    </div>
+    <div class="sec-hd"><h2 class="h2">Como funciona</h2></div>
     <div class="rd-vid" id="rd-vid" data-src="https://www.instagram.com/p/DeuvER1M_F4/embed/">
       <button type="button" class="rd-vid-btn" aria-label="Assistir ao vídeo: como funciona o Friburgo no Mapa"><img src="<?= B ?>/img/como-funciona.webp" width="540" height="960" alt="" loading="lazy" decoding="async"><span class="rd-vid-play" aria-hidden="true"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg></span></button>
     </div>
