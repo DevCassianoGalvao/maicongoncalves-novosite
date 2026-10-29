@@ -248,7 +248,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
       <div class="fd"><label for="category">Tipo do problema</label><select id="category" name="category"><option value="">—</option>
 <?php $cats = ticket_cats(); if ($t['category'] && !isset($cats[$t['category']])) $cats[$t['category']] = cat_label($t['category']) . ' (desativado)'; foreach ($cats as $k => $v): ?><option value="<?= $k ?>"<?= $t['category'] === $k ? ' selected' : '' ?>><?= e($v) ?></option><?php endforeach; ?></select></div>
       <div class="fd"><label for="department">Secretaria / órgão</label><input type="text" id="department" name="department" value="<?= e($t['department']) ?>" placeholder="Ex.: Secretaria de Obras"></div>
-      <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($t['protocol']) ?>"><p class="hint">Uso interno, não aparece no site.</p></div>
+      <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($t['protocol']) ?>"><p class="hint">Aparece no card da demanda no mapa. Ex.: Ofício nº 209/2026.</p></div>
 <?php if (is_admin($user)): ?>
       <div class="fd"><label for="instagram">Vídeo do Instagram <small class="muted">(só administrador)</small></label><input type="url" id="instagram" name="instagram" value="<?= e($t['instagram'] ?? '') ?>" placeholder="https://www.instagram.com/reel/..." inputmode="url"><p class="hint">Aparece no card do mapa com play; ao tocar, abre no Instagram.</p></div>
 <?php endif; ?>

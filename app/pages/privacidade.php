@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Política de privacidade – Vereador Maico
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=bb278261">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=334dcb33">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -94,7 +94,7 @@ if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.clas
       <p>Com a Prefeitura e os órgãos responsáveis, na medida necessária para resolver a demanda. Os e-mails são enviados pelo Brevo, serviço de envio de e-mails. Não vendemos nem cedemos seus dados para fins comerciais.</p>
 
       <h2>Cookies</h2>
-      <p>Este site não usa cookies de publicidade nem de rastreamento. Usamos apenas o que é necessário para funcionar: a lembrança de que você já viu o aviso de cookies (guardada no seu navegador) e, para a equipe do gabinete, o cookie de acesso ao painel. Os mapas usam o OpenStreetMap e as fontes vêm do Google Fonts; esses serviços recebem o endereço IP do seu aparelho para entregar o conteúdo.</p>
+      <p>Este site não usa cookies de publicidade nem de rastreamento. Usamos apenas o que é necessário para funcionar: a lembrança de que você já viu o aviso de cookies (guardada no seu navegador) e, para a equipe do gabinete, o cookie de acesso ao painel. O vídeo explicativo da página Friburgo no Mapa é do Instagram e só é carregado quando você toca nele; a partir daí, o Instagram pode registrar o acesso. Os mapas usam o OpenStreetMap e as fontes vêm do Google Fonts; esses serviços recebem o endereço IP do seu aparelho para entregar o conteúdo.</p>
 
       <h2>Por quanto tempo guardamos</h2>
       <p>Enquanto a demanda estiver sendo acompanhada e pelo tempo necessário para prestação de contas do mandato. Você pode pedir a exclusão a qualquer momento.</p>

@@ -95,6 +95,7 @@
           '<ul class="rd-meta">' +
             '<li>' + icons.cal + 'Registrado em ' + fmtDate(t.createdAt) + (t.by ? ' por ' + esc(t.by) : '') + '</li>' +
             '<li>' + icons.bank + 'Levado à Prefeitura em ' + fmtDate(t.publishedAt) + (t.department ? ' · ' + esc(t.department) : '') + '</li>' +
+            (t.oficio ? '<li>' + icons.doc + esc(t.oficio) + '</li>' : '') +
           '</ul>' +
           (t.after ? '<div class="rd-after"><small>Como ficou</small><button type="button" data-zoom="' + esc(t.after.url) + '"><img src="' + esc(t.after.url) + '" alt="Foto depois da solução"></button></div>' : '') +
         '</div>';
@@ -406,5 +407,13 @@
     pickSt.textContent = 'Use sua localização ou toque no mapa para marcar o local exato.';
     if (nearEl) { nearEl.hidden = true; nearEl.innerHTML = ''; } if (nearLayer && pick) { pick.removeLayer(nearLayer); nearLayer = null; }
     $('#rd-done').hidden = true; form.hidden = false; form.scrollIntoView({ behavior: 'smooth' });
+  });
+  // vídeo "Como funciona": o player do Instagram só carrega no toque (mais rápido e sem cookies antes da hora)
+  var vid = $('#rd-vid');
+  if (vid) vid.addEventListener('click', function () {
+    if (vid.querySelector('iframe')) return;
+    var f = doc.createElement('iframe');
+    f.src = vid.getAttribute('data-src'); f.title = 'Vídeo: como funciona o Friburgo no Mapa'; f.allow = 'autoplay; encrypted-media; picture-in-picture'; f.allowFullscreen = true; f.setAttribute('scrolling', 'no'); f.loading = 'lazy';
+    vid.classList.add('is-on'); vid.innerHTML = ''; vid.appendChild(f);
   });
 })();

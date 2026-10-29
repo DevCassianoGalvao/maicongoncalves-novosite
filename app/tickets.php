@@ -307,6 +307,14 @@ function first_name(?string $n): string
 }
 
 /** Demandas que aparecem no mapa público (publicadas ou resolvidas). */
+/** Texto do ofício para o card: se o gabinete digitou só o número, acrescenta "Ofício nº". */
+function oficio_label(string $p): string
+{
+    $p = trim($p);
+    if ($p === '') return '';
+    return preg_match('/of[ií]cio|protocolo/iu', $p) ? $p : 'Ofício nº ' . $p;
+}
+
 function tickets_public(): array
 {
     $pdo = db_or_null();
@@ -334,6 +342,7 @@ function tickets_public(): array
             'text' => (string) ($t['public_text'] !== null && $t['public_text'] !== '' ? $t['public_text'] : $t['description']),
             'by' => $t['anonymous'] ? '' : first_name($t['name']),
             'department' => (string) $t['department'],
+            'oficio' => oficio_label((string) $t['protocol']),
             'createdAt' => date('c', strtotime($t['created_at'])),
             'publishedAt' => date('c', $start),
             'resolvedAt' => $end ? date('c', $end) : null,

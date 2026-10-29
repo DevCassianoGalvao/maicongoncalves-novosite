@@ -163,7 +163,7 @@ admin_head('Cadastrar demanda', 'tnew', $leaflet);
       <div class="card">
         <h2>Encaminhamento</h2>
         <div class="fd"><label for="department">Secretaria / órgão</label><input type="text" id="department" name="department" value="<?= e($v['department']) ?>" placeholder="Ex.: Secretaria de Obras"></div>
-        <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($v['protocol']) ?>"><p class="hint">Uso interno, não aparece no site.</p></div>
+        <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($v['protocol']) ?>"><p class="hint">Aparece no card da demanda no mapa. Ex.: Ofício nº 209/2026.</p></div>
       </div>
     </div>
   </div>
