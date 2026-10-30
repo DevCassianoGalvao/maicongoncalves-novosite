@@ -69,4 +69,12 @@ if ($__page && $meta['page'] !== '404') array_unshift($__graph, $__page);
 <?php endif; ?>
 <meta name="twitter:card" content="summary_large_image">
 <?= seo_jsonld($__graph) ?>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TWEFN1Q95C"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
+  gtag('config', 'G-TWEFN1Q95C');
+</script>

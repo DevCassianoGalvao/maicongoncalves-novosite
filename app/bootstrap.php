@@ -137,9 +137,9 @@ function icon(string $name, string $weight = 'regular'): string
 /* ---------- cabeçalhos de segurança (todas as respostas PHP) ---------- */
 if (PHP_SAPI !== 'cli' && !headers_sent()) {
     header_remove('X-Powered-By');
-    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdnjs.cloudflare.com; worker-src 'self' blob:; " .
+    header("Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdnjs.cloudflare.com https://www.googletagmanager.com; worker-src 'self' blob:; " .
         "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdnjs.cloudflare.com; font-src 'self' https://fonts.gstatic.com data:; " .
-        "img-src 'self' data: blob: https:; connect-src 'self'; media-src 'self' https: blob:; " .
+        "img-src 'self' data: blob: https:; connect-src 'self' https://www.googletagmanager.com https://*.google-analytics.com https://*.analytics.google.com; media-src 'self' https: blob:; " .
         "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://player.vimeo.com https://www.instagram.com https://www.facebook.com https://www.google.com; " .
         "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'");
     header('X-Content-Type-Options: nosniff');
