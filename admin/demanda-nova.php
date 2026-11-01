@@ -9,7 +9,7 @@ $user = admin_guard();
 $bairros = require ROOT . '/app/bairros.php';
 
 $v = ['category' => '', 'description' => '', 'public_text' => '', 'instagram' => '', 'name' => '', 'phone' => '', 'email' => '', 'anonymous' => '1',
-    'address' => '', 'neighborhood' => '', 'lat' => '', 'lng' => '', 'status' => 'publicado', 'department' => '', 'protocol' => '',
+    'address' => '', 'neighborhood' => '', 'lat' => '', 'lng' => '', 'status' => 'publicado', 'secretaria' => '', 'protocol' => '',
     'created_at' => date('Y-m-d'), 'published_at' => date('Y-m-d'), 'resolved_at' => ''];
 $errors = [];
 
@@ -24,7 +24,7 @@ function form_date(string $s, string $time = '09:00:00'): ?string
 if (is_post()) {
     csrf_check();
     $max = ['category' => 20, 'description' => 3000, 'public_text' => 3000, 'name' => 120, 'phone' => 30, 'email' => 190, 'address' => 255,
-        'neighborhood' => 120, 'lat' => 20, 'lng' => 20, 'status' => 12, 'department' => 160, 'protocol' => 80, 'instagram' => 255, 'created_at' => 16, 'published_at' => 16, 'resolved_at' => 16];
+        'neighborhood' => 120, 'lat' => 20, 'lng' => 20, 'status' => 12, 'secretaria' => 20, 'protocol' => 80, 'instagram' => 255, 'created_at' => 16, 'published_at' => 16, 'resolved_at' => 16];
     foreach ($v as $k => $_) if ($k !== 'anonymous') $v[$k] = in($k, '', $max[$k] ?? 255);
     $v['anonymous'] = !empty($_POST['anonymous']) ? '1' : '';
     $v['email'] = mb_strtolower($v['email']);
@@ -81,8 +81,8 @@ if (is_post()) {
             'photos' => $photos, 'consent' => true,
         ]);
         if ($insta) q('UPDATE tickets SET instagram = ?, instagram_thumb = ? WHERE id = ?', [$insta, $instaThumb ? json_encode($instaThumb, JSON_UNESCAPED_SLASHES) : null, $id]);
-        q('UPDATE tickets SET status = ?, public_text = ?, department = ?, protocol = ?, after_photo = ?, published_at = ?, resolved_at = ?, created_at = ?, created_by = ?, ip = NULL WHERE id = ?', [
-            $v['status'], $v['public_text'] !== '' ? $v['public_text'] : ($published ? $v['description'] : null), $v['department'] ?: null, $v['protocol'] ?: null,
+        q('UPDATE tickets SET status = ?, public_text = ?, secretaria = ?, protocol = ?, after_photo = ?, published_at = ?, resolved_at = ?, created_at = ?, created_by = ?, ip = NULL WHERE id = ?', [
+            $v['status'], $v['public_text'] !== '' ? $v['public_text'] : ($published ? $v['description'] : null), (isset(SECRETARIAS[$v['secretaria']]) ? $v['secretaria'] : null), $v['protocol'] ?: null,
             $after, $published, $resolved, $created, (int) $user['id'], $id]);
         if (!empty($_POST['news']) && $v['email'] !== '') { q('UPDATE tickets SET news_optin = 1 WHERE id = ?', [$id]); subscriber_optin($v['email'], $v['name'], 'painel'); }
         ticket_note($id, 'Cadastrada pelo painel' . (substr($created, 0, 10) < date('Y-m-d') ? ', com data de ' . date('d/m/Y', strtotime($created)) : '') . '. Situação: ' . TICKET_STATUS[$v['status']] . '.', (int) $user['id']);
@@ -162,7 +162,7 @@ admin_head('Cadastrar demanda', 'tnew', $leaflet);
       </div>
       <div class="card">
         <h2>Encaminhamento</h2>
-        <div class="fd"><label for="department">Secretaria / órgão</label><input type="text" id="department" name="department" value="<?= e($v['department']) ?>" placeholder="Ex.: Secretaria de Obras"></div>
+        <div class="fd"><label for="secretaria">Secretaria responsável <small class="muted">(só equipe)</small></label><select id="secretaria" name="secretaria"><?= secretaria_options($v['secretaria']) ?></select><p class="hint">Não aparece no mapa nem no card.</p></div>
         <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($v['protocol']) ?>"><p class="hint">Aparece no card da demanda no mapa. Ex.: Ofício nº 209/2026.</p></div>
       </div>
     </div>

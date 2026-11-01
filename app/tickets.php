@@ -56,6 +56,70 @@ const TICKET_STATUS = [
     'arquivado' => 'Arquivado',
 ];
 
+/* ---------- secretarias (uso interno: a equipe escolhe; o público só vê o comparativo) ---------- */
+const SECRETARIAS = [
+    'agricultura' => 'Secretaria de Agricultura e Desenvolvimento Rural',
+    'ambiente' => 'Secretaria de Ambiente e Desenvolvimento Urbano Sustentável',
+    'animal' => 'Secretaria de Bem-estar e Proteção Animal',
+    'ciencia' => 'Secretaria de Ciência, Tecnologia, Inovação e Desenvolvimento Econômico',
+    'cultura' => 'Secretaria de Cultura',
+    'social' => 'Secretaria de Desenvolvimento Social e Direitos Humanos',
+    'educacao' => 'Secretaria de Educação',
+    'esportes' => 'Secretaria de Esportes e Lazer',
+    'regional' => 'Secretaria Executiva de Desenvolvimento Regional',
+    'fazenda' => 'Secretaria de Fazenda',
+    'gestao' => 'Secretaria de Gestão e Recursos Humanos',
+    'governo' => 'Secretaria de Governo',
+    'habitacao' => 'Secretaria de Habitação e Regularização Fundiária',
+    'obras' => 'Secretaria de Infraestrutura e Obras',
+    'licitacoes' => 'Secretaria de Licitações e Planejamento',
+    'mobilidade' => 'Secretaria de Mobilidade e Urbanismo',
+    'mulher' => 'Secretaria da Mulher',
+    'defesacivil' => 'Secretaria de Proteção e Defesa Civil',
+    'saude' => 'Secretaria de Saúde',
+    'seguranca' => 'Secretaria de Segurança e Ordem Pública',
+    'servicos' => 'Secretaria de Serviços e Equipamentos Públicos',
+    'turismo' => 'Secretaria de Turismo',
+    'gabinete' => 'Gabinete do Prefeito',
+    'controladoria' => 'Controladoria-Geral do Município',
+    'procuradoria' => 'Procuradoria-Geral do Município',
+];
+function secretaria_name(?string $slug): string { return $slug && isset(SECRETARIAS[$slug]) ? SECRETARIAS[$slug] : ''; }
+/** Campo de seleção para o painel (só equipe). */
+function secretaria_options(?string $sel): string
+{
+    $h = '<option value="">Ainda não definida</option>';
+    foreach (SECRETARIAS as $k => $n) $h .= '<option value="' . e($k) . '"' . ($k === $sel ? ' selected' : '') . '>' . e($n) . '</option>';
+    return $h;
+}
+/** Comparativo público: por secretaria, quantas demandas já foram à Prefeitura e quantas foram resolvidas. Vazio = seção oculta. */
+function secretaria_stats(): array
+{
+    $pdo = db_or_null();
+    if (!$pdo) return [];
+    db_migrate();
+    try {
+        $rows = $pdo->query("SELECT secretaria, status, published_at, resolved_at FROM tickets WHERE secretaria IS NOT NULL AND secretaria <> '' AND status IN ('publicado','resolvido') AND published_at IS NOT NULL")->fetchAll();
+    } catch (Throwable $ex) { return []; }
+    $by = [];
+    foreach ($rows as $r) {
+        if (!isset(SECRETARIAS[$r['secretaria']])) continue;
+        $s =& $by[$r['secretaria']];
+        if (!$s) $s = ['slug' => $r['secretaria'], 'name' => SECRETARIAS[$r['secretaria']], 'total' => 0, 'solved' => 0, 'daysSum' => 0];
+        $s['total']++;
+        if ($r['status'] === 'resolvido' && $r['resolved_at']) { $s['solved']++; $s['daysSum'] += max(0, (int) round((strtotime($r['resolved_at']) - strtotime($r['published_at'])) / 86400)); }
+        unset($s);
+    }
+    $out = [];
+    foreach ($by as $s) {
+        $s['rate'] = (int) round($s['solved'] * 100 / $s['total']);
+        $s['avgDays'] = $s['solved'] ? (int) round($s['daysSum'] / $s['solved']) : null;
+        $out[] = $s;
+    }
+    usort($out, function ($a, $b) { return [$b['solved'] / $b['total'], $b['solved'], $b['total']] <=> [$a['solved'] / $a['total'], $a['solved'], $a['total']]; });
+    return $out;
+}
+
 /* ---------- atualização automática do banco ---------- */
 function db_migrate(): void
 {
@@ -69,7 +133,7 @@ function db_migrate(): void
     } catch (Throwable $ex) {
         return; // site ainda não instalado
     }
-    if ($v >= 7) return;
+    if ($v >= 8) return;
     if ($v < 2) {
     $pdo->exec("CREATE TABLE IF NOT EXISTS tickets (
       id INT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -153,7 +217,13 @@ function db_migrate(): void
     if (!$has('tickets', 'video')) $pdo->exec('ALTER TABLE tickets ADD COLUMN video TEXT NULL AFTER photos');
     // v7: vídeo do Instagram (link) com capa
     if (!$has('tickets', 'instagram')) $pdo->exec('ALTER TABLE tickets ADD COLUMN instagram VARCHAR(255) NULL AFTER video, ADD COLUMN instagram_thumb TEXT NULL AFTER instagram');
-    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '7') ON DUPLICATE KEY UPDATE value = '7'");
+    // v8: secretaria responsável (uso interno da equipe; alimenta o comparativo público por secretaria)
+    if (!$has('tickets', 'secretaria')) {
+        $pdo->exec('ALTER TABLE tickets ADD COLUMN secretaria VARCHAR(20) NULL AFTER department, ADD KEY tickets_secretaria (secretaria)');
+        $up = $pdo->prepare('UPDATE tickets SET secretaria = ? WHERE department = ?'); // aproveita o texto livre antigo quando for igual ao nome
+        foreach (SECRETARIAS as $slug => $name) $up->execute([$slug, $name]);
+    }
+    $pdo->exec("INSERT INTO settings (name, value) VALUES ('db_version', '8') ON DUPLICATE KEY UPDATE value = '8'");
 }
 
 /* ---------- fotos (ficam fora da web; só aparecem pelo api/foto.php) ---------- */
@@ -341,7 +411,6 @@ function tickets_public(): array
             'place' => trim(($t['address'] ?: '') . ($t['neighborhood'] ? ($t['address'] ? ' – ' : '') . $t['neighborhood'] : '')),
             'text' => (string) ($t['public_text'] !== null && $t['public_text'] !== '' ? $t['public_text'] : $t['description']),
             'by' => $t['anonymous'] ? '' : first_name($t['name']),
-            'department' => (string) $t['department'],
             'oficio' => oficio_label((string) $t['protocol']),
             'createdAt' => date('c', strtotime($t['created_at'])),
             'publishedAt' => date('c', $start),

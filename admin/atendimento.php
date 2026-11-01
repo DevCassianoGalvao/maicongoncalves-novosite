@@ -44,8 +44,8 @@ if (is_post()) {
                 q('UPDATE tickets SET instagram = ?, instagram_thumb = ? WHERE id = ?', [$ig, $th ? json_encode($th, JSON_UNESCAPED_SLASHES) : null, $id]);
                 ticket_note($id, $ig ? 'Vídeo do Instagram vinculado' . ($th ? ' (capa baixada).' : ' (sem capa: o card usa a foto da demanda).') : 'Vídeo do Instagram removido.', (int) $user['id']);
             }
-            q('UPDATE tickets SET category = ?, department = ?, protocol = ?, public_text = ?, anonymous = ?, address = ?, neighborhood = ?, email = ?, updated_at = NOW() WHERE id = ?', [
-                isset(ticket_cats(true)[$cat]) ? $cat : null, in('department', '', 160) ?: null, in('protocol', '', 80) ?: null, in('public_text', '', 3000) ?: null,
+            q('UPDATE tickets SET category = ?, secretaria = ?, protocol = ?, public_text = ?, anonymous = ?, address = ?, neighborhood = ?, email = ?, updated_at = NOW() WHERE id = ?', [
+                isset(ticket_cats(true)[$cat]) ? $cat : null, (isset(SECRETARIAS[in('secretaria', '', 20)]) ? in('secretaria', '', 20) : null), in('protocol', '', 80) ?: null, in('public_text', '', 3000) ?: null,
                 !empty($_POST['anonymous']) ? 1 : 0, in('address', '', 255) ?: null, in('neighborhood', '', 120) ?: null, filter_var($mail, FILTER_VALIDATE_EMAIL) ? $mail : null, $id]);
             flash('ok', 'Dados do atendimento salvos.');
             break;
@@ -247,7 +247,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
       <h2>Encaminhamento</h2>
       <div class="fd"><label for="category">Tipo do problema</label><select id="category" name="category"><option value="">—</option>
 <?php $cats = ticket_cats(); if ($t['category'] && !isset($cats[$t['category']])) $cats[$t['category']] = cat_label($t['category']) . ' (desativado)'; foreach ($cats as $k => $v): ?><option value="<?= $k ?>"<?= $t['category'] === $k ? ' selected' : '' ?>><?= e($v) ?></option><?php endforeach; ?></select></div>
-      <div class="fd"><label for="department">Secretaria / órgão</label><input type="text" id="department" name="department" value="<?= e($t['department']) ?>" placeholder="Ex.: Secretaria de Obras"></div>
+      <div class="fd"><label for="secretaria">Secretaria responsável <small class="muted">(só equipe)</small></label><select id="secretaria" name="secretaria"><?= secretaria_options($t['secretaria'] ?? null) ?></select><p class="hint">Quem recebe o pedido na Prefeitura. Não aparece no mapa nem no card; alimenta o comparativo de resolução por secretaria no site.</p></div>
       <div class="fd"><label for="protocol">Nº do ofício ou protocolo</label><input type="text" id="protocol" name="protocol" value="<?= e($t['protocol']) ?>"><p class="hint">Aparece no card da demanda no mapa. Ex.: Ofício nº 209/2026.</p></div>
 <?php if (is_admin($user)): ?>
       <div class="fd"><label for="instagram">Vídeo do Instagram <small class="muted">(só administrador)</small></label><input type="url" id="instagram" name="instagram" value="<?= e($t['instagram'] ?? '') ?>" placeholder="https://www.instagram.com/reel/..." inputmode="url"><p class="hint">Aparece no card do mapa com play; ao tocar, abre no Instagram.</p></div>

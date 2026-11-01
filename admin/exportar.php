@@ -65,7 +65,7 @@ if ($tipo === 'demandas') {
             $t['source'] === 'contato' ? ($t['subject'] ?: 'Contato') : cat_label($t['category'], ''),
             ['mapa' => 'Site', 'painel' => 'Painel', 'contato' => 'Formulário antigo'][$t['source']] ?? $t['source'],
             $t['name'], $mail, $t['phone'], $t['address'], $t['neighborhood'], $t['lat'] !== null ? $t['lat'] . ',' . $t['lng'] : '',
-            $t['description'], $t['department'], $t['protocol'], $fmt($t['created_at']), $fmt($t['published_at']), $fmt($t['resolved_at']),
+            $t['description'], secretaria_name($t['secretaria'] ?? null), $t['protocol'], $fmt($t['created_at']), $fmt($t['published_at']), $fmt($t['resolved_at']),
             $mail !== '' && !empty($subs[$mail]) ? 'Sim' : 'Não'];
     }
     app_log('exportacoes', $user['email'] . ' exportou demandas (' . count($rows) . ')');

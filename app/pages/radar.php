@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Friburgo no Mapa – envie sua demanda | Ve
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=8d850686">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=db689b88">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -68,6 +68,7 @@ if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.clas
 $items = tickets_public();
 $waiting = array_values(array_filter($items, function ($t) { return $t['status'] === 'publicado'; }));
 $solved = array_values(array_filter($items, function ($t) { return $t['status'] === 'resolvido'; }));
+$secs = secretaria_stats();
 $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($solved)) : null;
 ?>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -165,13 +166,33 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
     </div>
   </div>
 </section>
+<?php if ($secs): $totAll = array_sum(array_column($secs, 'total')); $solvedAll = array_sum(array_column($secs, 'solved')); ?>
+<section class="sec sec--mist" id="secretarias">
+  <div class="wrap">
+    <div class="sec-hd"><h2 class="h2">Quem resolve mais?</h2></div>
+    <p class="lead rd-sec-lead">Cada demanda que nosso gabinete leva à Prefeitura é encaminhada à secretaria responsável. Aqui você compara quantas já foram resolvidas em cada uma. Quanto maior a barra verde, maior a taxa de resolução.</p>
+    <div class="rd-sec-card">
+      <ol class="rd-sec-list">
+<?php foreach ($secs as $s): ?>
+        <li class="rd-sec-row">
+          <div class="rd-sec-top"><b><?= e($s['name']) ?></b><span class="rd-sec-pct"><?= (int) $s['rate'] ?>%</span></div>
+          <div class="rd-sec-bar" role="img" aria-label="<?= e($s['name']) ?>: <?= (int) $s['solved'] ?> de <?= (int) $s['total'] ?> demandas resolvidas (<?= (int) $s['rate'] ?>%)"><i style="width:<?= (int) $s['rate'] ?>%"></i></div>
+          <small><?= (int) $s['solved'] ?> de <?= (int) $s['total'] ?> <?= (int) $s['total'] === 1 ? 'demanda resolvida' : 'demandas resolvidas' ?><?= $s['avgDays'] !== null ? ($s['avgDays'] < 1 ? ' · resolvidas em menos de 1 dia' : ' · tempo médio de ' . (int) $s['avgDays'] . ($s['avgDays'] === 1 ? ' dia' : ' dias')) : '' ?></small>
+        </li>
+<?php endforeach; ?>
+      </ol>
+      <p class="rd-legend"><span><i class="rd-dot rd-dot--ok"></i>Resolvidas</span><span><i class="rd-dot rd-dot--grey"></i>Ainda aguardando a Prefeitura</span><span>Contam só as demandas que nosso gabinete já levou à Prefeitura. Os números se atualizam sozinhos.</span></p>
+    </div>
+  </div>
+</section>
+<?php endif; ?>
 </main>
 <dialog class="lb" id="rd-lb" aria-label="Foto ampliada"><div class="lb-in"><img src="" alt=""></div><button class="lb-x" aria-label="Fechar"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"/></svg></button><button class="lb-p" aria-label="Foto anterior"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168.49,199.51a12,12,0,0,1-17,17l-80-80a12,12,0,0,1,0-17l80-80a12,12,0,0,1,17,17L97,128Z"/></svg></button><button class="lb-n" aria-label="Próxima foto"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M184.49,136.49l-80,80a12,12,0,0,1-17-17L159,128,87.51,56.49a12,12,0,1,1,17-17l80,80A12,12,0,0,1,184.49,136.49Z"/></svg></button><span class="lb-c" aria-live="polite"></span></dialog>
 <template id="rd-icons"><span data-i="clock"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,20A108,108,0,1,0,236,128,108.12,108.12,0,0,0,128,20Zm0,192a84,84,0,1,1,84-84A84.09,84.09,0,0,1,128,212Zm68-84a12,12,0,0,1-12,12H128a12,12,0,0,1-12-12V72a12,12,0,0,1,24,0v44h44A12,12,0,0,1,196,128Z"/></svg></span><span data-i="doc"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216.49,79.52l-56-56A12,12,0,0,0,152,20H56A20,20,0,0,0,36,40V216a20,20,0,0,0,20,20H200a20,20,0,0,0,20-20V88A12,12,0,0,0,216.49,79.52ZM160,57l23,23H160ZM60,212V44h76V92a12,12,0,0,0,12,12h48V212Zm112-80a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,132Zm0,40a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,172Z"/></svg></span><span data-i="check"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm45.66,85.66-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L112,148.69l50.34-50.35a8,8,0,0,1,11.32,11.32Z"/></svg></span><span data-i="pin"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,60a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,60Zm0,64a20,20,0,1,1,20-20A20,20,0,0,1,128,124Zm0-112a92.1,92.1,0,0,0-92,92c0,77.36,81.64,135.4,85.12,137.83a12,12,0,0,0,13.76,0,259,259,0,0,0,42.18-39C205.15,170.57,220,136.37,220,104A92.1,92.1,0,0,0,128,12Zm31.3,174.71A249.35,249.35,0,0,1,128,216.89a249.35,249.35,0,0,1-31.3-30.18C80,167.37,60,137.31,60,104a68,68,0,0,1,136,0C196,137.31,176,167.37,159.3,186.71Z"/></svg></span><span data-i="user"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M234.38,210a123.36,123.36,0,0,0-60.78-53.23,76,76,0,1,0-91.2,0A123.36,123.36,0,0,0,21.62,210a12,12,0,1,0,20.77,12c18.12-31.32,50.12-50,85.61-50s67.49,18.69,85.61,50a12,12,0,0,0,20.77-12ZM76,96a52,52,0,1,1,52,52A52.06,52.06,0,0,1,76,96Z"/></svg></span><span data-i="bank"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M24,108H44v48H32a12,12,0,0,0,0,24H224a12,12,0,0,0,0-24H212V108h20a12,12,0,0,0,6.29-22.22l-104-64a12,12,0,0,0-12.58,0l-104,64A12,12,0,0,0,24,108Zm44,0H92v48H68Zm72,0v48H116V108Zm48,48H164V108h24ZM128,46.09,189.6,84H66.4ZM252,208a12,12,0,0,1-12,12H16a12,12,0,0,1,0-24H240A12,12,0,0,1,252,208Z"/></svg></span><span data-i="x"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,191.51a12,12,0,0,1-17,17L128,145,64.49,208.49a12,12,0,0,1-17-17L111,128,47.51,64.49a12,12,0,0,1,17-17L128,111l63.51-63.52a12,12,0,0,1,17,17L145,128Z"/></svg></span><span data-i="cal"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,28H188V24a12,12,0,0,0-24,0v4H92V24a12,12,0,0,0-24,0v4H48A20,20,0,0,0,28,48V208a20,20,0,0,0,20,20H208a20,20,0,0,0,20-20V48A20,20,0,0,0,208,28ZM68,52a12,12,0,0,0,24,0h72a12,12,0,0,0,24,0h16V76H52V52ZM52,204V100H204V204Z"/></svg></span><span data-i="play"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"/></svg></span><span data-i="ig"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,80a48,48,0,1,0,48,48A48.05,48.05,0,0,0,128,80Zm0,72a24,24,0,1,1,24-24A24,24,0,0,1,128,152ZM176,20H80A60.07,60.07,0,0,0,20,80v96a60.07,60.07,0,0,0,60,60h96a60.07,60.07,0,0,0,60-60V80A60.07,60.07,0,0,0,176,20Zm36,156a36,36,0,0,1-36,36H80a36,36,0,0,1-36-36V80A36,36,0,0,1,80,44h96a36,36,0,0,1,36,36ZM196,76a16,16,0,1,1-16-16A16,16,0,0,1,196,76Z"/></svg></span><span data-i="prev"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168.49,199.51a12,12,0,0,1-17,17l-80-80a12,12,0,0,1,0-17l80-80a12,12,0,0,1,17,17L97,128Z"/></svg></span><span data-i="next"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M184.49,136.49l-80,80a12,12,0,0,1-17-17L159,128,87.51,56.49a12,12,0,1,1,17-17l80,80A12,12,0,0,1,184.49,136.49Z"/></svg></span><span data-i="video"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M249.45,69.31a12,12,0,0,0-12.51,1L212,88.43V72a20,20,0,0,0-20-20H32A20,20,0,0,0,12,72V184a20,20,0,0,0,20,20H192a20,20,0,0,0,20-20V167.57l24.94,18.14A12,12,0,0,0,256,176V80A12,12,0,0,0,249.45,69.31ZM188,180H36V76H188Zm44-27.57-20-14.54V118.11l20-14.54Z"/></svg></span></template>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>window.RD_ITEMS = <?= json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
-<script src="<?= B ?>/radar.js?v=b5629bba096b" defer></script>
+<script src="<?= B ?>/radar.js?v=40776df6096b" defer></script>
 
 <div class="ft-top on-white" aria-hidden="true">
   <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice">

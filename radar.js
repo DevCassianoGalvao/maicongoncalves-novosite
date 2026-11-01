@@ -94,7 +94,7 @@
           (t.text ? '<p>' + esc(t.text) + '</p>' : '') + timer +
           '<ul class="rd-meta">' +
             '<li>' + icons.cal + 'Registrado em ' + fmtDate(t.createdAt) + (t.by ? ' por ' + esc(t.by) : '') + '</li>' +
-            '<li>' + icons.bank + 'Levado à Prefeitura em ' + fmtDate(t.publishedAt) + (t.department ? ' · ' + esc(t.department) : '') + '</li>' +
+            '<li>' + icons.bank + 'Levado à Prefeitura em ' + fmtDate(t.publishedAt) + '</li>' +
             (t.oficio ? '<li>' + icons.doc + esc(t.oficio) + '</li>' : '') +
           '</ul>' +
           (t.after ? '<div class="rd-after"><small>Como ficou</small><button type="button" data-zoom="' + esc(t.after.url) + '"><img src="' + esc(t.after.url) + '" alt="Foto depois da solução"></button></div>' : '') +

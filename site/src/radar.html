@@ -2,6 +2,7 @@
 $items = tickets_public();
 $waiting = array_values(array_filter($items, function ($t) { return $t['status'] === 'publicado'; }));
 $solved = array_values(array_filter($items, function ($t) { return $t['status'] === 'resolvido'; }));
+$secs = secretaria_stats();
 $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($solved)) : null;
 ?>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
@@ -99,6 +100,26 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
     </div>
   </div>
 </section>
+<?php if ($secs): $totAll = array_sum(array_column($secs, 'total')); $solvedAll = array_sum(array_column($secs, 'solved')); ?>
+<section class="sec sec--mist" id="secretarias">
+  <div class="wrap">
+    <div class="sec-hd"><h2 class="h2">Quem resolve mais?</h2></div>
+    <p class="lead rd-sec-lead">Cada demanda que nosso gabinete leva à Prefeitura é encaminhada à secretaria responsável. Aqui você compara quantas já foram resolvidas em cada uma. Quanto maior a barra verde, maior a taxa de resolução.</p>
+    <div class="rd-sec-card">
+      <ol class="rd-sec-list">
+<?php foreach ($secs as $s): ?>
+        <li class="rd-sec-row">
+          <div class="rd-sec-top"><b><?= e($s['name']) ?></b><span class="rd-sec-pct"><?= (int) $s['rate'] ?>%</span></div>
+          <div class="rd-sec-bar" role="img" aria-label="<?= e($s['name']) ?>: <?= (int) $s['solved'] ?> de <?= (int) $s['total'] ?> demandas resolvidas (<?= (int) $s['rate'] ?>%)"><i style="width:<?= (int) $s['rate'] ?>%"></i></div>
+          <small><?= (int) $s['solved'] ?> de <?= (int) $s['total'] ?> <?= (int) $s['total'] === 1 ? 'demanda resolvida' : 'demandas resolvidas' ?><?= $s['avgDays'] !== null ? ($s['avgDays'] < 1 ? ' · resolvidas em menos de 1 dia' : ' · tempo médio de ' . (int) $s['avgDays'] . ($s['avgDays'] === 1 ? ' dia' : ' dias')) : '' ?></small>
+        </li>
+<?php endforeach; ?>
+      </ol>
+      <p class="rd-legend"><span><i class="rd-dot rd-dot--ok"></i>Resolvidas</span><span><i class="rd-dot rd-dot--grey"></i>Ainda aguardando a Prefeitura</span><span>Contam só as demandas que nosso gabinete já levou à Prefeitura. Os números se atualizam sozinhos.</span></p>
+    </div>
+  </div>
+</section>
+<?php endif; ?>
 </main>
 <dialog class="lb" id="rd-lb" aria-label="Foto ampliada"><div class="lb-in"><img src="" alt=""></div><button class="lb-x" aria-label="Fechar">{{ib:x}}</button><button class="lb-p" aria-label="Foto anterior">{{ib:caret-left}}</button><button class="lb-n" aria-label="Próxima foto">{{ib:caret-right}}</button><span class="lb-c" aria-live="polite"></span></dialog>
 <template id="rd-icons"><span data-i="clock">{{ib:clock}}</span><span data-i="doc">{{ib:file-text}}</span><span data-i="check">{{if:check-circle}}</span><span data-i="pin">{{ib:map-pin}}</span><span data-i="user">{{ib:user}}</span><span data-i="bank">{{ib:bank}}</span><span data-i="x">{{ib:x}}</span><span data-i="cal">{{ib:calendar-blank}}</span><span data-i="play">{{if:play}}</span><span data-i="ig">{{ib:instagram-logo}}</span><span data-i="prev">{{ib:caret-left}}</span><span data-i="next">{{ib:caret-right}}</span><span data-i="video">{{ib:video-camera}}</span></template>

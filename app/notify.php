@@ -28,7 +28,7 @@ function citizen_notify(int $id, string $kind): array
         $subject = 'Sua demanda ' . $code . ' foi enviada à Prefeitura';
         $kicker = 'Demanda enviada à Prefeitura';
         $lead = $hello . ' Nosso gabinete conferiu a sua demanda e a encaminhou oficialmente à Prefeitura de Nova Friburgo' .
-            ($t['department'] ? ' (' . $t['department'] . ')' : '') . '.';
+            '.';
         $more = 'A partir de agora ela aparece no Friburgo no Mapa, com um contador mostrando há quantos dias a Prefeitura foi avisada. Você pode acompanhar tudo em tempo real.';
         $btn = 'Acompanhar no Friburgo no Mapa';
         $rows = [['Protocolo', $code], ['Tipo', $cat], ['Local', $place ?: '—'], ['Enviada à Prefeitura em', $sent]];
