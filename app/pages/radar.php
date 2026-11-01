@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Friburgo no Mapa – envie sua demanda | Ve
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=1998bad8">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=3e29f12b">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -178,31 +178,41 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
     <div class="sec-hd"><h2 class="h2">Quem resolve mais?</h2></div>
     <p class="lead rd-sec-lead">Cada demanda que nosso gabinete leva à Prefeitura é encaminhada à secretaria responsável. Aqui você acompanha e compara quantas já foram resolvidas em cada uma. Quanto maior a barra verde, maior a taxa de resolução.</p>
     <div class="rd-kpis">
-      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M24,108H44v48H32a12,12,0,0,0,0,24H224a12,12,0,0,0,0-24H212V108h20a12,12,0,0,0,6.29-22.22l-104-64a12,12,0,0,0-12.58,0l-104,64A12,12,0,0,0,24,108Zm44,0H92v48H68Zm72,0v48H116V108Zm48,48H164V108h24ZM128,46.09,189.6,84H66.4ZM252,208a12,12,0,0,1-12,12H16a12,12,0,0,1,0-24H240A12,12,0,0,1,252,208Z"/></svg></span><div><b><?= (int) $dash['total'] ?></b><small>Demandas levadas à Prefeitura</small></div></div>
-      <div class="rd-kpi rd-kpi--ok"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M176.49,95.51a12,12,0,0,1,0,17l-56,56a12,12,0,0,1-17,0l-24-24a12,12,0,1,1,17-17L112,143l47.51-47.52A12,12,0,0,1,176.49,95.51ZM236,128A108,108,0,1,1,128,20,108.12,108.12,0,0,1,236,128Zm-24,0a84,84,0,1,0-84,84A84.09,84.09,0,0,0,212,128Z"/></svg></span><div><b><?= (int) $dash['solved'] ?></b><small>Resolvidas</small></div></div>
-      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,64.47l-144,144a12,12,0,1,1-17-17l144-144a12,12,0,0,1,17,17ZM47.72,104.27A40,40,0,1,1,76,116,39.72,39.72,0,0,1,47.72,104.27ZM60,76a16,16,0,1,0,4.69-11.31A15.87,15.87,0,0,0,60,76ZM220,180a40,40,0,1,1-11.72-28.29A39.71,39.71,0,0,1,220,180Zm-24,0a15.87,15.87,0,0,0-4.69-11.32h0A16,16,0,1,0,196,180Z"/></svg></span><div><b><?= (int) $dash['rate'] ?>%</b><small>Taxa de resolução</small></div></div>
-      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,44a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,44Zm0,168a72,72,0,1,1,72-72A72.08,72.08,0,0,1,128,212ZM164.49,99.51a12,12,0,0,1,0,17l-28,28a12,12,0,0,1-17-17l28-28A12,12,0,0,1,164.49,99.51ZM92,16A12,12,0,0,1,104,4h48a12,12,0,0,1,0,24H104A12,12,0,0,1,92,16Z"/></svg></span><div><b><?= $days === null ? '—' : ($days < 1 ? '<1' : (int) $days) ?><?php if ($days !== null): ?><em> <?= $days === 1 ? 'dia' : 'dias' ?></em><?php endif; ?></b><small>Tempo médio de resolução</small></div></div>
+      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M24,108H44v48H32a12,12,0,0,0,0,24H224a12,12,0,0,0,0-24H212V108h20a12,12,0,0,0,6.29-22.22l-104-64a12,12,0,0,0-12.58,0l-104,64A12,12,0,0,0,24,108Zm44,0H92v48H68Zm72,0v48H116V108Zm48,48H164V108h24ZM128,46.09,189.6,84H66.4ZM252,208a12,12,0,0,1-12,12H16a12,12,0,0,1,0-24H240A12,12,0,0,1,252,208Z"/></svg></span><div><b><span data-n="<?= (int) $dash['total'] ?>"><?= (int) $dash['total'] ?></span></b><small>Demandas levadas à Prefeitura</small></div></div>
+      <div class="rd-kpi rd-kpi--ok"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M176.49,95.51a12,12,0,0,1,0,17l-56,56a12,12,0,0,1-17,0l-24-24a12,12,0,1,1,17-17L112,143l47.51-47.52A12,12,0,0,1,176.49,95.51ZM236,128A108,108,0,1,1,128,20,108.12,108.12,0,0,1,236,128Zm-24,0a84,84,0,1,0-84,84A84.09,84.09,0,0,0,212,128Z"/></svg></span><div><b><span data-n="<?= (int) $dash['solved'] ?>"><?= (int) $dash['solved'] ?></span></b><small>Resolvidas</small></div></div>
+      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,64.47l-144,144a12,12,0,1,1-17-17l144-144a12,12,0,0,1,17,17ZM47.72,104.27A40,40,0,1,1,76,116,39.72,39.72,0,0,1,47.72,104.27ZM60,76a16,16,0,1,0,4.69-11.31A15.87,15.87,0,0,0,60,76ZM220,180a40,40,0,1,1-11.72-28.29A39.71,39.71,0,0,1,220,180Zm-24,0a15.87,15.87,0,0,0-4.69-11.32h0A16,16,0,1,0,196,180Z"/></svg></span><div><b><span data-n="<?= (int) $dash['rate'] ?>"><?= (int) $dash['rate'] ?></span>%</b><small>Taxa de resolução</small></div></div>
+      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,44a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,44Zm0,168a72,72,0,1,1,72-72A72.08,72.08,0,0,1,128,212ZM164.49,99.51a12,12,0,0,1,0,17l-28,28a12,12,0,0,1-17-17l28-28A12,12,0,0,1,164.49,99.51ZM92,16A12,12,0,0,1,104,4h48a12,12,0,0,1,0,24H104A12,12,0,0,1,92,16Z"/></svg></span><div><b><?php if ($days === null): ?>—<?php elseif ($days < 1): ?>&lt;1<?php else: ?><span data-n="<?= (int) $days ?>"><?= (int) $days ?></span><?php endif; ?><?php if ($days !== null): ?><em> <?= $days === 1 ? 'dia' : 'dias' ?></em><?php endif; ?></b><small>Tempo médio de resolução</small></div></div>
     </div>
     <div class="rd-dash">
       <article class="rd-pan rd-pan--bars">
         <h3>Taxa de resolução por secretaria</h3>
         <p class="rd-pan-sub">Da maior para a menor taxa</p>
-        <ol class="rd-sec-list">
-<?php foreach ($dash['secs'] as $s): ?>
+<?php $first = array_slice($dash['secs'], 0, 6); $rest = array_slice($dash['secs'], 6);
+      $row = function ($s) { ob_start(); ?>
           <li class="rd-sec-row">
-            <div class="rd-sec-top"><b><?= e($s['name']) ?></b><span class="rd-sec-pct"><?= (int) $s['rate'] ?>%</span></div>
+            <div class="rd-sec-top"><b><?= e($s['name']) ?></b><span class="rd-sec-pct<?= $s['rate'] ? '' : ' is-zero' ?>"><?= (int) $s['rate'] ?>%</span></div>
             <div class="rd-sec-bar" role="img" aria-label="<?= e($s['name']) ?>: <?= (int) $s['solved'] ?> de <?= (int) $s['total'] ?> resolvidas (<?= (int) $s['rate'] ?>%)"><i style="width:<?= (int) $s['rate'] ?>%"></i></div>
             <small><?= (int) $s['solved'] ?> de <?= (int) $s['total'] ?> <?= (int) $s['total'] === 1 ? 'resolvida' : 'resolvidas' ?><?= $s['avgDays'] !== null ? ($s['avgDays'] < 1 ? ' · em menos de 1 dia' : ' · média de ' . (int) $s['avgDays'] . ($s['avgDays'] === 1 ? ' dia' : ' dias')) : '' ?></small>
           </li>
-<?php endforeach; ?>
+<?php return ob_get_clean(); }; ?>
+        <ol class="rd-sec-list">
+<?php foreach ($first as $s) echo $row($s); ?>
         </ol>
+<?php if ($rest): ?>
+        <details class="rd-more">
+          <summary><span class="rd-more-a">Ver as outras <?= count($rest) ?> secretarias</span><span class="rd-more-b">Mostrar menos</span></summary>
+          <ol class="rd-sec-list">
+<?php foreach ($rest as $s) echo $row($s); ?>
+          </ol>
+        </details>
+<?php endif; ?>
         <p class="rd-pan-ft">Atualizado automaticamente</p>
       </article>
       <article class="rd-pan rd-pan--donut">
         <h3>Visão geral</h3>
         <p class="rd-pan-sub">Resolvidas × aguardando</p>
         <div class="rd-donut">
-          <svg viewBox="0 0 120 120" role="img" aria-label="<?= (int) $dash['rate'] ?>% das demandas resolvidas"><circle cx="60" cy="60" r="52" fill="none" stroke="#FE6500" stroke-width="14"/><circle cx="60" cy="60" r="52" fill="none" stroke="#16A34A" stroke-width="14" stroke-linecap="butt" stroke-dasharray="<?= round($okLen, 2) ?> <?= round($circ, 2) ?>" transform="rotate(-90 60 60)"/></svg>
+          <svg viewBox="0 0 120 120" role="img" aria-label="<?= (int) $dash['rate'] ?>% das demandas resolvidas"><defs><linearGradient id="rdGo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A3D"/><stop offset=".55" stop-color="#FE6500"/><stop offset="1" stop-color="#EE5200"/></linearGradient><linearGradient id="rdGg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4ADE80"/><stop offset="1" stop-color="#16A34A"/></linearGradient></defs><circle cx="60" cy="60" r="52" fill="none" stroke="url(#rdGo)" stroke-width="14"/><circle class="rd-ring" style="--ok:<?= round($okLen, 2) ?>px" cx="60" cy="60" r="52" fill="none" stroke="url(#rdGg)" stroke-width="14" stroke-linecap="butt" stroke-dasharray="<?= round($okLen, 2) ?> <?= round($circ, 2) ?>" transform="rotate(-90 60 60)"/></svg>
           <div class="rd-donut-c"><b><?= (int) $dash['rate'] ?>%</b><small>resolvido</small></div>
         </div>
         <p class="rd-legend"><span><i class="rd-dot rd-dot--ok"></i><?= (int) $dash['solved'] ?> resolvidas</span><span><i class="rd-dot"></i><?= (int) $dash['waiting'] ?> aguardando</span></p>
@@ -215,8 +225,9 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <?php for ($g = 0; $g <= 3; $g++): $gy = 8 + $lh - $g * $lh / 3; ?>
           <line x1="36" x2="<?= $lw ?>" y1="<?= round($gy, 1) ?>" y2="<?= round($gy, 1) ?>" stroke="#E3EAF4" stroke-width="1"/><text x="28" y="<?= round($gy + 4, 1) ?>" text-anchor="end"><?= (int) round($g * $mx / 3) ?></text>
 <?php endfor; ?>
-          <polyline points="<?= $pts('sent') ?>" fill="none" stroke="#FE6500" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-          <polyline points="<?= $pts('solved') ?>" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <defs><linearGradient id="rdLo" x1="0" x2="1" y1="0" y2="0"><stop offset="0" stop-color="#FF8A3D"/><stop offset=".6" stop-color="#FE6500"/><stop offset="1" stop-color="#EE5200"/></linearGradient></defs>
+          <polyline pathLength="1" points="<?= $pts('sent') ?>" fill="none" stroke="url(#rdLo)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline pathLength="1" points="<?= $pts('solved') ?>" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
 <?php foreach ($dash['months'] as $i => $m): ?>
           <text x="<?= round(36 + $i * ($lw - 52) / ($n - 1), 1) ?>" y="<?= $lh + 28 ?>" text-anchor="middle"><?= e($m['label']) ?></text>
 <?php endforeach; ?>
@@ -250,9 +261,9 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>window.RD_ITEMS = <?= json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
-<script src="<?= B ?>/radar.js?v=40776df6096b" defer></script>
+<script src="<?= B ?>/radar.js?v=239c6dfe096b" defer></script>
 
-<div class="ft-top on-white" aria-hidden="true">
+<div class="ft-top <?= !empty($dash) ? '' : 'on-white' ?>" aria-hidden="true">
   <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice">
     <circle class="mt-sun" cx="1080" cy="78" r="38" fill="url(#g-or)"/>
     <path d="M0 200V120l120-50 90 30 120-80 90 60 100-35 120 65 120-100 90 60 110-40 120 70 120-50 120 50 120-40v140z" fill="url(#g-m1)"/>

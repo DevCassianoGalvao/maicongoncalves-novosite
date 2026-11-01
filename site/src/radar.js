@@ -416,4 +416,21 @@
     f.src = vid.getAttribute('data-src'); f.title = 'Vídeo: como funciona o Friburgo no Mapa'; f.allow = 'autoplay; encrypted-media; picture-in-picture'; f.allowFullscreen = true; f.setAttribute('scrolling', 'no'); f.loading = 'lazy';
     vid.classList.add('is-on'); vid.innerHTML = ''; vid.appendChild(f);
   });
+  // painel de secretarias: animação de entrada ao rolar até ele (sem JS ou com "reduzir movimento" fica tudo visível)
+  var dash = $('#secretarias');
+  if (dash && 'IntersectionObserver' in window && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    dash.classList.add('rd-anim');
+    var nums = $$('[data-n]', dash);
+    nums.forEach(function (n) { n.textContent = '0'; });
+    var run = function () {
+      dash.classList.add('in');
+      nums.forEach(function (n, i) {
+        var to = +n.getAttribute('data-n'), t0 = null;
+        var step = function (t) { if (t0 === null) t0 = t; var p = Math.min(1, (t - t0) / 1100); n.textContent = Math.round(to * (1 - Math.pow(1 - p, 3))); if (p < 1) requestAnimationFrame(step); };
+        setTimeout(function () { requestAnimationFrame(step); }, 150 + i * 90);
+      });
+    };
+    var io2 = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io2.disconnect(); run(); } }, { threshold: 0.12 });
+    io2.observe(dash);
+  }
 })();
