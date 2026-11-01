@@ -92,8 +92,12 @@ function secretaria_options(?string $sel): string
     foreach (SECRETARIAS as $k => $n) $h .= '<option value="' . e($k) . '"' . ($k === $sel ? ' selected' : '') . '>' . e($n) . '</option>';
     return $h;
 }
-/** Comparativo público: por secretaria, quantas demandas já foram à Prefeitura e quantas foram resolvidas. Vazio = seção oculta. */
-function secretaria_stats(): array
+function secretaria_short(string $name): string { return preg_replace('/^(Secretaria Executiva de |Secretaria de |Secretaria da |Secretaria do )/u', '', $name); }
+/**
+ * Painel público de métricas por secretaria (só demandas já levadas à Prefeitura e com secretaria definida).
+ * Retorna [] quando não há nenhuma: a seção inteira fica oculta.
+ */
+function secretaria_dashboard(): array
 {
     $pdo = db_or_null();
     if (!$pdo) return [];
@@ -101,23 +105,41 @@ function secretaria_stats(): array
     try {
         $rows = $pdo->query("SELECT secretaria, status, published_at, resolved_at FROM tickets WHERE secretaria IS NOT NULL AND secretaria <> '' AND status IN ('publicado','resolvido') AND published_at IS NOT NULL")->fetchAll();
     } catch (Throwable $ex) { return []; }
-    $by = [];
+    $by = []; $total = 0; $solved = 0; $daysSum = 0; $sent = []; $done = [];
     foreach ($rows as $r) {
         if (!isset(SECRETARIAS[$r['secretaria']])) continue;
-        $s =& $by[$r['secretaria']];
-        if (!$s) $s = ['slug' => $r['secretaria'], 'name' => SECRETARIAS[$r['secretaria']], 'total' => 0, 'solved' => 0, 'daysSum' => 0];
-        $s['total']++;
-        if ($r['status'] === 'resolvido' && $r['resolved_at']) { $s['solved']++; $s['daysSum'] += max(0, (int) round((strtotime($r['resolved_at']) - strtotime($r['published_at'])) / 86400)); }
-        unset($s);
+        $k = $r['secretaria'];
+        if (!isset($by[$k])) $by[$k] = ['slug' => $k, 'name' => SECRETARIAS[$k], 'short' => secretaria_short(SECRETARIAS[$k]), 'total' => 0, 'solved' => 0, 'daysSum' => 0];
+        $by[$k]['total']++; $total++;
+        $sent[] = strtotime($r['published_at']);
+        if ($r['status'] === 'resolvido' && $r['resolved_at']) {
+            $d = max(0, (int) round((strtotime($r['resolved_at']) - strtotime($r['published_at'])) / 86400));
+            $by[$k]['solved']++; $by[$k]['daysSum'] += $d; $solved++; $daysSum += $d; $done[] = strtotime($r['resolved_at']);
+        }
     }
-    $out = [];
+    if (!$by) return [];
+    $secs = [];
     foreach ($by as $s) {
         $s['rate'] = (int) round($s['solved'] * 100 / $s['total']);
         $s['avgDays'] = $s['solved'] ? (int) round($s['daysSum'] / $s['solved']) : null;
-        $out[] = $s;
+        $secs[] = $s;
     }
-    usort($out, function ($a, $b) { return [$b['solved'] / $b['total'], $b['solved'], $b['total']] <=> [$a['solved'] / $a['total'], $a['solved'], $a['total']]; });
-    return $out;
+    usort($secs, function ($a, $b) { return [$b['solved'] / $b['total'], $b['solved'], $b['total']] <=> [$a['solved'] / $a['total'], $a['solved'], $a['total']]; });
+    $byVolume = $secs;
+    usort($byVolume, function ($a, $b) { return [$b['total'], $b['solved']] <=> [$a['total'], $a['solved']]; });
+    // evolução acumulada nos últimos 6 meses (enviadas à Prefeitura x resolvidas)
+    $mn = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+    $months = [];
+    for ($i = 5; $i >= 0; $i--) {
+        $first = strtotime(date('Y-m-01', strtotime("-$i month", strtotime(date('Y-m-01')))));
+        $end = strtotime('+1 month', $first);
+        $months[] = ['label' => $mn[(int) date('n', $first) - 1], 'sent' => count(array_filter($sent, function ($t) use ($end) { return $t < $end; })), 'solved' => count(array_filter($done, function ($t) use ($end) { return $t < $end; }))];
+    }
+    return [
+        'secs' => $secs, 'byVolume' => array_slice($byVolume, 0, 6), 'months' => $months,
+        'total' => $total, 'solved' => $solved, 'waiting' => $total - $solved, 'rate' => (int) round($solved * 100 / $total),
+        'avgDays' => $solved ? (int) round($daysSum / $solved) : null, 'count' => count($secs),
+    ];
 }
 
 /* ---------- atualização automática do banco ---------- */
