@@ -57,7 +57,6 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
   <div class="wrap rd-form-wrap">
     <div class="stackv rd-form-hd">
       <h2 class="h2">Enviar demanda</h2>
-      <p class="lead">Leva menos de dois minutos. Seu telefone e seu e-mail nunca aparecem no site.</p>
     </div>
     <form class="form rd-form" id="rd-form" action="/api/demandas.php" method="post" enctype="multipart/form-data" novalidate>
       <div class="fd fd--full"><span class="rd-n">1</span><label for="rd-fotos">Fotos ou vídeo do problema <small>(até 3 fotos e 1 vídeo de até 1 minuto)</small></label>
@@ -110,17 +109,9 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <section class="sec sec--mist" id="secretarias">
   <div class="wrap">
     <div class="sec-hd"><h2 class="h2">Quem resolve mais?</h2></div>
-    <p class="lead rd-sec-lead">Cada demanda que nosso gabinete leva à Prefeitura é encaminhada à secretaria responsável. Aqui você acompanha e compara quantas já foram resolvidas em cada uma. Quanto maior a barra verde, maior a taxa de resolução.</p>
-    <div class="rd-kpis">
-      <div class="rd-kpi"><span class="rd-kpi-ic">{{ib:bank}}</span><div><b><span data-n="<?= (int) $dash['total'] ?>"><?= (int) $dash['total'] ?></span></b><small>Demandas levadas à Prefeitura</small></div></div>
-      <div class="rd-kpi rd-kpi--ok"><span class="rd-kpi-ic">{{ib:check-circle}}</span><div><b><span data-n="<?= (int) $dash['solved'] ?>"><?= (int) $dash['solved'] ?></span></b><small>Resolvidas</small></div></div>
-      <div class="rd-kpi"><span class="rd-kpi-ic">{{ib:percent}}</span><div><b><span data-n="<?= (int) $dash['rate'] ?>"><?= (int) $dash['rate'] ?></span>%</b><small>Taxa de resolução</small></div></div>
-      <div class="rd-kpi"><span class="rd-kpi-ic">{{ib:timer}}</span><div><b><?php if ($days === null): ?>—<?php elseif ($days < 1): ?>&lt;1<?php else: ?><span data-n="<?= (int) $days ?>"><?= (int) $days ?></span><?php endif; ?><?php if ($days !== null): ?><em> <?= $days === 1 ? 'dia' : 'dias' ?></em><?php endif; ?></b><small>Tempo médio de resolução</small></div></div>
-    </div>
     <div class="rd-dash">
       <article class="rd-pan rd-pan--bars">
         <h3>Taxa de resolução por secretaria</h3>
-        <p class="rd-pan-sub">Da maior para a menor taxa</p>
 <?php $first = array_slice($dash['secs'], 0, 6); $rest = array_slice($dash['secs'], 6);
       $row = function ($s) { ob_start(); ?>
           <li class="rd-sec-row">

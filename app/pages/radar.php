@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Friburgo no Mapa – envie sua demanda | Ve
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=3e29f12b">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=9494ce47">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -123,7 +123,6 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
   <div class="wrap rd-form-wrap">
     <div class="stackv rd-form-hd">
       <h2 class="h2">Enviar demanda</h2>
-      <p class="lead">Leva menos de dois minutos. Seu telefone e seu e-mail nunca aparecem no site.</p>
     </div>
     <form class="form rd-form" id="rd-form" action="<?= B ?>/api/demandas.php" method="post" enctype="multipart/form-data" novalidate>
       <div class="fd fd--full"><span class="rd-n">1</span><label for="rd-fotos">Fotos ou vídeo do problema <small>(até 3 fotos e 1 vídeo de até 1 minuto)</small></label>
@@ -176,17 +175,9 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <section class="sec sec--mist" id="secretarias">
   <div class="wrap">
     <div class="sec-hd"><h2 class="h2">Quem resolve mais?</h2></div>
-    <p class="lead rd-sec-lead">Cada demanda que nosso gabinete leva à Prefeitura é encaminhada à secretaria responsável. Aqui você acompanha e compara quantas já foram resolvidas em cada uma. Quanto maior a barra verde, maior a taxa de resolução.</p>
-    <div class="rd-kpis">
-      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M24,108H44v48H32a12,12,0,0,0,0,24H224a12,12,0,0,0,0-24H212V108h20a12,12,0,0,0,6.29-22.22l-104-64a12,12,0,0,0-12.58,0l-104,64A12,12,0,0,0,24,108Zm44,0H92v48H68Zm72,0v48H116V108Zm48,48H164V108h24ZM128,46.09,189.6,84H66.4ZM252,208a12,12,0,0,1-12,12H16a12,12,0,0,1,0-24H240A12,12,0,0,1,252,208Z"/></svg></span><div><b><span data-n="<?= (int) $dash['total'] ?>"><?= (int) $dash['total'] ?></span></b><small>Demandas levadas à Prefeitura</small></div></div>
-      <div class="rd-kpi rd-kpi--ok"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M176.49,95.51a12,12,0,0,1,0,17l-56,56a12,12,0,0,1-17,0l-24-24a12,12,0,1,1,17-17L112,143l47.51-47.52A12,12,0,0,1,176.49,95.51ZM236,128A108,108,0,1,1,128,20,108.12,108.12,0,0,1,236,128Zm-24,0a84,84,0,1,0-84,84A84.09,84.09,0,0,0,212,128Z"/></svg></span><div><b><span data-n="<?= (int) $dash['solved'] ?>"><?= (int) $dash['solved'] ?></span></b><small>Resolvidas</small></div></div>
-      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208.49,64.47l-144,144a12,12,0,1,1-17-17l144-144a12,12,0,0,1,17,17ZM47.72,104.27A40,40,0,1,1,76,116,39.72,39.72,0,0,1,47.72,104.27ZM60,76a16,16,0,1,0,4.69-11.31A15.87,15.87,0,0,0,60,76ZM220,180a40,40,0,1,1-11.72-28.29A39.71,39.71,0,0,1,220,180Zm-24,0a15.87,15.87,0,0,0-4.69-11.32h0A16,16,0,1,0,196,180Z"/></svg></span><div><b><span data-n="<?= (int) $dash['rate'] ?>"><?= (int) $dash['rate'] ?></span>%</b><small>Taxa de resolução</small></div></div>
-      <div class="rd-kpi"><span class="rd-kpi-ic"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,44a96,96,0,1,0,96,96A96.11,96.11,0,0,0,128,44Zm0,168a72,72,0,1,1,72-72A72.08,72.08,0,0,1,128,212ZM164.49,99.51a12,12,0,0,1,0,17l-28,28a12,12,0,0,1-17-17l28-28A12,12,0,0,1,164.49,99.51ZM92,16A12,12,0,0,1,104,4h48a12,12,0,0,1,0,24H104A12,12,0,0,1,92,16Z"/></svg></span><div><b><?php if ($days === null): ?>—<?php elseif ($days < 1): ?>&lt;1<?php else: ?><span data-n="<?= (int) $days ?>"><?= (int) $days ?></span><?php endif; ?><?php if ($days !== null): ?><em> <?= $days === 1 ? 'dia' : 'dias' ?></em><?php endif; ?></b><small>Tempo médio de resolução</small></div></div>
-    </div>
     <div class="rd-dash">
       <article class="rd-pan rd-pan--bars">
         <h3>Taxa de resolução por secretaria</h3>
-        <p class="rd-pan-sub">Da maior para a menor taxa</p>
 <?php $first = array_slice($dash['secs'], 0, 6); $rest = array_slice($dash['secs'], 6);
       $row = function ($s) { ob_start(); ?>
           <li class="rd-sec-row">
