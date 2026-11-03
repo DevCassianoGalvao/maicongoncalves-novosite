@@ -433,4 +433,15 @@
     var io2 = new IntersectionObserver(function (es) { if (es[0].isIntersecting) { io2.disconnect(); run(); } }, { threshold: 0.12 });
     io2.observe(dash);
   }
+  // colunas: indica "arraste para o lado" só quando não cabem
+  var cols = $('.rd-cols');
+  if (cols) {
+    var fit = function () {
+      var over = cols.scrollWidth > cols.clientWidth + 2;
+      cols.classList.toggle('is-scroll', over);
+      cols.classList.toggle('is-end', over && cols.scrollLeft + cols.clientWidth >= cols.scrollWidth - 4);
+    };
+    cols.addEventListener('scroll', function () { cols.classList.add('is-moved'); fit(); }, { passive: true });
+    window.addEventListener('resize', fit); fit();
+  }
 })();

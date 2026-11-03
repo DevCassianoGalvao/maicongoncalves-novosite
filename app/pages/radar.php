@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Friburgo no Mapa – envie sua demanda | Ve
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=f175fd06">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=e18b57b8">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -229,7 +229,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
       <article class="rd-pan rd-pan--cols">
         <h3>Secretarias com mais demandas</h3>
         <p class="rd-pan-sub">Resolvidas e aguardando</p>
-        <div class="rd-cols">
+        <div class="rd-cols" tabindex="0" aria-label="Gráfico de colunas: role para o lado para ver todas">
 <?php foreach ($dash['byVolume'] as $s): ?>
           <div class="rd-col" title="<?= e($s['name']) ?>: <?= (int) $s['solved'] ?> resolvidas de <?= (int) $s['total'] ?>">
             <span class="rd-col-n"><?= (int) $s['total'] ?></span>
@@ -238,6 +238,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
           </div>
 <?php endforeach; ?>
         </div>
+        <p class="rd-cols-hint" aria-hidden="true"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M220,148v36c0,13.85-1.63,26.52-4.58,35.68a12,12,0,0,1-22.84-7.36c2.14-6.65,3.42-17.24,3.42-28.32V148a8,8,0,0,0-16,0v4a12,12,0,0,1-24,0V132a8,8,0,0,0-16,0v12a12,12,0,0,1-24,0V76a8,8,0,0,0-16,0V184a12,12,0,0,1-22.18,6.34l-18.68-30-.21-.34A8,8,0,0,0,45,167.92L70.27,209.8a12,12,0,0,1-20.56,12.39l-25.31-42-.12-.2A32,32,0,0,1,76,142.83V76a32,32,0,0,1,64,0v25a32,32,0,0,1,36.78,17A32,32,0,0,1,220,148ZM252.48,47.51l-32-32a12,12,0,0,0-17,17L215,44H172a12,12,0,0,0,0,24h43L203.51,79.51a12,12,0,1,0,17,17l32-32A12,12,0,0,0,252.48,47.51Z"/></svg>Arraste para o lado para ver todas</p>
         <p class="rd-legend"><span><i class="rd-dot rd-dot--ok"></i>Resolvidas</span><span><i class="rd-dot"></i>Aguardando</span></p>
         <p class="rd-pan-ft">Atualizado automaticamente</p>
       </article>
@@ -252,7 +253,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>window.RD_ITEMS = <?= json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
-<script src="<?= B ?>/radar.js?v=239c6dfe096b" defer></script>
+<script src="<?= B ?>/radar.js?v=30228474096b" defer></script>
 
 <div class="ft-top <?= !empty($dash) ? '' : 'on-white' ?>" aria-hidden="true">
   <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice">

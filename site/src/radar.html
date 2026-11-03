@@ -163,7 +163,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
       <article class="rd-pan rd-pan--cols">
         <h3>Secretarias com mais demandas</h3>
         <p class="rd-pan-sub">Resolvidas e aguardando</p>
-        <div class="rd-cols">
+        <div class="rd-cols" tabindex="0" aria-label="Gráfico de colunas: role para o lado para ver todas">
 <?php foreach ($dash['byVolume'] as $s): ?>
           <div class="rd-col" title="<?= e($s['name']) ?>: <?= (int) $s['solved'] ?> resolvidas de <?= (int) $s['total'] ?>">
             <span class="rd-col-n"><?= (int) $s['total'] ?></span>
@@ -172,6 +172,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
           </div>
 <?php endforeach; ?>
         </div>
+        <p class="rd-cols-hint" aria-hidden="true">{{ib:hand-swipe-right}}Arraste para o lado para ver todas</p>
         <p class="rd-legend"><span><i class="rd-dot rd-dot--ok"></i>Resolvidas</span><span><i class="rd-dot"></i>Aguardando</span></p>
         <p class="rd-pan-ft">Atualizado automaticamente</p>
       </article>
