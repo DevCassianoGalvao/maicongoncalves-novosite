@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Friburgo no Mapa – envie sua demanda | Ve
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=9494ce47">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=f175fd06">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -233,7 +233,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <?php foreach ($dash['byVolume'] as $s): ?>
           <div class="rd-col" title="<?= e($s['name']) ?>: <?= (int) $s['solved'] ?> resolvidas de <?= (int) $s['total'] ?>">
             <span class="rd-col-n"><?= (int) $s['total'] ?></span>
-            <div class="rd-col-bar" style="height:<?= round($s['total'] / $vmax * 100) ?>%"><i class="w" style="flex:<?= (int) ($s['total'] - $s['solved']) ?>"></i><i class="ok" style="flex:<?= (int) $s['solved'] ?>"></i></div>
+            <div class="rd-col-bar" style="--v:<?= round($s['total'] / $vmax * 100) ?>"><i class="w" style="flex:<?= (int) ($s['total'] - $s['solved']) ?>"></i><i class="ok" style="flex:<?= (int) $s['solved'] ?>"></i></div>
             <span class="rd-col-l"><?= e($s['short']) ?></span>
           </div>
 <?php endforeach; ?>

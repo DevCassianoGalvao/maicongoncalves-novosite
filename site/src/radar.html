@@ -167,7 +167,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <?php foreach ($dash['byVolume'] as $s): ?>
           <div class="rd-col" title="<?= e($s['name']) ?>: <?= (int) $s['solved'] ?> resolvidas de <?= (int) $s['total'] ?>">
             <span class="rd-col-n"><?= (int) $s['total'] ?></span>
-            <div class="rd-col-bar" style="height:<?= round($s['total'] / $vmax * 100) ?>%"><i class="w" style="flex:<?= (int) ($s['total'] - $s['solved']) ?>"></i><i class="ok" style="flex:<?= (int) $s['solved'] ?>"></i></div>
+            <div class="rd-col-bar" style="--v:<?= round($s['total'] / $vmax * 100) ?>"><i class="w" style="flex:<?= (int) ($s['total'] - $s['solved']) ?>"></i><i class="ok" style="flex:<?= (int) $s['solved'] ?>"></i></div>
             <span class="rd-col-l"><?= e($s['short']) ?></span>
           </div>
 <?php endforeach; ?>
