@@ -369,6 +369,68 @@ function ticket_note(int $id, string $body, ?int $userId = null): void
     q('INSERT INTO ticket_notes (ticket_id, user_id, body, created_at) VALUES (?, ?, ?, NOW())', [$id, $userId, $body]);
 }
 
+/**
+ * Busca do painel: cada palavra precisa aparecer em algum campo (nome, telefone, e-mail, bairro, rua, descrição,
+ * texto público, ofício/protocolo, tipo, secretaria, código #). "Ofício 209/2026", "of. 209", "209/26" e "#00054" funcionam.
+ * Retorna [condições, args, expressão de relevância, args da relevância]. Espera os aliases t (tickets) e c (ticket_categories).
+ */
+/** "212/26" -> "2122026" (ano com 2 dígitos vira 20xx), para achar o ofício digitado de forma abreviada. */
+function oficio_year4(string $s): string
+{
+    if (preg_match('/(\d+)\s*[\/\-.]\s*(\d{2})\s*$/', $s, $m)) return $m[1] . '20' . $m[2];
+    return preg_replace('/[^0-9]/', '', $s);
+}
+
+function ticket_search_sql(string $term): array
+{
+    $digits = function (string $col): string { return "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(LOWER($col),'/',''),'.',''),'-',''),' ',''),'º',''),'°',''),'(',''),')','')"; };
+    $fold = function (string $s): string { $s = mb_strtolower($s, 'UTF-8'); return strtr($s, ['á' => 'a', 'à' => 'a', 'â' => 'a', 'ã' => 'a', 'é' => 'e', 'ê' => 'e', 'í' => 'i', 'ó' => 'o', 'ô' => 'o', 'õ' => 'o', 'ú' => 'u', 'ü' => 'u', 'ç' => 'c']); };
+    $term = trim(preg_replace('/\s+/u', ' ', $term));
+    $conds = []; $args = []; $rank = []; $rargs = [];
+    $pnorm = $digits('t.protocol');
+    // 1) Busca explícita de ofício/protocolo: "ofício nº 209/2026", "of 209", "protocolo 123"
+    if (preg_match('/^(?:of[ií]cios?|of\.?|oficio|prot(?:ocolo)?\.?)\s*(?:n[º°o.]*\s*)?(.+)$/iu', $term, $m) && preg_match('/\d/', $m[1])) {
+        $num = $m[1];
+        $n = $fold(preg_replace('/[\s\/.\-º°()]/u', '', $num));
+        $conds[] = "(t.protocol LIKE ? OR $pnorm LIKE ? OR $pnorm LIKE ?)";
+        array_push($args, "%$num%", "%$n%", '%' . oficio_year4($num) . '%');
+        $rank[] = "($pnorm = ?) * 100 + ($pnorm LIKE ?) * 60";
+        array_push($rargs, $n, "$n%");
+        return [$conds, $args, implode(' + ', $rank), $rargs];
+    }
+    // 2) Código do atendimento: "#00054" ou "#54"
+    if (preg_match('/^#\s*0*(\d+)$/', $term, $m)) {
+        $conds[] = 't.id = ?'; $args[] = (int) $m[1];
+        return [$conds, $args, '1', []];
+    }
+    // 3) Palavras livres: todas precisam bater (busca vai afunilando)
+    $stop = ['de', 'da', 'do', 'das', 'dos', 'e', 'a', 'o', 'na', 'no', 'em', 'rua', 'r.', 'av', 'av.'];
+    $words = array_values(array_filter(explode(' ', $term), function ($w) use ($stop) { return $w !== '' && !in_array(mb_strtolower($w, 'UTF-8'), $stop, true); }));
+    if (!$words) $words = [$term];
+    foreach (array_slice($words, 0, 8) as $wd) {
+        $like = '%' . addcslashes($wd, '%_\\') . '%';
+        $or = ['t.name LIKE ?', 't.email LIKE ?', 't.neighborhood LIKE ?', 't.address LIKE ?', 't.description LIKE ?', 't.public_text LIKE ?', 't.subject LIKE ?', 't.protocol LIKE ?', 'c.name LIKE ?', 't.category LIKE ?'];
+        $a = array_fill(0, count($or), $like);
+        $num = preg_replace('/[^0-9]/', '', $wd);
+        if ($num !== '' && strlen($num) >= strlen(preg_replace('/[\s\/.\-()º°]/u', '', $wd)) - 1) { // a palavra é (quase) só número
+            $or[] = "$pnorm LIKE ?"; $a[] = "%$num%";
+            if (oficio_year4($wd) !== $num) { $or[] = "$pnorm LIKE ?"; $a[] = '%' . oficio_year4($wd) . '%'; }
+            $or[] = "REPLACE(REPLACE(REPLACE(REPLACE(t.phone,' ',''),'-',''),'(',''),')','') LIKE ?"; $a[] = "%$num%";
+            if (strlen($num) <= 6) { $or[] = 't.id = ?'; $a[] = (int) $num; }
+            $rank[] = "($pnorm = ?) * 100 + ($pnorm LIKE ?) * 60 + (t.id = ?) * 40";
+            array_push($rargs, $num, "$num%", (int) $num);
+        }
+        $fw = $fold($wd);
+        $secs = array_keys(array_filter(SECRETARIAS, function ($name) use ($fw, $fold) { return mb_strlen($fw) >= 3 && strpos($fold($name), $fw) !== false; }));
+        if ($secs) { $or[] = 't.secretaria IN (' . implode(',', array_fill(0, count($secs), '?')) . ')'; $a = array_merge($a, $secs); }
+        $conds[] = '(' . implode(' OR ', $or) . ')';
+        $args = array_merge($args, $a);
+        $rank[] = '(t.name LIKE ?) * 10 + (t.neighborhood LIKE ?) * 8 + (c.name LIKE ?) * 6';
+        array_push($rargs, $like, $like, $like);
+    }
+    return [$conds, $args, $rank ? implode(' + ', $rank) : '0', $rargs];
+}
+
 function ticket_code(int $id): string { return '#' . str_pad((string) $id, 5, '0', STR_PAD_LEFT); }
 
 /** "23 dias", "5 horas", "1 dia". */
