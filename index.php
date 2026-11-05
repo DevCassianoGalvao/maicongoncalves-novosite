@@ -26,6 +26,7 @@ $pages = [
     'descobrindo-talentos' => 'peneira',
     'noticias'             => 'noticias',
     'friburgo-no-mapa'     => 'radar',
+    'fiscalize-voce'       => 'fiscalize',
     'privacidade'          => 'privacidade',
     'descadastrar'         => 'descadastrar',
 ];
@@ -59,6 +60,19 @@ if ($slug === 'friburgo-no-mapa') {
         'image' => abs_url('/img/og-friburgo-no-mapa.jpg') . '?v=2', 'image_w' => 1200, 'image_h' => 630,
         'image_alt' => 'Friburgo no Mapa: envie sua demanda e acompanhe em tempo real',
         'description' => 'Envie sua demanda ao nosso gabinete. Nós conferimos, encaminhamos oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.',
+    ];
+}
+if ($slug === 'fiscalize-voce') {
+    // Página oculta até o gabinete liberar (flag pagina_publica no banco). Oculta: 404 para quem não está logado no painel.
+    require_once ROOT . '/app/fiscalize.php';
+    require_once ROOT . '/app/auth.php';
+    $fvOpen = fv_is_public();
+    if (!$fvOpen && (!db_or_null() || auth_user() === null)) render_404();
+    header('Cache-Control: ' . ($fvOpen ? 'public, max-age=300' : 'no-store'));
+    $meta = [
+        'title' => 'Fiscalize Você – compras da Prefeitura de Nova Friburgo | Vereador Maicon Gonçalves',
+        'description' => 'Veja as compras da Prefeitura de Nova Friburgo, com o valor de cada unidade calculado a partir dos dados públicos do PNCP.',
+        'robots' => $fvOpen ? '' : 'noindex, nofollow',
     ];
 }
 if (isset($pages[$slug])) {

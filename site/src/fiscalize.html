@@ -1,0 +1,224 @@
+<?php
+// Fiscalize Você: filtros pela URL (GET). Só compras com status "publicado".
+$fvPer = (string) ($_GET['periodo'] ?? '7');
+$fvDe = null; $fvAte = null;
+switch ($fvPer) {
+    case '30': $fvDe = date('Y-m-d', strtotime('-30 days')); break;
+    case '90': $fvDe = date('Y-m-d', strtotime('-90 days')); break;
+    case 'ano': $fvDe = date('Y-01-01'); break;
+    case 'tudo': break;
+    case 'pers':
+        $fvDe = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['de'] ?? '')) ? $_GET['de'] : null;
+        $fvAte = preg_match('/^\d{4}-\d{2}-\d{2}$/', (string) ($_GET['ate'] ?? '')) ? $_GET['ate'] : null;
+        break;
+    default: $fvPer = '7'; $fvDe = date('Y-m-d', strtotime('-7 days'));
+}
+$fvF = ['de' => $fvDe, 'ate' => $fvAte, 'sec' => mb_substr(trim((string) ($_GET['secretaria'] ?? '')), 0, 20), 'q' => mb_substr(trim((string) ($_GET['busca'] ?? '')), 0, 80),
+    'sit' => in_array($_GET['situacao'] ?? '', ['acima', 'sem'], true) ? $_GET['situacao'] : '', 'ord' => in_array($_GET['ordem'] ?? '', ['total', 'unitario'], true) ? $_GET['ordem'] : 'recentes'];
+$fvItems = fv_public_items($fvF);
+$fvSecs = q("SELECT DISTINCT secretaria FROM fv_compras WHERE status = 'publicado'")->fetchAll(PDO::FETCH_COLUMN);
+usort($fvSecs, function ($a, $b) { return strcmp(fv_fold(fv_secretaria_name($a)), fv_fold(fv_secretaria_name($b))); });
+// resumo (reage aos filtros)
+$fvTotal = 0.0; $fvCompras = []; $fvAcima = 0; $fvSem = 0;
+foreach ($fvItems as $it) {
+    $fvTotal += (float) $it['valor_total_item'];
+    $k = $it['compra_id'];
+    if (!isset($fvCompras[$k])) $fvCompras[$k] = ['v' => 0.0, 'sec' => $it['secretaria'], 'obj' => $it['objeto']];
+    $fvCompras[$k]['v'] += (float) $it['valor_total_item'];
+    if (in_array($it['situacao'], ['acima', 'muito_acima'], true)) $fvAcima++;
+    if (in_array($it['situacao'], ['sem_referencia', 'revisar'], true)) $fvSem++;
+}
+$fvMaior = null;
+foreach ($fvCompras as $c) if (!$fvMaior || $c['v'] > $fvMaior['v']) $fvMaior = $c;
+$fvUpd = fv_cfg('ultima_lista');
+$fvPage = max(1, (int) ($_GET['p'] ?? 1));
+$fvPerPage = 24;
+$fvShown = array_slice($fvItems, 0, $fvPage * $fvPerPage);
+$fvQs = function (array $over) { $q = array_filter(array_merge(array_intersect_key($_GET, array_flip(['periodo', 'de', 'ate', 'secretaria', 'busca', 'situacao', 'ordem'])), $over), 'strlen'); return url('/fiscalize-voce/') . ($q ? '?' . http_build_query($q) : ''); };
+$fvLimA = (int) fv_cfg('limite_acima'); $fvLimM = (int) fv_cfg('limite_muito_acima');
+$fvWa = preg_replace('/\D/', '', (string) (settings_all()['whatsapp'] ?? ''));
+?>
+<main class="fv">
+<section class="ph-hero ph-hero--c fv-hero">
+  <div class="hero-bg" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span></div>
+  <div class="wrap ph-hero-in">
+    <span class="chip" data-h><i></i>Dinheiro público em Nova Friburgo</span>
+    <h1 class="h1" data-split><span class="scr">Fiscalize Você{{scr}}</span></h1>
+    <p class="lead" data-h>Veja as compras da Prefeitura de Nova Friburgo, com o valor de cada unidade.</p>
+    <p class="fv-upd" data-h>{{i:clock-counter-clockwise}}Dados atualizados em <?= $fvUpd ? date('d/m/Y \à\s H\hi', strtotime($fvUpd)) : '—' ?>, a partir do Portal Nacional de Contratações Públicas.</p>
+  </div>
+</section>
+
+<section class="sec fv-filters-sec" id="filtros">
+  <div class="wrap">
+<?php if (!fv_is_public()): ?>    <p class="fv-preview" role="status">{{ib:eye-slash}}<span>Prévia: esta página está <b>oculta</b>. Só quem está logado no painel consegue ver. Para abrir ao público: Painel › Compras da Prefeitura › Configurações.</span></p>
+<?php endif; ?>
+    <form class="fv-filters" method="get" action="/fiscalize-voce/#compras" id="fv-form">
+      <div class="fd fv-f-busca"><label for="fv-busca">Buscar</label><input type="search" id="fv-busca" name="busca" value="<?= e($fvF['q']) ?>" placeholder="Ex.: teclado, merenda, gasolina"></div>
+      <div class="fd"><label for="fv-periodo">Período</label><select id="fv-periodo" name="periodo">
+        <?php foreach (['7' => 'Últimos 7 dias', '30' => 'Últimos 30 dias', '90' => 'Últimos 90 dias', 'ano' => 'Este ano', 'tudo' => 'Tudo', 'pers' => 'Escolher datas'] as $k => $l): ?><option value="<?= $k ?>"<?= $fvPer === (string) $k ? ' selected' : '' ?>><?= $l ?></option><?php endforeach; ?>
+      </select></div>
+      <div class="fd fv-f-datas"<?= $fvPer === 'pers' ? '' : ' hidden' ?>><label>De / até</label><div class="fv-dates"><input type="date" name="de" value="<?= e($fvDe ?? '') ?>" aria-label="De"><input type="date" name="ate" value="<?= e($fvAte ?? '') ?>" aria-label="Até"></div></div>
+      <div class="fd"><label for="fv-sec">Secretaria</label><select id="fv-sec" name="secretaria"><option value="">Todas</option>
+        <?php foreach ($fvSecs as $s): ?><option value="<?= e($s ?: '_') ?>"<?= $fvF['sec'] === ($s ?: '_') ? ' selected' : '' ?>><?= e($s ? secretaria_short(fv_secretaria_name($s)) : 'Várias / não identificada') ?></option><?php endforeach; ?>
+      </select></div>
+      <div class="fd"><label for="fv-sit">Situação</label><select id="fv-sit" name="situacao"><option value="">Todas</option><option value="acima"<?= $fvF['sit'] === 'acima' ? ' selected' : '' ?>>Acima da referência</option><option value="sem"<?= $fvF['sit'] === 'sem' ? ' selected' : '' ?>>Sem referência</option></select></div>
+      <div class="fd"><label for="fv-ord">Ordenar</label><select id="fv-ord" name="ordem"><option value="recentes">Mais recentes</option><option value="total"<?= $fvF['ord'] === 'total' ? ' selected' : '' ?>>Maior valor total</option><option value="unitario"<?= $fvF['ord'] === 'unitario' ? ' selected' : '' ?>>Maior valor por unidade</option></select></div>
+      <button class="btn btn--orange btn--sm fv-go" type="submit"><span>Filtrar</span><span class="btn-i">{{ib:funnel}}{{ib:funnel}}</span></button>
+    </form>
+
+    <div class="fv-kpis" aria-label="Resumo do período">
+      <div class="fv-kpi fv-kpi--big"><small>Valor total das compras</small><b><?= fv_money($fvTotal) ?></b><span>valor homologado no período</span></div>
+      <div class="fv-kpi"><small>Compras</small><b><?= count($fvCompras) ?></b><span><?= count($fvItems) ?> <?= count($fvItems) === 1 ? 'item' : 'itens' ?></span></div>
+      <div class="fv-kpi"><small>Maior compra</small><b><?= $fvMaior ? fv_money($fvMaior['v'], false) : '—' ?></b><span><?= $fvMaior ? e(fv_secretaria_label($fvMaior['sec'])) : 'nenhuma no período' ?></span></div>
+      <div class="fv-kpi fv-kpi--warn"><small>Acima da referência</small><b><?= $fvAcima ?></b><span><?= $fvAcima === 1 ? 'item' : 'itens' ?> com valor por unidade mais alto</span></div>
+      <div class="fv-kpi"><small>Sem referência</small><b><?= $fvSem ?></b><span>sem preço para comparar ainda</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="sec fv-list-sec" id="compras">
+  <div class="wrap">
+<?php if (!$fvItems): ?>
+    <div class="fv-empty">
+      <p><b>Nenhuma compra encontrada com esses filtros.</b></p>
+      <p>As compras aparecem aqui depois que nossa equipe confere os números com o processo oficial.</p>
+<?php if ($fvPer !== 'tudo'): ?>      <a class="btn btn--white btn--sm" href="<?= e($fvQs(['periodo' => 'tudo', 'de' => '', 'ate' => '', 'p' => ''])) ?>#compras"><span>Ver todo o período</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a><?php endif; ?>
+    </div>
+<?php else: ?>
+    <ul class="fv-cards">
+<?php foreach ($fvShown as $it):
+    $sit = $it['situacao'];
+    $dif = $it['diferenca_percentual'] !== null ? (float) $it['diferenca_percentual'] : null;
+    $mod = mb_strtolower((string) $it['modalidade'], 'UTF-8'); ?>
+      <li class="fv-card fv-card--<?= e($sit) ?>">
+        <div class="fv-card-hd">
+          <span class="fv-sec"><?= e(fv_secretaria_label($it['secretaria'])) ?></span>
+          <span class="fv-date"><?= date_short($it['data_compra']) ?></span>
+        </div>
+        <h3 class="fv-title"><?= e(fv_qty($it['quantidade'])) ?> × <?= e($it['titulo_simples'] ?: fv_short_title((string) $it['descricao'])) ?></h3>
+        <div class="fv-unit"><small>Valor por unidade</small><b><?= fv_money($it['valor_unitario']) ?></b><span><?= e(fv_per($it['unidade_medida'])) ?></span></div>
+        <dl class="fv-facts">
+          <div><dt>Valor total</dt><dd><?= fv_money($it['valor_total_item']) ?></dd></div>
+          <div><dt>Quantidade</dt><dd><?= e(fv_qty_unit($it['quantidade'], $it['unidade_medida'])) ?></dd></div>
+        </dl>
+        <div class="fv-sit">
+<?php if (in_array($sit, ['acima', 'muito_acima'], true)): ?>
+          <span class="fv-tag fv-tag--<?= $sit === 'muito_acima' ? 'hot' : 'warm' ?>"><?= $sit === 'muito_acima' ? 'Muito acima' : 'Acima' ?> da referência (+<?= number_format($dif, 0, ',', '.') ?>%)</span>
+<?php elseif ($sit === 'normal'): ?>
+          <span class="fv-tag fv-tag--ok">Perto da referência (<?= ($dif > 0 ? '+' : '') . number_format((float) $dif, 0, ',', '.') ?>%)</span>
+<?php else: ?>
+          <span class="fv-tag">Sem referência para comparar</span>
+<?php endif; ?>
+<?php if ($it['referencia_valor'] !== null): ?>
+          <p>Referência: <b><?= fv_money($it['referencia_valor']) ?></b> <?= e(fv_per($it['unidade_medida'])) ?> · <?= $it['referencia_url'] ? '<a href="' . e($it['referencia_url']) . '" target="_blank" rel="noopener nofollow">' . e($it['referencia_fonte']) . '</a>' : e($it['referencia_fonte']) ?></p>
+<?php endif; ?>
+        </div>
+<?php if ($it['srp']): ?>
+        <p class="fv-note"><abbr title="<?= e(FV_TERMOS['registro de preços']) ?>">Registro de preços</abbr>: é o valor máximo que pode ser comprado no período, conforme a necessidade. Não é o valor já pago.</p>
+<?php endif; ?>
+<?php if ($it['esclarecimento']): ?>
+        <div class="fv-esc"><b>Esclarecimento da Prefeitura<?= $it['esclarecimento_data'] ? ' (' . date_short($it['esclarecimento_data']) . ')' : '' ?>:</b> <?= nl2br(e($it['esclarecimento'])) ?></div>
+<?php endif; ?>
+        <p class="fv-forn">Fornecedor: <b><?= e($it['fornecedor_nome'] ?: '—') ?></b><?= $it['fornecedor_cnpj'] ? ' · CNPJ ' . e(fv_cnpj($it['fornecedor_cnpj'])) : '' ?></p>
+        <div class="fv-card-ft">
+          <a class="fv-src" href="<?= e($it['url_fonte']) ?>" target="_blank" rel="noopener nofollow">{{ib:arrow-square-out}}Ver fonte oficial</a>
+          <small>Processo <?= e($it['numero_processo'] ?: '—') ?> · <?php $t = null; foreach (['pregão', 'dispensa', 'inexigibilidade'] as $k) if (strpos($mod, $k) !== false) $t = $k; ?><?= $t ? '<abbr title="' . e(FV_TERMOS[$t]) . '">' . e($it['modalidade']) . '</abbr>' : e($it['modalidade']) ?></small>
+        </div>
+        <button class="fv-err-btn" type="button" data-item="<?= (int) $it['id'] ?>" data-label="<?= e(fv_qty($it['quantidade']) . ' × ' . ($it['titulo_simples'] ?: fv_short_title((string) $it['descricao'])) . ' — processo ' . ($it['numero_processo'] ?: $it['pncp_id'])) ?>">Encontrou algum erro?</button>
+      </li>
+<?php endforeach; ?>
+    </ul>
+<?php if (count($fvItems) > count($fvShown)): ?>
+    <div class="fv-more"><a class="btn btn--white" href="<?= e($fvQs(['p' => $fvPage + 1])) ?>#compras"><span>Ver mais compras (<?= count($fvItems) - count($fvShown) ?>)</span><span class="btn-i">{{ib:caret-down}}{{ib:caret-down}}</span></a></div>
+<?php endif; ?>
+<?php endif; ?>
+  </div>
+</section>
+
+<section class="sec fv-about" id="como-ler">
+  <div class="wrap fv-about-in">
+    <div>
+      <h2 class="h2">Como ler esta página</h2>
+      <ul class="fv-howto">
+        <li><b>Valor por unidade</b> = valor total do item ÷ quantidade. O cálculo é automático e conferido pela nossa equipe antes de aparecer aqui.</li>
+        <li><b>Referência</b> é o preço de comparação, sempre com a fonte: outras compras da própria Prefeitura, compras públicas de outros órgãos ou o Painel de Preços do governo federal.</li>
+        <li><b>Acima da referência</b> aparece a partir de +<?= $fvLimA ?>%; <b>muito acima</b>, a partir de +<?= $fvLimM ?>%.</li>
+        <li><b>Sem referência para comparar</b>: ainda não temos um preço confiável para comparar esse item.</li>
+      </ul>
+      <dl class="fv-gloss">
+<?php foreach (FV_TERMOS as $t => $d): ?>
+        <div><dt><?= e(mb_strtoupper(mb_substr($t, 0, 1), 'UTF-8') . mb_substr($t, 1)) ?></dt><dd><?= e($d) ?></dd></div>
+<?php endforeach; ?>
+      </dl>
+    </div>
+    <div class="fv-disclaimer">
+      <p>Dados públicos do <a href="https://pncp.gov.br" target="_blank" rel="noopener">PNCP</a> e do Portal da Transparência da Prefeitura. Os cálculos são feitos automaticamente pela equipe do gabinete.</p>
+      <p><b>Um valor por unidade acima da referência não prova irregularidade.</b> Ele indica que vale perguntar. Quem apura é o Tribunal de Contas do Estado, o Ministério Público e a Câmara Municipal.</p>
+      <p>A Prefeitura pode enviar esclarecimentos a qualquer momento; eles aparecem junto da compra, com a data.</p>
+      <button class="btn btn--orange fv-err-btn" type="button" data-item="" data-label=""><span>Encontrou algum erro? Fale com o gabinete</span><span class="btn-i">{{ib:chat-circle-text}}{{ib:chat-circle-text}}</span></button>
+    </div>
+  </div>
+</section>
+
+<dialog class="fv-dlg" id="fv-dlg" aria-labelledby="fv-dlg-t">
+  <form class="fv-dlg-in" id="fv-err-form" method="dialog">
+    <button class="fv-dlg-x" type="button" aria-label="Fechar" data-close>{{ib:x}}</button>
+    <h2 id="fv-dlg-t">Encontrou algum erro?</h2>
+    <p class="fv-dlg-item" id="fv-dlg-item" hidden></p>
+    <p>Conte o que está errado. Nossa equipe confere com o processo oficial e corrige.</p>
+    <input type="hidden" name="item" value="">
+    <input type="hidden" name="t" value="">
+    <div class="fv-hp" aria-hidden="true"><label>Site <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+    <div class="fd"><label for="fv-e-nome">Seu nome</label><input id="fv-e-nome" name="nome" maxlength="120" autocomplete="name"></div>
+    <div class="fd"><label for="fv-e-contato">E-mail ou WhatsApp</label><input id="fv-e-contato" name="contato" maxlength="190" required autocomplete="email"></div>
+    <div class="fd"><label for="fv-e-msg">O que está errado?</label><textarea id="fv-e-msg" name="mensagem" maxlength="1500" required></textarea></div>
+    <p class="fv-dlg-msg" id="fv-dlg-msg" role="alert" hidden></p>
+    <div class="fv-dlg-acts">
+      <button class="btn btn--orange" type="submit"><span>Enviar</span><span class="btn-i">{{ib:paper-plane-tilt}}{{ib:paper-plane-tilt}}</span></button>
+<?php if ($fvWa): ?>      <a class="fv-wa" href="https://wa.me/<?= e($fvWa) ?>?text=<?= rawurlencode('Olá! Vi um possível erro no Fiscalize Você: ') ?>" target="_blank" rel="noopener">ou fale pelo WhatsApp</a><?php endif; ?>
+    </div>
+  </form>
+</dialog>
+</main>
+<script>
+(function () {
+  var f = document.getElementById('fv-form');
+  if (f) {
+    var per = f.querySelector('[name=periodo]'), datas = f.querySelector('.fv-f-datas');
+    f.querySelectorAll('select').forEach(function (s) {
+      s.addEventListener('change', function () {
+        if (s === per) { datas.hidden = per.value !== 'pers'; if (per.value === 'pers') return; }
+        f.submit();
+      });
+    });
+    datas.querySelectorAll('input').forEach(function (i) { i.addEventListener('change', function () { if (datas.querySelector('[name=de]').value) f.submit(); }); });
+  }
+  var dlg = document.getElementById('fv-dlg'), form = document.getElementById('fv-err-form'), msg = document.getElementById('fv-dlg-msg'), lab = document.getElementById('fv-dlg-item');
+  if (!dlg || !dlg.showModal) return;
+  document.querySelectorAll('.fv-err-btn').forEach(function (b) {
+    b.addEventListener('click', function () {
+      form.reset(); msg.hidden = true;
+      form.item.value = b.getAttribute('data-item') || '';
+      form.t.value = Date.now();
+      var l = b.getAttribute('data-label'); lab.hidden = !l; lab.textContent = l || '';
+      dlg.showModal();
+    });
+  });
+  dlg.querySelector('[data-close]').addEventListener('click', function () { dlg.close(); });
+  dlg.addEventListener('click', function (ev) { if (ev.target === dlg) dlg.close(); });
+  form.addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    var btn = form.querySelector('button[type=submit]'); btn.disabled = true;
+    fetch(document.documentElement.getAttribute('data-base') + '/api/fiscalize-erro.php', { method: 'POST', body: new FormData(form), credentials: 'same-origin' })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        msg.hidden = false; msg.className = 'fv-dlg-msg' + (j.ok ? ' is-ok' : '');
+        msg.textContent = j.ok ? 'Recebemos, obrigado! Vamos conferir com o processo oficial.' : (j.error || 'Não foi possível enviar agora.');
+        if (j.ok) setTimeout(function () { dlg.close(); }, 2600);
+      })
+      .catch(function () { msg.hidden = false; msg.className = 'fv-dlg-msg'; msg.textContent = 'Sem conexão no momento. Tente de novo.'; })
+      .then(function () { btn.disabled = false; });
+  });
+})();
+</script>

@@ -94,3 +94,12 @@ O site tem um servidor MCP em `/mcp/<MCP_SECRET>` (Streamable HTTP). O projeto "
 Foto: o Claude pede um link de upload (15 min, uso único), envia a foto com `curl -X PUT` e usa o `media_id` em `criar_post`.
 A foto é salva sem EXIF/GPS, com 1688 px de largura, em WebP. Artigos nascem como **rascunho**, com um `url_preview` (7 dias, sem login).
 Auditoria: tabela `mcp_log` (ferramenta, parâmetros sem texto do corpo, IP, resultado, id do artigo). Limites: 60 chamadas/min e 10 imagens/hora por IP.
+
+## Fiscalize Você (compras da Prefeitura)
+
+- Página `/fiscalize-voce/`, oculta por padrão: dá 404 para visitantes até marcar "Página aberta ao público" em Painel › Compras da Prefeitura › Configurações (flag `pagina_publica` na tabela `fv_config`). Fora do menu e do sitemap; `noindex` enquanto oculta.
+- Dados: API de consulta do PNCP, filtrada pelo IBGE 3303401 (Nova Friburgo) e pelo CNPJ 28.606.630/0001-23 (Município). O valor por unidade vem do resultado homologado de cada item (valor total ÷ quantidade).
+- Coleta: `php tools/fiscalize-coletar.php` (cron diário no cPanel; opções `--lista`, `--tempo=280`, `--recalcular`). O botão "Coletar agora" do painel roda ~50 s.
+- Curadoria: compras entram como "nova"; só as "publicadas" aparecem. Itens corrigidos à mão não são sobrescritos pela coleta.
+- Referências: cadastradas no painel (com fonte e link) ou, para materiais, a mediana do mesmo item em outras compras da Prefeitura (sempre marcada para conferir).
+- Código: `app/fiscalize.php`, `admin/fiscalize*.php`, `site/src/fiscalize.html`, `api/fiscalize-erro.php`.
