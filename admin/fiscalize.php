@@ -14,9 +14,9 @@ if (is_post()) {
         $lock = fopen(storage() . '/fiscalize.lock', 'c');
         if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) { flash('err', 'Já tem uma coleta rodando. Espere alguns minutos.'); redirect(url('/admin/fiscalize.php')); }
         try {
-            $r = fv_sync(50, !empty($_POST['lista']));
+            $r = fv_sync(25, !empty($_POST['lista']));
             flash($r['erros'] ? 'err' : 'ok', "Coleta: {$r['novas']} compras novas, {$r['atualizadas']} atualizadas, {$r['itens']} resultados de itens. " .
-                ($r['pendentes'] ? "Ainda faltam {$r['pendentes']} compras na fila (a coleta automática termina, ou clique de novo)." : 'Fila vazia.') .
+                ($r['lista'] ? '' : 'A lista do PNCP ainda está sendo lida (continua de onde parou). ') . ($r['pendentes'] ? "Faltam buscar os itens de {$r['pendentes']} compras: a coleta automática termina, ou clique de novo." : 'Fila vazia.') .
                 ($r['erros'] ? ' Erros: ' . count($r['erros']) . ' (veja o registro em Configurações).' : ''));
         } catch (Throwable $ex) { flash('err', 'A coleta falhou: ' . $ex->getMessage()); }
         redirect(url('/admin/fiscalize.php'));
@@ -74,7 +74,7 @@ if (is_post()) {
 $st = (string) ($_GET['st'] ?? 'novo');
 $term = trim((string) ($_GET['q'] ?? ''));
 $sec = (string) ($_GET['sec'] ?? '');
-$comValor = ($_GET['tudo'] ?? '') !== '1';
+$comValor = ($_GET['res'] ?? '') === '1';
 $page = max(1, (int) ($_GET['p'] ?? 1));
 $per = 30;
 
@@ -108,7 +108,7 @@ $secsUsed = q('SELECT secretaria, COUNT(*) n FROM fv_compras GROUP BY secretaria
 
 function fvq(array $over): string
 {
-    $q = array_filter(array_merge(['st' => $_GET['st'] ?? '', 'q' => $_GET['q'] ?? '', 'sec' => $_GET['sec'] ?? '', 'tudo' => $_GET['tudo'] ?? ''], $over), 'strlen');
+    $q = array_filter(array_merge(['st' => $_GET['st'] ?? '', 'q' => $_GET['q'] ?? '', 'sec' => $_GET['sec'] ?? '', 'res' => $_GET['res'] ?? ''], $over), 'strlen');
     return url('/admin/fiscalize.php') . ($q ? '?' . http_build_query($q) : '');
 }
 
@@ -201,7 +201,7 @@ admin_head('Fiscalize Você', 'fv');
       <option value="<?= e($s['secretaria'] ?: '_') ?>"<?= $sec === ($s['secretaria'] ?: '_') ? ' selected' : '' ?>><?= e($s['secretaria'] ? secretaria_short(fv_secretaria_name($s['secretaria'])) : 'Sem secretaria identificada') ?> (<?= (int) $s['n'] ?>)</option>
 <?php endforeach; ?>
     </select>
-    <label class="check small"><input type="checkbox" name="tudo" value="1"<?= $comValor ? '' : ' checked' ?> onchange="this.form.submit()"> Mostrar também as sem resultado</label>
+    <label class="check small"><input type="checkbox" name="res" value="1"<?= $comValor ? ' checked' : '' ?> onchange="this.form.submit()"> Só com valor homologado</label>
     <button class="btn btn--ghost" type="submit"><?= icon('magnifying-glass') ?>Buscar</button>
   </form>
 <?php if (!$rows): ?>
@@ -221,7 +221,7 @@ admin_head('Fiscalize Você', 'fv');
         <td><a class="t" href="<?= e($link) ?>"><?= e(str_limit((string) $c['objeto'], 120)) ?></a>
           <div class="small muted"><?= e($c['modalidade']) ?> · proc. <?= e($c['numero_processo'] ?: '—') ?><?= $c['srp'] ? ' · <span class="badge">registro de preços</span>' : '' ?> <span class="badge <?= ['novo' => 'badge--new', 'revisado' => 'badge--sched', 'publicado' => 'badge--pub', 'ocultado' => ''][$c['status']] ?>"><?= FV_STATUS[$c['status']] ?></span></div></td>
         <td class="hide-m small"><?= $c['secretaria'] ? e(secretaria_short(fv_secretaria_name($c['secretaria']))) : '<span class="muted">não identificada</span>' ?></td>
-        <td><b><?= fv_money($c['valor_total']) ?></b><?php if ((float) $c['valor_estimado'] > 0): ?><div class="small muted">estimado <?= fv_money($c['valor_estimado'], false) ?></div><?php endif; ?></td>
+        <td><?= $c['valor_total'] !== null ? '<b>' . fv_money($c['valor_total']) . '</b>' : '<span class="small muted">' . ($c['itens_sync'] === 'pendente' ? 'buscando itens…' : 'sem resultado ainda') . '</span>' ?><?php if ((float) $c['valor_estimado'] > 0): ?><div class="small muted">estimado <?= fv_money($c['valor_estimado'], false) ?></div><?php endif; ?></td>
         <td class="hide-m small"><?= (int) $c['n_res'] ?> com resultado<?= $c['itens_sync'] === 'pendente' ? ' <span class="badge badge--draft">na fila</span>' : ($c['itens_sync'] === 'erro' ? ' <span class="badge" style="color:var(--err)">erro</span>' : '') ?>
           <?= $c['n_acima'] ? '<br><span class="badge badge--new">' . (int) $c['n_acima'] . ' acima da ref.</span>' : '' ?><?= $c['n_aviso'] ? ' <span class="badge badge--draft">' . (int) $c['n_aviso'] . ' p/ conferir</span>' : '' ?></td>
         <td class="hide-m small muted"><?= $c['data_homologacao'] ? 'homol. ' . date_short($c['data_homologacao']) : 'publ. ' . date_short($c['data_publicacao']) ?></td>

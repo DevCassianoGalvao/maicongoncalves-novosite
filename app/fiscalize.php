@@ -15,7 +15,7 @@ const FV_CFG_DEFAULTS = [
     'pagina_publica' => '0', 'limite_acima' => '20', 'limite_muito_acima' => '50',
     'ibge_municipio' => '3303401', // Nova Friburgo (3303500 é Nova Iguaçu)
     'orgaos_cnpj' => '28606630000123', // Município de Nova Friburgo (Prefeitura). Separe outros CNPJs por vírgula.
-    'coleta_desde' => '2025-01-01', 'ultima_coleta' => '', 'ultima_lista' => '',
+    'coleta_desde' => '2025-01-01', 'ultima_coleta' => '', 'ultima_lista' => '', 'lista_cursor' => '',
 ];
 // Modalidades da Lei 14.133 no PNCP (1 a 13)
 const FV_MODALIDADES = [6 => 'Pregão eletrônico', 8 => 'Dispensa', 9 => 'Inexigibilidade', 4 => 'Concorrência eletrônica', 5 => 'Concorrência presencial', 7 => 'Pregão presencial',
@@ -96,17 +96,18 @@ function fv_tables(): void
 
 function fv_cfg(string $k): string
 {
-    static $cache = null;
-    if ($cache === null) {
-        $cache = FV_CFG_DEFAULTS;
-        try { fv_tables(); foreach (q('SELECT chave, valor FROM fv_config')->fetchAll() as $r) $cache[$r['chave']] = (string) $r['valor']; } catch (Throwable $ex) {}
+    if (!isset($GLOBALS['fv_cfg_cache'])) {
+        $GLOBALS['fv_cfg_cache'] = FV_CFG_DEFAULTS;
+        try { fv_tables(); foreach (q('SELECT chave, valor FROM fv_config')->fetchAll() as $r) $GLOBALS['fv_cfg_cache'][$r['chave']] = (string) $r['valor']; } catch (Throwable $ex) {}
     }
-    return $cache[$k] ?? '';
+    return $GLOBALS['fv_cfg_cache'][$k] ?? '';
 }
 function fv_cfg_set(string $k, string $v): void
 {
     fv_tables();
     q('INSERT INTO fv_config (chave, valor) VALUES (?, ?) ON DUPLICATE KEY UPDATE valor = VALUES(valor)', [$k, $v]);
+    fv_cfg($k);
+    $GLOBALS['fv_cfg_cache'][$k] = $v;
 }
 /** Página aberta ao público? (flag no banco; muda sem novo deploy) */
 function fv_is_public(): bool
@@ -227,7 +228,7 @@ function fv_http(string $url, int $tries = 2)
     $err = '';
     for ($i = 0; $i < $tries; $i++) {
         $ch = curl_init($url);
-        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 40, CURLOPT_CONNECTTIMEOUT => 10, CURLOPT_FOLLOWLOCATION => true,
+        curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 20, CURLOPT_CONNECTTIMEOUT => 8, CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTPHEADER => ['Accept: application/json'], CURLOPT_USERAGENT => 'FiscalizeVoce/1.0 (+https://maicongoncalves.com.br)']);
         $body = curl_exec($ch);
         $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -263,32 +264,44 @@ function fv_sync(int $budget = 280, bool $forceList = false, ?callable $say = nu
     $orgaos = array_filter(array_map(function ($x) { return preg_replace('/\D/', '', $x); }, explode(',', fv_cfg('orgaos_cnpj'))));
     $ibge = preg_replace('/\D/', '', fv_cfg('ibge_municipio'));
 
-    // 1) lista de contratações atualizadas no período
+    // 1) lista de contratações atualizadas no período. Guarda o ponto onde parou (lista_cursor) para continuar na próxima execução.
     $last = fv_cfg('ultima_lista');
-    if ($forceList || $last === '' || strtotime($last) < time() - 20 * 3600) {
-        $from = fv_cfg('ultima_coleta') !== '' ? date('Y-m-d', strtotime(fv_cfg('ultima_coleta') . ' -3 days')) : fv_cfg('coleta_desde');
-        $to = date('Y-m-d');
-        $complete = true;
-        for ($a = strtotime($from); $a <= strtotime($to) && $complete; $a = strtotime('+1 day', $b)) {
-            $b = min(strtotime('+364 days', $a), strtotime($to));
-            foreach (FV_MODALIDADES as $mod => $mname) {
-                for ($pg = 1; $pg <= 200; $pg++) {
-                    if ($left() < 15) { $complete = false; break 2; }
-                    $url = 'https://pncp.gov.br/api/consulta/v1/contratacoes/atualizacao?' . http_build_query(['dataInicial' => date('Ymd', $a), 'dataFinal' => date('Ymd', $b),
-                        'codigoModalidadeContratacao' => $mod, 'codigoMunicipioIbge' => $ibge, 'pagina' => $pg, 'tamanhoPagina' => 50]);
-                    try { $j = fv_http($url); } catch (Throwable $ex) { $out['erros'][] = $ex->getMessage(); break; }
-                    foreach (($j['data'] ?? []) as $c) {
-                        if (!in_array((string) ($c['orgaoEntidade']['cnpj'] ?? ''), $orgaos, true)) continue;
-                        $r = fv_upsert_compra($c);
-                        if ($r === 'nova') $out['novas']++; elseif ($r === 'atualizada') $out['atualizadas']++;
-                    }
-                    if ($pg >= (int) ($j['totalPaginas'] ?? 0)) break;
+    $cur = json_decode(fv_cfg('lista_cursor'), true);
+    if (is_array($cur) || $forceList || $last === '' || strtotime($last) < time() - 20 * 3600) {
+        if (!is_array($cur) || $forceList) {
+            $from = fv_cfg('ultima_coleta') !== '' ? date('Y-m-d', strtotime(fv_cfg('ultima_coleta') . ' -3 days')) : fv_cfg('coleta_desde');
+            $cur = ['from' => $from, 'to' => date('Y-m-d'), 'a' => $from, 'm' => 0, 'pg' => 1];
+        }
+        $mods = array_keys(FV_MODALIDADES);
+        $listBudget = $budget * 0.6; // o resto do tempo fica para os itens
+        $complete = false;
+        while (true) {
+            if (microtime(true) - $t0 > $listBudget) break;
+            $a = strtotime($cur['a']);
+            if ($a > strtotime($cur['to'])) { $complete = true; break; }
+            $b = min(strtotime('+364 days', $a), strtotime($cur['to']));
+            $url = 'https://pncp.gov.br/api/consulta/v1/contratacoes/atualizacao?' . http_build_query(['dataInicial' => date('Ymd', $a), 'dataFinal' => date('Ymd', $b),
+                'codigoModalidadeContratacao' => $mods[$cur['m']], 'codigoMunicipioIbge' => $ibge, 'pagina' => $cur['pg'], 'tamanhoPagina' => 50]);
+            $pages = 0;
+            try {
+                $j = fv_http($url);
+                foreach (($j['data'] ?? []) as $c) {
+                    if (!in_array((string) ($c['orgaoEntidade']['cnpj'] ?? ''), $orgaos, true)) continue;
+                    $r = fv_upsert_compra($c);
+                    if ($r === 'nova') $out['novas']++; elseif ($r === 'atualizada') $out['atualizadas']++;
                 }
-            }
+                $pages = (int) ($j['totalPaginas'] ?? 0);
+            } catch (Throwable $ex) { $out['erros'][] = $ex->getMessage(); }
+            // avança: próxima página, próxima modalidade ou próximo período de até 1 ano
+            if ($cur['pg'] < $pages) $cur['pg']++;
+            elseif ($cur['m'] < count($mods) - 1) { $cur['m']++; $cur['pg'] = 1; }
+            else { $cur['a'] = date('Y-m-d', strtotime('+1 day', $b)); $cur['m'] = 0; $cur['pg'] = 1; }
+            fv_cfg_set('lista_cursor', json_encode($cur));
         }
         if ($complete) {
+            fv_cfg_set('lista_cursor', '');
             fv_cfg_set('ultima_lista', date('Y-m-d H:i:s'));
-            fv_cfg_set('ultima_coleta', $to);
+            fv_cfg_set('ultima_coleta', $cur['to']);
             $out['lista'] = true;
         }
         $say("lista: {$out['novas']} novas, {$out['atualizadas']} atualizadas" . ($complete ? '' : ' (parcial, continua na próxima)'));
@@ -296,7 +309,7 @@ function fv_sync(int $budget = 280, bool $forceList = false, ?callable $say = nu
 
     // 2) itens e resultados das compras pendentes (as mais recentes primeiro)
     foreach (q("SELECT * FROM fv_compras WHERE itens_sync = 'pendente' ORDER BY data_publicacao DESC, id DESC")->fetchAll() as $c) {
-        if ($left() < 20) break;
+        if ($left() < 6) break;
         try {
             $n = fv_sync_itens($c, $left);
             if ($n === null) break; // acabou o tempo no meio: continua depois
@@ -359,7 +372,7 @@ function fv_sync_itens(array $c, callable $left): ?int
     $seen = [];
     foreach ($itens as $it) {
         if (empty($it['temResultado'])) continue;
-        if ($left() < 8) return null;
+        if ($left() < 4) return null;
         $res = fv_http("$base/itens/{$it['numeroItem']}/resultados");
         foreach ($res as $r) {
             if (!empty($r['dataCancelamento'])) continue;
