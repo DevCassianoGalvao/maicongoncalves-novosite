@@ -95,6 +95,16 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
       <span class="rd-done-i">{{if:check-circle}}</span>
       <h3 class="h3">Recebemos sua demanda!</h3>
       <p>Protocolo <b id="rd-code"></b>. Nossa equipe vai analisar e falar com você pelo WhatsApp. Quando o pedido for levado à Prefeitura, ele aparece no mapa e você recebe um aviso por e-mail.</p>
+      <div class="rd-tell">
+        <span class="rd-tell-i">{{ib:bell-ringing}}</span>
+        <div>
+          <b>Foi resolvido? Avise a gente!</b>
+          <p>Nem sempre a Prefeitura nos informa quando resolve. Se o problema for consertado, mande uma mensagem com o seu protocolo. Assim a demanda fica verde no mapa e o acompanhamento fica certo para todo mundo.</p>
+<?php $rdWa = preg_replace('/\D+/', '', S('whatsapp')); if ($rdWa): ?>
+          <a class="rd-tell-wa" id="rd-tell-wa" href="https://wa.me/<?= e($rdWa) ?>" data-wa="https://wa.me/<?= e($rdWa) ?>" target="_blank" rel="noopener">{{ib:whatsapp-logo}}Avisar pelo WhatsApp</a>
+<?php endif; ?>
+        </div>
+      </div>
       <button type="button" class="btn btn--line btn--sm" id="rd-again"><span>Enviar outra demanda</span><span class="btn-i">{{ib:plus}}{{ib:plus}}</span></button>
     </div>
   </div>

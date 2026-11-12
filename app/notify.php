@@ -42,6 +42,26 @@ function citizen_notify(int $id, string $kind): array
         $rows = [['Protocolo', $code], ['Tipo', $cat], ['Local', $place ?: '—'], ['Resolvida em', $t['resolved_at'] ? date('d/m/Y', strtotime($t['resolved_at'])) : date('d/m/Y')]];
     }
 
+    // pedido para o cidadão avisar quando resolver (a Prefeitura nem sempre informa o gabinete)
+    $waNum = preg_replace('/\D+/', '', S('whatsapp'));
+    if ($kind === 'publicado') {
+        $askT = 'Foi resolvido? Avise a gente!';
+        $askP = 'Nem sempre a Prefeitura nos informa quando resolve. Quando o problema for consertado, responda este e-mail ou mande uma mensagem com o protocolo ' . $code . '. Assim a demanda fica verde no mapa e o acompanhamento fica certo para todo mundo.';
+        $askMsg = 'Olá! A minha demanda ' . $code . ' do Friburgo no Mapa foi resolvida.';
+        $askBtn = 'Avisar pelo WhatsApp';
+    } else {
+        $askT = 'O problema voltou ou não foi resolvido de verdade?';
+        $askP = 'Se o conserto não ficou bom ou o problema voltou, responda este e-mail ou mande uma mensagem com o protocolo ' . $code . '. A gente cobra de novo.';
+        $askMsg = 'Olá! A minha demanda ' . $code . ' do Friburgo no Mapa ainda não foi resolvida de verdade.';
+        $askBtn = 'Falar pelo WhatsApp';
+    }
+    $askWa = $waNum ? 'https://wa.me/' . $waNum . '?text=' . rawurlencode($askMsg) : '';
+    $askHtml = '<div style="background:#fff;padding:4px 22px 18px"><div style="background:#FFF4EB;border:1.5px solid #FFD3B3;border-radius:14px;padding:16px 18px">
+      <div style="font-size:16px;font-weight:700;color:#0F1B3A">' . e($askT) . '</div>
+      <p style="font-size:14px;line-height:1.6;color:#5B4636;margin:6px 0 0">' . e($askP) . '</p>' .
+      ($askWa ? '<a href="' . e($askWa) . '" style="display:inline-block;margin-top:12px;padding:10px 18px;border-radius:999px;background:#16A34A;color:#fff;text-decoration:none;font-weight:700;font-size:14px">' . e($askBtn) . '</a>' : '') .
+    '</div></div>';
+
     $tr = '';
     foreach ($rows as [$k, $v]) {
         $tr .= '<tr><td style="padding:10px 14px;border-bottom:1px solid #E3EAF4;color:#5B6884;font-size:13px;font-weight:700;width:40%;vertical-align:top">' . e($k) .
@@ -59,7 +79,7 @@ function citizen_notify(int $id, string $kind): array
     <p style="font-size:16px;line-height:1.6;color:#0F1B3A;margin:0 0 12px">' . e($lead) . '</p>
     <p style="font-size:15px;line-height:1.6;color:#3B4763;margin:0">' . e($more) . '</p>
   </div>
-  <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%;background:#fff;border-collapse:collapse">' . $tr . '</table>
+  <table role="presentation" cellspacing="0" cellpadding="0" style="width:100%;background:#fff;border-collapse:collapse">' . $tr . '</table>' . $askHtml . '
   <div style="background:#fff;border-radius:0 0 16px 16px;padding:20px 22px 24px">
     <a href="' . e($track) . '" style="display:inline-block;padding:13px 22px;border-radius:999px;background:' . $accent . ';color:#fff;text-decoration:none;font-weight:700">' . e($btn) . '</a>
     <p style="color:#5B6884;font-size:13px;line-height:1.6;margin:18px 0 0">Dúvidas? Responda este e-mail' . ($wa ? ' ou <a href="' . e($wa) . '" style="color:#0144C9">fale com a equipe pelo WhatsApp</a>' : '') . '.</p>
@@ -68,6 +88,7 @@ function citizen_notify(int $id, string $kind): array
 </div></body></html>';
     $text = strtoupper($kicker) . "\n\n$lead\n\n$more\n\n";
     foreach ($rows as [$k, $v]) $text .= "$k: $v\n";
+    $text .= "\n$askT\n$askP\n" . ($askWa ? "$askBtn: $askWa\n" : '');
     $text .= "\n$btn: $track\n";
 
     $from = (string) env('PUBLIC_FROM_EMAIL', '') ?: (string) env('MAIL_FROM_EMAIL', '');

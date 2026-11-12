@@ -395,6 +395,8 @@
     }).then(function (j) {
       if (!j.ok) { say(j.error || 'Não foi possível enviar.'); if (j.field) { var f = $('[name="' + j.field + '"]', form); if (f) f.classList.add('is-bad'); } return; }
       $('#rd-code').textContent = j.code;
+      var tw = $('#rd-tell-wa');
+      if (tw) tw.href = tw.getAttribute('data-wa') + '?text=' + encodeURIComponent('Olá! A minha demanda ' + j.code + ' do Friburgo no Mapa foi resolvida.');
       form.hidden = true; $('#rd-done').hidden = false;
       $('#rd-done').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }).catch(function () { say('Sem conexão no momento. Verifique a internet e tente de novo.'); })
