@@ -397,11 +397,26 @@
       $('#rd-code').textContent = j.code;
       var tw = $('#rd-tell-wa');
       if (tw) tw.href = tw.getAttribute('data-wa') + '?text=' + encodeURIComponent('Olá! A minha demanda ' + j.code + ' do Friburgo no Mapa foi resolvida.');
+      var hadMail = !!(form.querySelector('[name=email]') && form.querySelector('[name=email]').value.trim());
       form.hidden = true; $('#rd-done').hidden = false;
       $('#rd-done').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      // pop-up: a pessoa não volta mais a esta tela, então o pedido de "avise quando resolver" precisa ficar bem visível agora
+      var pop = $('#rd-pop');
+      if (pop && pop.showModal) {
+        $('#rd-pop-code').textContent = j.code;
+        var pw = $('#rd-pop-wa');
+        if (pw) pw.href = pw.getAttribute('data-wa') + '?text=' + encodeURIComponent('Olá! Enviei a demanda ' + j.code + ' pelo Friburgo no Mapa. Quando o problema for resolvido, eu aviso por aqui.');
+        $('#rd-pop-mail').hidden = !hadMail;
+        setTimeout(function () { try { pop.showModal(); } catch (e) {} }, 450);
+      }
     }).catch(function () { say('Sem conexão no momento. Verifique a internet e tente de novo.'); })
       .then(function () { send.classList.remove('is-busy'); $('span', send).textContent = 'ENVIAR DEMANDA'; });
   });
+  var popEl = $('#rd-pop');
+  if (popEl) {
+    $$('[data-pop-close]', popEl).forEach(function (b) { b.addEventListener('click', function () { popEl.close(); }); });
+    popEl.addEventListener('click', function (ev) { if (ev.target === popEl) popEl.close(); });
+  }
   $('#rd-again').addEventListener('click', function () {
     form.reset(); photos = []; if (vid && vid.posterUrl) URL.revokeObjectURL(vid.posterUrl); vid = null; draw(); msg.hidden = true; ruaAuto = false; $('#rd-t').value = Date.now();
     $$('#rd-lat,#rd-lng,#rd-acc,#rd-addr,#rd-manual', form).forEach(function (i) { i.value = ''; });

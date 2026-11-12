@@ -191,6 +191,27 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
   </div>
 </section>
 <?php endif; ?>
+<dialog class="rd-pop" id="rd-pop" aria-labelledby="rd-pop-t">
+  <div class="rd-pop-in">
+    <button type="button" class="rd-pop-x" aria-label="Fechar" data-pop-close>{{ib:x}}</button>
+    <span class="rd-pop-ok">{{if:check-circle}}</span>
+    <h2 id="rd-pop-t">Demanda enviada!</h2>
+    <p class="rd-pop-code">Seu protocolo: <b id="rd-pop-code"></b></p>
+    <div class="rd-pop-ask">
+      <span class="rd-tell-i">{{ib:bell-ringing}}</span>
+      <div>
+        <b>Um pedido importante: quando o problema for resolvido, avise a gente.</b>
+        <p>Nem sempre a Prefeitura nos informa quando resolve. Com o seu aviso, a demanda fica verde no mapa e o acompanhamento fica certo para todo mundo.</p>
+      </div>
+    </div>
+<?php if ($rdWa = preg_replace('/\D+/', '', S('whatsapp'))): ?>
+    <a class="rd-pop-wa" id="rd-pop-wa" href="https://wa.me/<?= e($rdWa) ?>" data-wa="https://wa.me/<?= e($rdWa) ?>" target="_blank" rel="noopener">{{ib:whatsapp-logo}}Salvar a conversa no WhatsApp</a>
+    <p class="rd-pop-hint">Mande a mensagem com o protocolo agora. Quando resolver, é só responder nessa mesma conversa.</p>
+<?php endif; ?>
+    <p class="rd-pop-hint" id="rd-pop-mail" hidden>Os próximos avisos sobre a sua demanda também chegam no seu e-mail.</p>
+    <button type="button" class="btn btn--line btn--sm rd-pop-close" data-pop-close autofocus><span>Entendi</span><span class="btn-i">{{ib:check}}{{ib:check}}</span></button>
+  </div>
+</dialog>
 </main>
 <dialog class="lb" id="rd-lb" aria-label="Foto ampliada"><div class="lb-in"><img src="" alt=""></div><button class="lb-x" aria-label="Fechar">{{ib:x}}</button><button class="lb-p" aria-label="Foto anterior">{{ib:caret-left}}</button><button class="lb-n" aria-label="Próxima foto">{{ib:caret-right}}</button><span class="lb-c" aria-live="polite"></span></dialog>
 <template id="rd-icons"><span data-i="clock">{{ib:clock}}</span><span data-i="doc">{{ib:file-text}}</span><span data-i="check">{{if:check-circle}}</span><span data-i="pin">{{ib:map-pin}}</span><span data-i="user">{{ib:user}}</span><span data-i="bank">{{ib:bank}}</span><span data-i="x">{{ib:x}}</span><span data-i="cal">{{ib:calendar-blank}}</span><span data-i="play">{{if:play}}</span><span data-i="ig">{{ib:instagram-logo}}</span><span data-i="prev">{{ib:caret-left}}</span><span data-i="next">{{ib:caret-right}}</span><span data-i="video">{{ib:video-camera}}</span></template>
