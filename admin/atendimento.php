@@ -242,6 +242,18 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
       <p class="small muted" style="margin:0 0 12px"><?= e($t['phone']) ?><?= $t['birth'] ? ' · nasc. ' . e($t['birth']) : '' ?><?php if ($t['email']): ?><br><a href="mailto:<?= e($t['email']) ?>"><?= e($t['email']) ?></a><?php endif; ?></p>
 <?php if ($wa): ?><a class="btn btn--block" style="background:#1FAF5A" href="<?= e($wa) ?>" target="_blank" rel="noopener"><?= icon('whatsapp') ?>Conversar no WhatsApp</a><?php endif; ?>
     </div>
+    <form method="post" class="card" id="oficio" action="<?= e(url('/admin/oficio.php')) ?>">
+      <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int) $id ?>">
+      <h2>Gerar ofício</h2>
+      <p class="hint small muted" style="margin:-6px 0 12px">Baixa o ofício em Word, já com texto formal, endereço, data e <?= count($photos) ? count($photos) . ' foto' . (count($photos) > 1 ? 's' : '') : 'sem fotos' ?>. Revise, salve em PDF e assine.</p>
+      <div class="fd"><label for="of-sec">Para quem</label><select id="of-sec" name="secretaria" required><?= str_replace('<option value="">Ainda não definida</option>', '<option value="">Escolha…</option>', secretaria_options($t['secretaria'] ?? null)) ?></select></div>
+      <div class="fd"><label>Tratamento</label>
+        <div class="row" style="gap:16px"><label class="check small"><input type="radio" name="g" value="m" checked> Senhor</label><label class="check small"><input type="radio" name="g" value="f"> Senhora</label></div>
+        <p class="hint">Vira "Senhor Secretário", "Senhora Subprefeita" etc.</p></div>
+      <div class="fd"><label for="of-num">Nº do ofício <small class="muted">(opcional)</small></label><input type="text" id="of-num" name="numero" inputmode="numeric" maxlength="6" placeholder="Em branco = preencher no Word"><p class="hint">Se ficar em branco, sai destacado em amarelo no documento.</p></div>
+      <div class="fd"><label for="of-comp">Motivo com suas palavras <small class="muted">(opcional)</small></label><textarea id="of-comp" name="complemento" rows="3" placeholder="Ex.: os brinquedos encontram-se quebrados e enferrujados, apresentando riscos à segurança das crianças"></textarea><p class="hint">Se vazio, usa o texto padrão do tipo "<?= e(cat_label($t['category'])) ?>".</p></div>
+      <button class="btn btn--or btn--block" type="submit"><?= icon('download-simple') ?>Gerar ofício (Word)</button>
+    </form>
     <form method="post" class="card">
       <?= csrf_field() ?><input type="hidden" name="do" value="save">
       <h2>Encaminhamento</h2>
