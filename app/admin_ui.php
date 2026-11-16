@@ -126,6 +126,13 @@ function admin_foot(string $extra = ''): void
       if (!b || b.classList.contains('link-btn')) return;
       b.classList.add('is-saving'); // não usa "disabled" para o valor do botão continuar indo no envio
       var label = b.lastChild && b.lastChild.nodeType === 3 ? b.lastChild : null;
+      if (f.hasAttribute('data-download')) {
+        // download (ex.: ofício em Word): a página não muda, então o botão volta ao normal sozinho
+        var orig = label ? label.textContent : '';
+        if (label) label.textContent = 'Gerando…';
+        setTimeout(function () { b.classList.remove('is-saving'); if (label) label.textContent = orig; }, 2500);
+        return;
+      }
       if (label) label.textContent = /exclu/i.test(label.textContent) ? 'Excluindo…' : /public|atualiz/i.test(label.textContent) ? 'Publicando…' : 'Salvando…';
     });
   });

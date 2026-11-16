@@ -242,7 +242,7 @@ admin_head('Atendimento ' . ticket_code($id), 'tickets', $leaflet);
       <p class="small muted" style="margin:0 0 12px"><?= e($t['phone']) ?><?= $t['birth'] ? ' · nasc. ' . e($t['birth']) : '' ?><?php if ($t['email']): ?><br><a href="mailto:<?= e($t['email']) ?>"><?= e($t['email']) ?></a><?php endif; ?></p>
 <?php if ($wa): ?><a class="btn btn--block" style="background:#1FAF5A" href="<?= e($wa) ?>" target="_blank" rel="noopener"><?= icon('whatsapp') ?>Conversar no WhatsApp</a><?php endif; ?>
     </div>
-    <form method="post" class="card" id="oficio" action="<?= e(url('/admin/oficio.php')) ?>">
+    <form method="post" class="card" id="oficio" data-download action="<?= e(url('/admin/oficio.php')) ?>">
       <?= csrf_field() ?><input type="hidden" name="id" value="<?= (int) $id ?>">
       <h2>Gerar ofício</h2>
       <p class="hint small muted" style="margin:-6px 0 12px">Baixa o ofício em Word, já com texto formal, endereço, data e <?= count($photos) ? count($photos) . ' foto' . (count($photos) > 1 ? 's' : '') : 'sem fotos' ?>. Revise, salve em PDF e assine.</p>
