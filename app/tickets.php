@@ -83,6 +83,8 @@ const SECRETARIAS = [
     'gabinete' => 'Gabinete do Prefeito',
     'controladoria' => 'Controladoria-Geral do Município',
     'procuradoria' => 'Procuradoria-Geral do Município',
+    'sub_olaria' => 'Subprefeitura - Olaria',
+    'sub_conselheiro' => 'Subprefeitura - Conselheiro',
 ];
 function secretaria_name(?string $slug): string { return $slug && isset(SECRETARIAS[$slug]) ? SECRETARIAS[$slug] : ''; }
 /** Campo de seleção para o painel (só equipe). */
