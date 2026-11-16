@@ -117,8 +117,18 @@ function oficio_img(string $rid, int $id, int $cx, int $cy, string $name): strin
         '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' .
         '<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="' . $id . '" name="' . ox($name) . '"/><pic:cNvPicPr/></pic:nvPicPr>' .
         '<pic:blipFill><a:blip r:embed="' . $rid . '"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>' .
-        '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' . $cx . '" cy="' . $cy . '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic>' .
+        '<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="' . $cx . '" cy="' . $cy . '"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln><a:noFill/></a:ln></pic:spPr></pic:pic>' .
         '</a:graphicData></a:graphic></wp:inline></w:drawing></w:r>';
+}
+/** Imagem flutuante à esquerda do parágrafo, com o texto correndo à direita (substitui a tabela, que aparecia com linhas no LibreOffice). */
+function oficio_img_float(string $rid, int $id, int $cx, int $cy, string $name): string
+{
+    $inline = oficio_img($rid, $id, $cx, $cy, $name);
+    $graphic = substr($inline, strpos($inline, '<a:graphic '), strrpos($inline, '</a:graphic>') + 12 - strpos($inline, '<a:graphic '));
+    return '<w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="228600" simplePos="0" relativeHeight="251658240" behindDoc="0" locked="0" layoutInCell="1" allowOverlap="0">' .
+        '<wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="column"><wp:posOffset>0</wp:posOffset></wp:positionH><wp:positionV relativeFrom="paragraph"><wp:posOffset>0</wp:posOffset></wp:positionV>' .
+        '<wp:extent cx="' . $cx . '" cy="' . $cy . '"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapSquare wrapText="right"/><wp:docPr id="' . $id . '" name="' . ox($name) . '"/>' .
+        '<wp:cNvGraphicFramePr><a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/></wp:cNvGraphicFramePr>' . $graphic . '</wp:anchor></w:drawing></w:r>';
 }
 /** Tamanho em EMU para caber em maxW x maxH polegadas mantendo a proporção. */
 function oficio_fit(int $w, int $h, float $maxW, float $maxH): array
@@ -185,14 +195,17 @@ function oficio_docx(array $t, array $o): string
     $body .= oficio_p($runs($p2), ['jc' => 'both']);
     $body .= oficio_p(oficio_run('Atenciosamente,'), ['before' => 120, 'after' => 360, 'keep' => true]);
 
-    // foto 1 à esquerda, data e espaço da assinatura à direita (tabela sem bordas)
-    $data = oficio_p(oficio_run(oficio_data($o['data'])), ['jc' => 'right', 'after' => 0]);
-    $left = oficio_p('', ['after' => 0]);
-    if ($fotos) { [$cx, $cy] = oficio_fit($fotos[0]['w'], $fotos[0]['h'], 2.7, 3.0); $left = oficio_p(oficio_img($fotos[0]['rid'], 10, $cx, $cy, 'Foto 1'), ['after' => 0]); }
-    $cell = function (int $w, string $content, string $valign) { return '<w:tc><w:tcPr><w:tcW w:w="' . $w . '" w:type="dxa"/><w:vAlign w:val="' . $valign . '"/></w:tcPr>' . $content . '</w:tc>'; };
-    $body .= '<w:tbl><w:tblPr><w:tblW w:w="9000" w:type="dxa"/><w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders><w:tblLayout w:type="fixed"/><w:tblLook w:val="0000"/></w:tblPr>' .
-        '<w:tblGrid><w:gridCol w:w="4200"/><w:gridCol w:w="4800"/></w:tblGrid><w:tr><w:trPr><w:cantSplit/></w:trPr>' .
-        $cell(4200, $left, 'top') . $cell(4800, $data . oficio_p('', ['after' => 1400]), 'center') . '</w:tr></w:tbl>';
+    // foto 1 flutuando à esquerda; data à direita, mais ou menos na metade da altura da foto, e espaço para a assinatura
+    $dataP = oficio_run(oficio_data($o['data']));
+    if ($fotos) {
+        [$cx, $cy] = oficio_fit($fotos[0]['w'], $fotos[0]['h'], 2.7, 3.0);
+        $hTw = (int) round($cy / 914400 * 1440);
+        $body .= oficio_p(oficio_img_float($fotos[0]['rid'], 10, $cx, $cy, 'Foto 1'), ['after' => 0, 'keep' => true]);
+        $body .= oficio_p($dataP, ['jc' => 'right', 'before' => max(0, (int) ($hTw / 2) - 300), 'after' => 0]);
+        $body .= oficio_p('', ['after' => max(0, (int) ($hTw / 2))]);
+    } else {
+        $body .= oficio_p($dataP, ['jc' => 'right', 'before' => 600, 'after' => 1400]);
+    }
 
     // anexo com as demais fotos
     if (count($fotos) > 1) {
