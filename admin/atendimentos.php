@@ -88,7 +88,7 @@ admin_head('Atendimentos', 'tickets');
     $what = $t['source'] !== 'contato' ? cat_label($t['category']) : ($t['subject'] ?: 'Contato');
     $link = url('/admin/atendimento.php?id=' . $t['id']); ?>
       <tr data-href="<?= e($link) ?>" tabindex="0"<?= $t['status'] === 'novo' ? ' class="is-new"' : '' ?>>
-        <td class="hide-m" style="width:76px"><?php if ($ph): ?><img class="thumb" src="<?= e(ticket_photo_url((int) $t['id'], $ph[0]['src'])) ?>" alt="" loading="lazy"><?php else: ?><div class="thumb thumb--ic"><?= icon($t['source'] !== 'contato' ? 'map-pin' : 'envelope-simple') ?></div><?php endif; ?></td>
+        <td class="hide-m" style="width:76px"><?php if ($ph): ?><img class="thumb" src="<?= e(ticket_photo_url((int) $t['id'], $ph[0]['src']) . '&s=s') ?>" alt="" loading="lazy"><?php else: ?><div class="thumb thumb--ic"><?= icon($t['source'] !== 'contato' ? 'map-pin' : 'envelope-simple') ?></div><?php endif; ?></td>
         <td><a class="t" href="<?= e($link) ?>"><?= e($what) ?></a> <span class="small muted"><?= ticket_code((int) $t['id']) ?></span><?php if (!empty($t['protocol'])): ?> <span class="badge badge--of"><?= e(oficio_label((string) $t['protocol'])) ?></span><?php endif; ?>
           <div class="small muted"><?= e($t['neighborhood'] ?: ($t['address'] ?: '—')) ?><?= !empty($t['secretaria']) ? ' · ' . e(secretaria_short(secretaria_name($t['secretaria']))) : '' ?> · <span class="badge badge--src"><?= ['mapa' => 'Site', 'painel' => 'Painel', 'contato' => 'Contato'][$t['source']] ?? 'Site' ?></span></div></td>
         <td class="hide-m"><?= e($t['name'] ?: 'Sem nome') ?><div class="small muted"><?= e($t['phone']) ?></div></td>

@@ -302,3 +302,16 @@ select{-webkit-appearance:none;appearance:none;padding-right:42px!important;curs
 .ab-adm-tipo .check{display:flex;align-items:center;gap:8px;font-weight:600}
 .ab-adm-tipo input[type=text],.ab-adm-tipo input:not([type]){font-size:13px;padding:7px 10px}
 .ab-adm-tipo:not(.is-on) input:not([type=checkbox]){display:none}
+/* Armazenamento e backup */
+.bk-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.bk-kpis .card.bk-kpi{display:grid;gap:4px;margin:0;align-content:start}.bk-kpi small{font-size:12.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.bk-kpi b{font-size:26px;line-height:1.1}.bk-kpi span{font-size:13px;color:var(--muted)}
+.bk-bars{display:grid;gap:8px}
+.bk-bar{display:grid;grid-template-columns:52px 1fr 76px;align-items:center;gap:10px;font-size:13px}
+.bk-bar i{display:block;height:14px;border-radius:999px;background:linear-gradient(90deg,#FF8A3D,#FE6500)}
+.bk-bar b{text-align:right;font-weight:700}
+.bk-steps{padding-left:20px;display:grid;gap:8px;line-height:1.5}
+.bk-uri{display:inline-block;margin-top:4px;padding:4px 8px;border-radius:8px;background:#F1F4F9;word-break:break-all}
+.bk-log{list-style:none;margin:0;padding:0;display:grid;gap:10px;font-size:13.5px}
+.bk-log li{padding-left:12px;border-left:3px solid #16A34A}.bk-log li.err{border-color:var(--err)}
+@media (max-width:1000px){.bk-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}

@@ -17,6 +17,20 @@ $belongs = $t && (strpos((string) $t['photos'], $needle) !== false || strpos((st
 $public = $t && in_array($t['status'], ['publicado', 'resolvido'], true);
 if (!$belongs || (!$public && !auth_user())) { http_response_code(404); exit; }
 
+// miniatura (?s=s 320 px | ?s=m 720 px): gerada uma vez e guardada em storage/demandas/_thumbs/
+$sz = ['s' => 320, 'm' => 720][$_GET['s'] ?? ''] ?? 0;
+if ($sz && !$isVideo) {
+    $th = storage('demandas') . '/_thumbs/' . $sz . '/' . preg_replace('/\.(jpg|webp)$/', '.webp', $src);
+    if (!is_file($th) || filemtime($th) < filemtime($file)) {
+        try {
+            require_once ROOT . '/app/images.php';
+            if (!is_dir(dirname($th))) @mkdir(dirname($th), 0775, true);
+            $im = img_fit(img_open($file), $sz);
+            if (function_exists('imagewebp') && @imagewebp($im, $th . '.tmp', 78)) @rename($th . '.tmp', $th);
+        } catch (Throwable $ex) {}
+    }
+    if (is_file($th)) $file = $th;
+}
 $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 $type = ['webp' => 'image/webp', 'jpg' => 'image/jpeg', 'mp4' => 'video/mp4', 'mov' => 'video/quicktime', 'webm' => 'video/webm'][$ext] ?? 'application/octet-stream';
 $size = filesize($file);

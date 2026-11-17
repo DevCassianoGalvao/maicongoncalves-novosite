@@ -50,6 +50,7 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
         'Sistema' => is_admin($u) ? [
             'users' => ['/admin/usuarios.php', 'users', 'Usuários'],
             'settings' => ['/admin/configuracoes.php', 'gear-six', 'Configurações'],
+            'bk' => ['/admin/backup.php', 'hard-drives', 'Armazenamento e backup'],
             'account' => ['/admin/conta.php', 'user-circle', 'Minha conta'],
         ] : ['account' => ['/admin/conta.php', 'user-circle', 'Minha conta']],
     ];

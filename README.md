@@ -112,3 +112,15 @@ Auditoria: tabela `mcp_log` (ferramenta, parâmetros sem texto do corpo, IP, res
 - "Sua instituição quer participar?" cria um rascunho e um atendimento no painel. Cliques no WhatsApp são contados por instituição.
 - As 6 instituições de exemplo (fictícias, imagens em `img/amigos-exemplo/`) são criadas na primeira vez que as tabelas são criadas; apague em Configurações antes de lançar.
 - Código: `app/amigos.php`, `admin/amigos*.php`, `site/src/amigos*.html`, `api/amigos-*.php`.
+
+## Armazenamento e backup (Painel › Sistema › Armazenamento e backup)
+
+- **Miniaturas:** `api/foto.php?...&s=s` (320 px) e `&s=m` (720 px) geram e guardam miniaturas em `storage/demandas/_thumbs/`. O mapa e o painel usam as miniaturas; a foto inteira só abre ao ampliar.
+- **Vídeos:** comprimidos no celular (960 px, ~1 Mbps, até 60 s). Se o navegador não conseguir comprimir, o limite do envio sem compressão é 15 MB.
+- **Backup semanal só deste site** (`app/backup.php`, `tools/backup.php`):
+  - banco inteiro exportado em SQL → `banco-AAAA-MM-DD_HHMMSS.zip` (ficam os 8 últimos no Drive e 2 no servidor, em `storage/backup/`);
+  - fotos e vídeos incrementais → `arquivos-…-parteN.zip` (até ~400 MB cada; só o que é novo desde o último backup, controlado por `storage/backup/manifesto.json`);
+  - com senha definida no painel, os .zip saem criptografados (AES-256, abrir com 7-Zip/WinRAR);
+  - envio para o Google Drive via OAuth (escopo `drive.file`), pasta "Backup – site vereador Maicon Gonçalves"; falha manda e-mail para o gabinete.
+- **Cron (cPanel):** `20 4 * * 0 /usr/local/bin/php /home/xdigcomb/maicongoncalves.com.br/tools/backup.php >/dev/null 2>&1`
+- **Restaurar:** importar o .sql do `banco-*.zip` mais recente no phpMyAdmin; extrair todos os `arquivos-*.zip` na pasta do site, do mais antigo para o mais novo; código vem do GitHub e o `.env` fica guardado à parte.

@@ -271,14 +271,14 @@ function ticket_photo_store_bytes(string $jpg): ?array
 }
 /** Tipos de vídeo aceitos (o navegador normalmente já envia MP4 comprimido). */
 const VIDEO_TYPES = ['video/mp4' => 'mp4', 'video/quicktime' => 'mov', 'video/webm' => 'webm', 'video/3gpp' => '3gp', 'video/x-m4v' => 'mp4'];
-const VIDEO_MAX_BYTES = 25 * 1024 * 1024;
+const VIDEO_MAX_BYTES = 15 * 1024 * 1024; // só chega perto disso quando o celular não consegue comprimir
 
 /** Guarda o vídeo enviado (fora da web). Lança exceção se não for vídeo válido. */
 function ticket_video_store(string $tmp): array
 {
     $size = (int) @filesize($tmp);
     if ($size <= 0) throw new RuntimeException('Vídeo vazio.');
-    if ($size > VIDEO_MAX_BYTES) throw new RuntimeException('Vídeo grande demais (máximo de 25 MB).');
+    if ($size > VIDEO_MAX_BYTES) throw new RuntimeException('Vídeo grande demais (máximo de 15 MB). Grave um vídeo mais curto.');
     $mime = function_exists('finfo_open') ? (string) finfo_file(finfo_open(FILEINFO_MIME_TYPE), $tmp) : '';
     $head = (string) file_get_contents($tmp, false, null, 0, 16);
     $isMp4 = substr($head, 4, 4) === 'ftyp';
@@ -502,10 +502,10 @@ function tickets_public(): array
             'publishedAt' => date('c', $start),
             'resolvedAt' => $end ? date('c', $end) : null,
             'days' => $end ? max(0, (int) round(($end - $start) / 86400)) : null,
-            'photos' => array_map(function ($p) use ($t) { return ['url' => ticket_photo_url((int) $t['id'], $p['src']), 'w' => $p['w'] ?? null, 'h' => $p['h'] ?? null]; }, $photos),
-            'insta' => !empty($t['instagram']) ? ['url' => $t['instagram'], 'thumb' => ($it = json_decode((string) ($t['instagram_thumb'] ?? ''), true)) ? ticket_photo_url((int) $t['id'], $it['src']) : ($photos ? ticket_photo_url((int) $t['id'], $photos[0]['src']) : null)] : null,
-            'video' => ($vd = json_decode((string) ($t['video'] ?? ''), true)) ? ['url' => ticket_photo_url((int) $t['id'], $vd['src']), 'mime' => $vd['mime'] ?? 'video/mp4', 'poster' => !empty($vd['poster']) ? ticket_photo_url((int) $t['id'], $vd['poster']['src']) : ($photos ? ticket_photo_url((int) $t['id'], $photos[0]['src']) : null)] : null,
-            'after' => $after ? ['url' => ticket_photo_url((int) $t['id'], $after['src']), 'w' => $after['w'] ?? null, 'h' => $after['h'] ?? null] : null,
+            'photos' => array_map(function ($p) use ($t) { $u = ticket_photo_url((int) $t['id'], $p['src']); return ['url' => $u, 'm' => $u . '&s=m', 's' => $u . '&s=s', 'w' => $p['w'] ?? null, 'h' => $p['h'] ?? null]; }, $photos),
+            'insta' => !empty($t['instagram']) ? ['url' => $t['instagram'], 'thumb' => ($it = json_decode((string) ($t['instagram_thumb'] ?? ''), true)) ? ticket_photo_url((int) $t['id'], $it['src']) . '&s=m' : ($photos ? ticket_photo_url((int) $t['id'], $photos[0]['src']) . '&s=m' : null)] : null,
+            'video' => ($vd = json_decode((string) ($t['video'] ?? ''), true)) ? ['url' => ticket_photo_url((int) $t['id'], $vd['src']), 'mime' => $vd['mime'] ?? 'video/mp4', 'poster' => !empty($vd['poster']) ? ticket_photo_url((int) $t['id'], $vd['poster']['src']) . '&s=m' : ($photos ? ticket_photo_url((int) $t['id'], $photos[0]['src']) . '&s=m' : null)] : null,
+            'after' => $after ? ['url' => ticket_photo_url((int) $t['id'], $after['src']), 'm' => ticket_photo_url((int) $t['id'], $after['src']) . '&s=m', 'w' => $after['w'] ?? null, 'h' => $after['h'] ?? null] : null,
         ];
     }
     return $out;

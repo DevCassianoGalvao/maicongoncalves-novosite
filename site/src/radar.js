@@ -75,7 +75,7 @@
 
     var renderCard = function (t) {
       var ph = t.photos || [], vd = t.video, ig = t.insta;
-      if (vd && ph.length && ph[0].url === vd.poster) ph = ph.slice(1); // a capa do vídeo não se repete como foto
+      if (vd && ph.length && ph[0].m === vd.poster) ph = ph.slice(1); // a capa do vídeo não se repete como foto
       var top = ig ? 'ig' : vd ? 'video' : ph.length ? 'photo' : '';
       gallery = ph.map(function (p) { return p.url; }).concat(t.after ? [t.after.url] : []);
       var timer = t.status === 'resolvido'
@@ -86,8 +86,8 @@
         (ig ? '<a class="rd-ig" href="' + esc(ig.url) + '" target="_blank" rel="noopener" aria-label="Assistir ao vídeo no Instagram">' + (ig.thumb ? '<img src="' + esc(ig.thumb) + '" alt="" loading="lazy">' : '') +
           '<span class="rd-ig-play">' + icons.play + '</span><span class="rd-ig-tag">' + icons.ig + 'Assistir no Instagram</span></a>' : '') +
         (vd ? '<div class="rd-card-vid"><video controls playsinline preload="none"' + (vd.poster ? ' poster="' + esc(vd.poster) + '"' : '') + '><source src="' + esc(vd.url) + '" type="' + esc(vd.mime) + '"></video></div>' : '') +
-        (top === 'photo' ? '<button type="button" class="rd-card-ph" data-zoom="' + esc(ph[0].url) + '"><img src="' + esc(ph[0].url) + '" alt="Foto do problema: ' + esc(t.catLabel) + '">' + (ph.length > 1 ? '<span>' + ph.length + ' fotos ' + icons.next + '</span>' : '') + '</button>' : '') +
-        (ph.length > (top === 'photo' ? 1 : 0) ? '<div class="rd-thumbs">' + ph.map(function (p, i) { return '<button type="button" data-zoom="' + esc(p.url) + '" aria-label="Ver foto ' + (i + 1) + '"><img src="' + esc(p.url) + '" alt=""></button>'; }).join('') + '</div>' : '') +
+        (top === 'photo' ? '<button type="button" class="rd-card-ph" data-zoom="' + esc(ph[0].url) + '"><img src="' + esc(ph[0].m || ph[0].url) + '" alt=""Foto do problema: ' + esc(t.catLabel) + '">' + (ph.length > 1 ? '<span>' + ph.length + ' fotos ' + icons.next + '</span>' : '') + '</button>' : '') +
+        (ph.length > (top === 'photo' ? 1 : 0) ? '<div class="rd-thumbs">' + ph.map(function (p, i) { return '<button type="button" data-zoom="' + esc(p.url) + '" aria-label="Ver foto ' + (i + 1) + '"><img src="' + esc(p.s || p.url) + '" alt="" loading="lazy"></button>'; }).join('') + '</div>' : '') +
         '<div class="rd-card-b">' +
           '<div class="rd-card-tags"><span class="tag">' + esc(t.catLabel) + '</span><span class="rd-code">' + esc(t.code) + '</span></div>' +
           (t.place ? '<h3>' + esc(t.place) + '</h3>' : '') +
@@ -97,7 +97,7 @@
             '<li>' + icons.bank + 'Levado à Prefeitura em ' + fmtDate(t.publishedAt) + '</li>' +
             (t.oficio ? '<li>' + icons.doc + esc(t.oficio) + '</li>' : '') +
           '</ul>' +
-          (t.after ? '<div class="rd-after"><small>Como ficou</small><button type="button" data-zoom="' + esc(t.after.url) + '"><img src="' + esc(t.after.url) + '" alt="Foto depois da solução"></button></div>' : '') +
+          (t.after ? '<div class="rd-after"><small>Como ficou</small><button type="button" data-zoom="' + esc(t.after.url) + '"><img src="' + esc(t.after.m || t.after.url) + '" alt="Foto depois da solução"></button></div>' : '') +
         '</div>';
       card.hidden = false;
       doc.documentElement.classList.toggle('rd-sheet-open', mobile());
@@ -117,7 +117,7 @@
     ITEMS.forEach(function (t) {
       var m = L.marker([t.lat, t.lng], { icon: pinIcon(t.status), keyboard: true, alt: t.catLabel + (t.place ? ' – ' + t.place : '') });
       m.item = t;
-      var thumb = t.photos && t.photos[0] ? '<img src="' + esc(t.photos[0].url) + '" alt="">' : '';
+      var thumb = t.photos && t.photos[0] ? '<img src="' + esc(t.photos[0].s || t.photos[0].url) + '" alt="">' : '';
       if (canHover) m.bindTooltip('<div class="rd-tip">' + thumb + '<div><b>' + esc(t.catLabel) + '</b><span>' + (t.status === 'resolvido' ? 'Resolvido em ' + t.days + (t.days === 1 ? ' dia' : ' dias') : 'Aguardando há <em data-since="' + esc(t.publishedAt) + '">' + span(t.publishedAt) + '</em>') + '</span></div></div>', { direction: 'top', opacity: 1, className: 'rd-tipbox' });
       m.on('click', function () {
         m.closeTooltip && m.closeTooltip();
@@ -166,7 +166,7 @@
   var form = $('#rd-form');
   if (!form) return;
   var msg = $('#rd-msg'), send = $('#rd-send'), fileIn = $('#rd-fotos'), ups = $('#rd-ups'), drop = $('#rd-drop');
-  var photos = [], MAXF = 3, vid = null, MAXV = 25 * 1024 * 1024;
+  var photos = [], MAXF = 3, vid = null, MAXV = 15 * 1024 * 1024;
   $('#rd-t').value = Date.now();
   var say = function (t, ok) { msg.hidden = false; msg.textContent = t; msg.classList.toggle('is-ok', !!ok); };
   var norm = function (s) { return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, ' ').trim(); };
@@ -217,7 +217,7 @@
       return m.supported().then(function (ok) {
         if (!ok) {
           // navegador sem compressão: aceita o arquivo original se já for pequeno
-          if (f.size > MAXV) throw new Error('Este navegador não consegue diminuir o vídeo. Grave um vídeo mais curto (até 25 MB) ou envie pelo WhatsApp.');
+          if (f.size > MAXV) throw new Error('Este navegador não consegue diminuir o vídeo. Grave um vídeo mais curto (até 15 MB) ou envie pelo WhatsApp.');
           return { blob: f, duration: 0, original: true };
         }
         return m.compress(f, function (p) { if (cancelled) return; me.pct = p; draw(); });
@@ -284,7 +284,7 @@
     var html = '<div class="rd-near-hd">' + icons.pin + '<div><b>' + (n === 1 ? 'Já existe 1 demanda' : 'Já existem ' + n + ' demandas') + ' a até ' + NEAR + ' m daqui</b>' +
       '<span>Confira se não é o mesmo problema. Se for, não precisa enviar de novo: nossa equipe já está acompanhando. Se for outro, pode continuar.</span></div></div><ul>';
     pub.forEach(function (x) {
-      var t = x.t, th = t.photos && t.photos[0] ? '<img src="' + esc(t.photos[0].url) + '" alt="">' : '<span class="rd-near-i">' + icons.pin + '</span>';
+      var t = x.t, th = t.photos && t.photos[0] ? '<img src="' + esc(t.photos[0].s || t.photos[0].url) + '" alt="">' : '<span class="rd-near-i">' + icons.pin + '</span>';
       html += '<li>' + th + '<div><b>' + esc(t.catLabel) + same(t.cat) + '</b><span>' + Math.round(x.d) + ' m · ' +
         'aguardando a Prefeitura há ' + span(t.publishedAt) + (t.place ? ' · ' + esc(t.place) : '') + '</span></div>' +
         (openById ? '<button type="button" class="rd-near-go" data-id="' + t.id + '">Ver</button>' : '') + '</li>';
