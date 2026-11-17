@@ -289,3 +289,16 @@ select{-webkit-appearance:none;appearance:none;padding-right:42px!important;curs
 .filters .check{flex:none;white-space:nowrap}
 .filters .check input{flex:none;width:auto}
 .fv-bulk select{width:auto;flex:0 1 260px}
+/* Amigos do Bem */
+.ab-adm-name{display:flex;align-items:center;gap:10px}.ab-adm-name img{width:40px;height:40px;border-radius:10px;object-fit:cover;flex:none}
+.ab-adm-ic{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:#FFF1E6;color:#FE6500;flex:none}.ab-adm-ic svg{width:18px;height:18px}
+.ab-adm-logo{display:block;width:96px;height:96px;border-radius:18px;object-fit:cover;margin-bottom:6px}
+.ab-adm-capa{display:block;width:100%;max-width:320px;aspect-ratio:16/9;border-radius:12px;object-fit:cover;margin-bottom:6px}
+.ab-adm-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;margin-bottom:10px}
+.ab-adm-gal label{display:grid;gap:4px}.ab-adm-gal img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:10px}
+.ab-adm-tipos{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.ab-adm-tipo{display:grid;gap:6px;padding:10px 12px;border:1.5px solid var(--line);border-radius:14px}
+.ab-adm-tipo.is-on{border-color:#FE6500;background:#FFF8F2}
+.ab-adm-tipo .check{display:flex;align-items:center;gap:8px;font-weight:600}
+.ab-adm-tipo input[type=text],.ab-adm-tipo input:not([type]){font-size:13px;padding:7px 10px}
+.ab-adm-tipo:not(.is-on) input:not([type=checkbox]){display:none}

@@ -111,6 +111,9 @@ page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'No
 page('noticia', T, '', read('noticia.html'), nav='news')
 page('radar', 'Friburgo no Mapa – envie sua demanda | Vereador Maicon Gonçalves', 'Envie sua demanda ao nosso gabinete. Nós conferimos, encaminhamos oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top="<?= !empty($dash) ? '' : 'on-white' ?>", kind='demandas')
 page('fiscalize', 'Fiscalize Você – compras da Prefeitura de Nova Friburgo | Vereador Maicon Gonçalves', 'Veja as compras da Prefeitura de Nova Friburgo, com o valor de cada unidade.', read('fiscalize.html'), ft_top='on-white', kind='fiscalize')
+page('amigos', 'Amigos do Bem – onde doar em Nova Friburgo | Vereador Maicon Gonçalves', 'Instituições de Nova Friburgo que recebem doações.', read('amigos.html'), ft_top='on-white', kind='amigos')
+page('amigos-inst', 'Amigos do Bem | Vereador Maicon Gonçalves', '', read('amigos-inst.html'), ft_top='on-white', kind='amigos')
+page('amigos-atualizar', 'Amigos do Bem | Vereador Maicon Gonçalves', '', read('amigos-atualizar.html'), ft_top='on-white', kind='amigos')
 page('privacidade', 'Política de privacidade – Vereador Maicon Gonçalves', 'Como o gabinete do vereador Maicon Gonçalves trata os dados enviados pelo site, de acordo com a LGPD.', read('privacidade.html'), ft_top='on-white', kind='privacidade')
 page('descadastrar', 'Descadastrar – Vereador Maicon Gonçalves', '', read('descadastrar.html'), kind='descadastrar')
 page('404', 'Página não encontrada – ' + T, '', read('404.html'), kind='404')
@@ -126,7 +129,8 @@ open(rp, 'w', encoding='utf-8').write(rjs)
 # ícones pedidos pelo PHP: icon('nome') ou icon('nome', 'bold'|'fill')
 need = {(n, 'i') for n in ('facebook-logo', 'instagram-logo', 'tiktok-logo', 'youtube-logo',  # redes (content.php)
                            'squares-four', 'newspaper', 'plus-circle', 'tag', 'gear-six', 'user-circle', 'map-pin-plus', 'users', 'download-simple', 'caret-up', 'caret-down',  # menu do painel
-                           'check-circle', 'warning-circle', 'tray', 'currency-circle-dollar')}
+                           'check-circle', 'warning-circle', 'tray', 'currency-circle-dollar', 'hand-heart')}
+need |= {(n, 'if') for n in ('bowl-food', 't-shirt', 'bed', 'puzzle-piece', 'pencil-simple', 'hand-soap', 'baby', 'paw-print', 'armchair', 'book-open', 'hand-heart', 'hand-coins', 'gift', 'drop', 'first-aid-kit', 'tote', 'heart', 'house-line')}  # Amigos do Bem: AB_ICONES em app/amigos.php
 for f in glob.glob(os.path.join(REPO, '**', '*.php'), recursive=True):
     if '/vendor/' in f or '/app/pages/' in f: continue
     for name, w in re.findall(r"icon\('([a-z0-9-]+)'(?:,\s*'(bold|fill)')?\)", open(f, encoding='utf-8').read()):

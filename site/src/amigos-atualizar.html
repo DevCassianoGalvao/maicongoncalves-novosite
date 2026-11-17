@@ -1,0 +1,45 @@
+<?php
+// Link secreto da instituição para atualizar o que precisa (sem senha). $abInst e $abSaved vêm do index.php.
+$i = $abInst;
+$abTodos = ab_tipos();
+$abMarcados = array_map(function ($t) { return (int) $t['id']; }, $i['tipos']);
+?>
+<main class="ab ab-upd">
+<section class="ph-hero ab-hero ab-hero--sm">
+  <div class="wrap ph-hero-in">
+    <span class="chip"><i></i>Amigos do Bem</span>
+    <h1 class="h1"><?= e($i['nome']) ?></h1>
+    <p class="lead">Atualize aqui o que vocês estão precisando. As mudanças aparecem na página na hora.</p>
+  </div>
+</section>
+<section class="sec">
+  <div class="wrap ab-upd-in">
+<?php if ($abSaved): ?>    <p class="ab-form-msg is-ok" role="status">Atualizado! <a href="<?= e(url('/amigos-do-bem/' . $i['slug'] . '/')) ?>">Ver a página da instituição</a></p><?php endif; ?>
+<?php if ($i['status'] !== 'publicada'): ?>    <p class="ab-demo-note">{{ib:info}}<span>A página de vocês ainda não está publicada. Nossa equipe publica depois de conferir os dados.</span></p><?php endif; ?>
+    <form method="post" class="ab-form ab-upd-form">
+      <input type="hidden" name="_t" value="<?= e($i['token']) ?>">
+      <h2>Precisam agora</h2>
+      <p class="hint">Pedidos com prazo aparecem em destaque. Depois do prazo, somem sozinhos.</p>
+<?php foreach ($i['necessidades'] as $n): ?>
+      <label class="ab-upd-old"><input type="checkbox" name="remover[]" value="<?= (int) $n['id'] ?>"> Já recebemos, tirar: <b><?= e($n['item']) ?></b><?= $n['quantidade'] ? ' (' . e($n['quantidade']) . ')' : '' ?><?= $n['prazo'] ? ' · ' . e(ab_prazo($n['prazo'])) : '' ?></label>
+<?php endforeach; ?>
+<?php for ($k = 0; $k < 3; $k++): ?>
+      <div class="ab-upd-row">
+        <div class="fd"><label for="ni<?= $k ?>">Item</label><input id="ni<?= $k ?>" name="nec_item[]" maxlength="160" placeholder="Ex.: Leite integral"></div>
+        <div class="fd"><label for="nq<?= $k ?>">Quantidade</label><input id="nq<?= $k ?>" name="nec_qtd[]" maxlength="60" placeholder="Ex.: 60 litros"></div>
+        <div class="fd"><label for="np<?= $k ?>">Até quando</label><input id="np<?= $k ?>" type="date" name="nec_prazo[]" min="<?= date('Y-m-d') ?>"></div>
+      </div>
+<?php endfor; ?>
+      <h2>O que vocês recebem</h2>
+      <div class="ab-upd-tipos">
+<?php foreach ($abTodos as $tid => $t): ?>        <label><input type="checkbox" name="tipos[]" value="<?= (int) $tid ?>"<?= in_array($tid, $abMarcados, true) ? ' checked' : '' ?>> <?= e($t['nome']) ?></label>
+<?php endforeach; ?>
+      </div>
+      <div class="fd"><label for="nao">O que vocês não recebem</label><input id="nao" name="nao_aceita" maxlength="500" value="<?= e($i['nao_aceita']) ?>"></div>
+      <div class="fd"><label for="hor">Dias e horários para entregar</label><input id="hor" name="horarios" maxlength="500" value="<?= e($i['horarios']) ?>"></div>
+      <button class="btn btn--orange" type="submit"><span>Salvar</span><span class="btn-i">{{ib:check}}{{ib:check}}</span></button>
+      <p class="hint">Para mudar nome, fotos, endereço, contatos ou PIX, fale com o gabinete.</p>
+    </form>
+  </div>
+</section>
+</main>

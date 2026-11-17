@@ -1,0 +1,211 @@
+<?php
+// Amigos do Bem: instituições publicadas, filtros no próprio navegador (são poucas dezenas).
+$abInsts = ab_list('publicada');
+$abTipos = ab_tipos();
+$abCount = []; $abBairros = []; $abUrg = []; $abDemo = false;
+foreach ($abInsts as $i) {
+    foreach ($i['tipos'] as $t) $abCount[(int) $t['id']] = ($abCount[(int) $t['id']] ?? 0) + 1;
+    if ($i['bairro']) $abBairros[$i['bairro']] = true;
+    foreach ($i['necessidades'] as $n) $abUrg[] = $n + ['inst' => $i];
+    if ($i['demo']) $abDemo = true;
+}
+ksort($abBairros);
+usort($abUrg, function ($a, $b) { return [$a['prazo'] === null, $a['prazo']] <=> [$b['prazo'] === null, $b['prazo']]; });
+$abPins = array_values(array_filter(array_map(function ($i) {
+    return $i['lat'] !== null ? ['n' => $i['nome'], 's' => $i['slug'], 'lat' => (float) $i['lat'], 'lng' => (float) $i['lng'], 'c' => ab_causa($i['causa']), 'b' => $i['bairro'], 'l' => ab_img($i['logo'])] : null;
+}, $abInsts)));
+?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<main class="ab">
+<section class="ph-hero ab-hero">
+  <div class="hero-bg" aria-hidden="true"><span class="orb orb-1"></span><span class="orb orb-2"></span></div>
+  <div class="wrap ph-hero-in">
+    <span class="chip" data-h><i></i>Corrente do bem em Nova Friburgo</span>
+    <h1 class="h1" data-split><span class="scr">Amigos do Bem{{scr}}</span></h1>
+    <p class="lead" data-h><?= e(ab_cfg('intro')) ?></p>
+    <div class="ab-stats" data-h>
+      <span><b><?= count($abInsts) ?></b> <?= count($abInsts) === 1 ? 'instituição' : 'instituições' ?></span>
+      <span><b><?= count($abCount) ?></b> tipos de doação</span>
+<?php if ($abUrg): ?>      <span class="ab-stats-urg"><b><?= count($abUrg) ?></b> <?= count($abUrg) === 1 ? 'pedido urgente' : 'pedidos urgentes' ?></span><?php endif; ?>
+    </div>
+  </div>
+</section>
+
+<section class="sec ab-pick-sec" id="doar">
+  <div class="wrap">
+<?php if ($abDemo): ?>
+    <p class="ab-demo-note" role="note">{{ib:info}}<span>As instituições marcadas como <b>exemplo</b> são fictícias, criadas só para testar a página. Os contatos delas não funcionam.</span></p>
+<?php endif; ?>
+    <h2 class="h2">O que você quer doar?</h2>
+    <div class="ab-tipos" role="group" aria-label="Filtrar por tipo de doação">
+      <button type="button" class="ab-tipo is-on" data-tipo="">{{if:gift}}<span>Tudo</span><small><?= count($abInsts) ?></small></button>
+<?php foreach ($abTipos as $tid => $t): if (empty($abCount[$tid])) continue; ?>
+      <button type="button" class="ab-tipo" data-tipo="<?= (int) $tid ?>"><?= icon($t['icone'], 'fill') ?><span><?= e($t['nome']) ?></span><small><?= (int) $abCount[$tid] ?></small></button>
+<?php endforeach; ?>
+    </div>
+    <div class="ab-filters">
+      <label class="ab-search">{{ib:magnifying-glass}}<input type="search" id="ab-q" placeholder="Buscar por nome ou causa" aria-label="Buscar instituição"></label>
+      <select id="ab-bairro" aria-label="Bairro"><option value="">Todos os bairros</option><?php foreach (array_keys($abBairros) as $b): ?><option><?= e($b) ?></option><?php endforeach; ?></select>
+    </div>
+  </div>
+</section>
+
+<?php if ($abUrg): ?>
+<section class="ab-urg-sec" aria-labelledby="ab-urg-t">
+  <div class="wrap">
+    <div class="ab-urg-hd"><h2 class="ab-urg-t" id="ab-urg-t">{{if:warning-circle}}Precisam agora</h2><p>Pedidos com prazo. Fale direto com a instituição.</p></div>
+    <ul class="ab-urg" tabindex="0" aria-label="Pedidos urgentes">
+<?php foreach (array_slice($abUrg, 0, 12) as $n): ?>
+      <li><a href="<?= e(url('/amigos-do-bem/' . $n['inst']['slug'] . '/')) ?>">
+        <b><?= e($n['item']) ?></b><?php if ($n['quantidade']): ?><span class="ab-urg-q"><?= e($n['quantidade']) ?></span><?php endif; ?>
+        <small><?= e($n['inst']['nome']) ?><?= $n['prazo'] ? ' · <em>' . e(ab_prazo($n['prazo'])) . '</em>' : '' ?></small></a></li>
+<?php endforeach; ?>
+    </ul>
+  </div>
+</section>
+<?php endif; ?>
+
+<section class="sec ab-list-sec" id="instituicoes">
+  <div class="wrap">
+    <p class="ab-count" id="ab-count" aria-live="polite"></p>
+<?php if (!$abInsts): ?>
+    <p class="ab-empty">Nenhuma instituição publicada ainda.</p>
+<?php else: ?>
+    <ul class="ab-cards">
+<?php foreach ($abInsts as $i): $tids = array_map(function ($t) { return (int) $t['id']; }, $i['tipos']); $wa = ab_wa($i['whatsapp']); ?>
+      <li class="ab-card" data-tipos=",<?= implode(',', $tids) ?>," data-bairro="<?= e($i['bairro']) ?>" data-q="<?= e(mb_strtolower($i['nome'] . ' ' . ab_causa($i['causa']) . ' ' . $i['resumo'], 'UTF-8')) ?>">
+        <a class="ab-card-img" href="<?= e(url('/amigos-do-bem/' . $i['slug'] . '/')) ?>" tabindex="-1" aria-hidden="true">
+          <?php if ($i['capa']): ?><img src="<?= e(ab_img($i['capa'])) ?>" alt="" loading="lazy" width="800" height="450"><?php endif; ?>
+          <?php if ($i['demo']): ?><span class="ab-demo">Exemplo</span><?php endif; ?>
+        </a>
+        <div class="ab-card-bd">
+          <div class="ab-card-hd">
+            <?php if ($i['logo']): ?><img class="ab-logo" src="<?= e(ab_img($i['logo'])) ?>" alt="" width="56" height="56" loading="lazy"><?php endif; ?>
+            <div><span class="ab-causa"><?= e(ab_causa($i['causa'])) ?></span><h3><a href="<?= e(url('/amigos-do-bem/' . $i['slug'] . '/')) ?>"><?= e($i['nome']) ?></a></h3></div>
+          </div>
+          <p class="ab-resumo"><?= e($i['resumo']) ?></p>
+          <p class="ab-local">{{ib:map-pin}}<?= e($i['bairro'] ?: 'Nova Friburgo') ?><?= $i['busca_em_casa'] ? ' · <span class="ab-busca">{{ib:truck}}Busca em casa</span>' : '' ?></p>
+          <ul class="ab-ticons" aria-label="Aceita">
+<?php foreach ($i['tipos'] as $t): ?>            <li title="<?= e($t['nome']) ?>"><?= icon($t['icone'], 'fill') ?><span class="sr"><?= e($t['nome']) ?></span></li>
+<?php endforeach; ?>
+          </ul>
+<?php if ($i['necessidades']): ?>          <p class="ab-card-urg">{{if:warning-circle}}Precisa agora: <?= e($i['necessidades'][0]['item']) ?><?= count($i['necessidades']) > 1 ? ' e mais ' . (count($i['necessidades']) - 1) : '' ?></p><?php endif; ?>
+          <div class="ab-card-ft">
+            <a class="btn btn--navy btn--sm" href="<?= e(url('/amigos-do-bem/' . $i['slug'] . '/')) ?>"><span>Como doar</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a>
+<?php if ($wa && !$i['demo']): ?>            <a class="ab-wa" href="https://wa.me/<?= e($wa) ?>?text=<?= rawurlencode('Olá! Vi a ' . $i['nome'] . ' no site Amigos do Bem e quero doar.') ?>" target="_blank" rel="noopener" data-ab-wa="<?= e($i['slug']) ?>" aria-label="WhatsApp de <?= e($i['nome']) ?>">{{if:whatsapp-logo}}</a><?php endif; ?>
+          </div>
+        </div>
+      </li>
+<?php endforeach; ?>
+    </ul>
+    <p class="ab-empty" id="ab-none" hidden>Nenhuma instituição com esses filtros. <button type="button" class="link" id="ab-clear">Limpar filtros</button></p>
+<?php endif; ?>
+  </div>
+</section>
+
+<?php if ($abPins): ?>
+<section class="sec sec--mist ab-map-sec" id="mapa">
+  <div class="wrap">
+    <div class="sec-hd"><h2 class="h2">No mapa</h2></div>
+    <div id="ab-map" class="ab-map" role="region" aria-label="Mapa das instituições"></div>
+  </div>
+</section>
+<?php endif; ?>
+
+<section class="sec ab-join" id="participar">
+  <div class="wrap ab-join-in">
+    <div>
+      <h2 class="h2">Sua instituição quer participar?</h2>
+      <p class="lead">A participação é gratuita. Mande os dados e nossa equipe entra em contato para conferir as informações antes de publicar.</p>
+      <ul class="ab-how">
+        <li>{{if:seal-check}}<span>Só entram instituições conferidas pelo gabinete, com autorização para divulgar.</span></li>
+        <li>{{if:hand-heart}}<span>A doação é feita direto à instituição. Nada passa pelo gabinete.</span></li>
+        <li>{{if:arrows-clockwise}}<span>A instituição recebe um link para atualizar o que está precisando, sem senha.</span></li>
+      </ul>
+    </div>
+    <form class="ab-form" id="ab-join-form" novalidate>
+      <input type="hidden" name="t" value="">
+      <div class="fv-hp" aria-hidden="true"><label>Site <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+      <div class="fd"><label for="abj-nome">Nome da instituição</label><input id="abj-nome" name="nome" maxlength="160" required></div>
+      <div class="fd"><label for="abj-causa">Quem vocês atendem</label><select id="abj-causa" name="causa"><?php foreach (AB_CAUSAS as $k => $v): ?><option value="<?= $k ?>"><?= e($v) ?></option><?php endforeach; ?></select></div>
+      <div class="fd"><label for="abj-bairro">Bairro</label><input id="abj-bairro" name="bairro" maxlength="120"></div>
+      <div class="fd"><label for="abj-resp">Seu nome</label><input id="abj-resp" name="responsavel" maxlength="120" required autocomplete="name"></div>
+      <div class="fd"><label for="abj-tel">WhatsApp</label><input id="abj-tel" name="whatsapp" maxlength="30" required inputmode="tel" autocomplete="tel" placeholder="(22) 99999-9999"></div>
+      <div class="fd"><label for="abj-msg">O que vocês mais precisam receber?</label><textarea id="abj-msg" name="mensagem" maxlength="1200" rows="3"></textarea></div>
+      <p class="ab-form-msg" id="ab-join-msg" role="alert" hidden></p>
+      <button class="btn btn--orange" type="submit"><span>Quero participar</span><span class="btn-i">{{ib:paper-plane-tilt}}{{ib:paper-plane-tilt}}</span></button>
+    </form>
+  </div>
+</section>
+
+<section class="ab-disclaimer">
+  <div class="wrap"><p>O gabinete do vereador Maicon Gonçalves apenas divulga as instituições. Nenhuma doação passa pelo gabinete: tudo é combinado e entregue direto à instituição. Confira sempre o nome do titular antes de fazer um PIX.</p></div>
+</section>
+</main>
+<?php if ($abPins): ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<?php endif; ?>
+<script>
+(function () {
+  var cards = [].slice.call(document.querySelectorAll('.ab-card')), tipo = '', q = document.getElementById('ab-q'), bairro = document.getElementById('ab-bairro');
+  var count = document.getElementById('ab-count'), none = document.getElementById('ab-none');
+  var fold = function (s) { return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, ''); };
+  function apply() {
+    var t = fold(q ? q.value.trim() : ''), b = bairro ? bairro.value : '', n = 0;
+    cards.forEach(function (c) {
+      var ok = (!tipo || c.getAttribute('data-tipos').indexOf(',' + tipo + ',') > -1) && (!b || c.getAttribute('data-bairro') === b) && (!t || fold(c.getAttribute('data-q')).indexOf(t) > -1);
+      c.hidden = !ok; if (ok) n++;
+    });
+    if (count) count.textContent = n === cards.length ? '' : n + (n === 1 ? ' instituição encontrada' : ' instituições encontradas');
+    if (none) none.hidden = n > 0;
+  }
+  [].forEach.call(document.querySelectorAll('.ab-tipo'), function (btn) {
+    btn.setAttribute('aria-pressed', btn.classList.contains('is-on') ? 'true' : 'false');
+    btn.addEventListener('click', function () {
+      [].forEach.call(document.querySelectorAll('.ab-tipo'), function (o) { o.classList.remove('is-on'); o.setAttribute('aria-pressed', 'false'); });
+      btn.classList.add('is-on'); btn.setAttribute('aria-pressed', 'true');
+      tipo = btn.getAttribute('data-tipo'); apply();
+      if (tipo) document.getElementById('instituicoes').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+  if (q) q.addEventListener('input', apply);
+  if (bairro) bairro.addEventListener('change', apply);
+  var clr = document.getElementById('ab-clear');
+  if (clr) clr.addEventListener('click', function () { q.value = ''; bairro.value = ''; document.querySelector('.ab-tipo[data-tipo=""]').click(); });
+
+  var base = document.documentElement.getAttribute('data-base') || '';
+  [].forEach.call(document.querySelectorAll('[data-ab-wa]'), function (a) {
+    a.addEventListener('click', function () { try { navigator.sendBeacon(base + '/api/amigos-clique.php', new Blob(['slug=' + encodeURIComponent(a.getAttribute('data-ab-wa'))], { type: 'application/x-www-form-urlencoded' })); } catch (e) {} });
+  });
+
+  var el = document.getElementById('ab-map'), pins = <?= json_encode($abPins, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
+  if (el && window.L && pins.length) {
+    var m = L.map(el, { scrollWheelZoom: false }).setView([-22.2819, -42.5311], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(m);
+    var esc = function (s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; };
+    var bounds = [];
+    pins.forEach(function (p) {
+      var icon = L.divIcon({ className: 'ab-pin', html: p.l ? '<img src="' + esc(p.l) + '" alt="">' : '<span></span>', iconSize: [42, 42], iconAnchor: [21, 42], popupAnchor: [0, -38] });
+      L.marker([p.lat, p.lng], { icon: icon, title: p.n }).addTo(m).bindPopup('<b>' + esc(p.n) + '</b><br><small>' + esc(p.c) + (p.b ? ' · ' + esc(p.b) : '') + '</small><br><a href="' + base + '/amigos-do-bem/' + esc(p.s) + '/">Como doar →</a>');
+      bounds.push([p.lat, p.lng]);
+    });
+    if (bounds.length > 1) m.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+  }
+
+  var f = document.getElementById('ab-join-form'), msg = document.getElementById('ab-join-msg');
+  if (f) {
+    f.t.value = Date.now();
+    f.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      if (!f.checkValidity()) { f.reportValidity(); return; }
+      var b = f.querySelector('button[type=submit]'); b.disabled = true;
+      fetch(base + '/api/amigos-participar.php', { method: 'POST', body: new FormData(f), credentials: 'same-origin' }).then(function (r) { return r.json(); }).then(function (j) {
+        msg.hidden = false; msg.className = 'ab-form-msg' + (j.ok ? ' is-ok' : '');
+        msg.textContent = j.ok ? 'Recebemos! Nossa equipe vai falar com você pelo WhatsApp para conferir os dados.' : (j.error || 'Não foi possível enviar agora.');
+        if (j.ok) f.reset();
+      }).catch(function () { msg.hidden = false; msg.className = 'ab-form-msg'; msg.textContent = 'Sem conexão no momento. Tente de novo.'; })
+        .then(function () { b.disabled = false; });
+    });
+  }
+})();
+</script>

@@ -1,0 +1,162 @@
+<?php
+// Página de uma instituição do Amigos do Bem. $abInst vem do index.php.
+$i = $abInst;
+$abWa = $i['demo'] ? '' : ab_wa($i['whatsapp']);
+$abTel = ab_digits($i['telefone']);
+$abIg = ab_insta($i['instagram']);
+$abUrl = abs_url('/amigos-do-bem/' . $i['slug'] . '/');
+$abOutras = array_values(array_filter(ab_list('publicada'), function ($o) use ($i) { return $o['id'] !== $i['id']; }));
+$abOutras = array_slice($abOutras, 0, 3);
+$abParas = array_filter(array_map('trim', preg_split('/\n\s*\n/', (string) $i['historia'])));
+?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<main class="ab ab-inst">
+<section class="ab-ihero">
+  <?php if ($i['capa']): ?><img class="ab-ihero-bg" src="<?= e(ab_img($i['capa'])) ?>" alt="" width="1600" height="900"><?php endif; ?>
+  <div class="ab-ihero-shade" aria-hidden="true"></div>
+  <div class="wrap ab-ihero-in">
+    <a class="ab-back" href="<?= e(url('/amigos-do-bem/')) ?>">{{ib:arrow-left}}Amigos do Bem</a>
+    <div class="ab-ihero-id">
+      <?php if ($i['logo']): ?><img class="ab-ilogo" src="<?= e(ab_img($i['logo'])) ?>" alt="Logo de <?= e($i['nome']) ?>" width="96" height="96"><?php endif; ?>
+      <div>
+        <span class="chip"><i></i><?= e(ab_causa($i['causa'])) ?><?= $i['demo'] ? ' · exemplo fictício' : '' ?></span>
+        <h1 class="h1"><?= e($i['nome']) ?></h1>
+        <p class="ab-ihero-sub">{{ib:map-pin}}<?= e($i['bairro'] ?: 'Nova Friburgo') ?>, Nova Friburgo</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<?php if ($i['demo']): ?>
+<div class="wrap"><p class="ab-demo-note ab-demo-note--top" role="note">{{ib:info}}<span>Esta é uma <b>instituição fictícia</b>, criada só para testar a página. Os contatos e o PIX não são reais.</span></p></div>
+<?php endif; ?>
+
+<div class="wrap ab-igrid">
+  <div class="ab-imain">
+<?php if ($i['resumo']): ?>    <p class="ab-ilead"><?= e($i['resumo']) ?></p><?php endif; ?>
+
+<?php if ($i['necessidades']): ?>
+    <section class="ab-iblock ab-inec" aria-labelledby="ab-nec-t">
+      <h2 id="ab-nec-t">{{if:warning-circle}}Precisa agora</h2>
+      <ul>
+<?php foreach ($i['necessidades'] as $n): ?>        <li><b><?= e($n['item']) ?></b><?= $n['quantidade'] ? '<span>' . e($n['quantidade']) . '</span>' : '' ?><?= $n['prazo'] ? '<em>' . e(ab_prazo($n['prazo'])) . '</em>' : '' ?></li>
+<?php endforeach; ?>
+      </ul>
+    </section>
+<?php endif; ?>
+
+<?php if ($i['tipos']): ?>
+    <section class="ab-iblock" aria-labelledby="ab-ac-t">
+      <h2 id="ab-ac-t">O que recebemos</h2>
+      <ul class="ab-iaccept">
+<?php foreach ($i['tipos'] as $t): ?>        <li><span class="ab-iaccept-i"><?= icon($t['icone'], 'fill') ?></span><div><b><?= e($t['nome']) ?></b><?= $t['obs'] ? '<small>' . e($t['obs']) . '</small>' : '' ?></div></li>
+<?php endforeach; ?>
+      </ul>
+<?php if ($i['nao_aceita']): ?>      <p class="ab-inot">{{if:x-circle}}<span><b>Não recebemos:</b> <?= e($i['nao_aceita']) ?></span></p><?php endif; ?>
+<?php if ($i['obs_doacao']): ?>      <p class="ab-iobs"><?= nl2br(e($i['obs_doacao'])) ?></p><?php endif; ?>
+    </section>
+<?php endif; ?>
+
+<?php if ($abParas): ?>
+    <section class="ab-iblock ab-istory" aria-labelledby="ab-h-t">
+      <h2 id="ab-h-t">Nossa história</h2>
+<?php foreach ($abParas as $p): ?>      <p><?= nl2br(e($p)) ?></p>
+<?php endforeach; ?>
+    </section>
+<?php endif; ?>
+
+<?php if ($i['fotos']): ?>
+    <section class="ab-iblock" aria-labelledby="ab-f-t">
+      <h2 id="ab-f-t">Fotos</h2>
+      <div class="ab-igal">
+<?php foreach ($i['fotos'] as $k => $f): ?>        <a href="<?= e(ab_img($f['src'])) ?>" target="_blank" rel="noopener"><img src="<?= e(ab_img($f['src'])) ?>" alt="Foto <?= $k + 1 ?> de <?= e($i['nome']) ?>" loading="lazy"></a>
+<?php endforeach; ?>
+      </div>
+    </section>
+<?php endif; ?>
+  </div>
+
+  <aside class="ab-iside">
+    <div class="ab-how-card">
+      <h2>Como doar</h2>
+<?php if ($i['endereco'] || $i['bairro']): ?>
+      <div class="ab-hrow">{{if:map-pin}}<div><b>Onde entregar</b><span><?= e(trim($i['endereco'] . ($i['bairro'] ? ' – ' . $i['bairro'] : ''), ' –')) ?>, Nova Friburgo</span>
+        <?php if ($i['lat'] !== null): ?><a href="https://www.google.com/maps/dir/?api=1&amp;destination=<?= (float) $i['lat'] ?>,<?= (float) $i['lng'] ?>" target="_blank" rel="noopener">Como chegar</a><?php endif; ?></div></div>
+<?php endif; ?>
+<?php if ($i['lat'] !== null): ?>      <div id="ab-imap" class="ab-imap" data-lat="<?= (float) $i['lat'] ?>" data-lng="<?= (float) $i['lng'] ?>"></div><?php endif; ?>
+<?php if ($i['horarios']): ?>      <div class="ab-hrow">{{if:clock}}<div><b>Horários</b><span><?= e($i['horarios']) ?></span></div></div><?php endif; ?>
+<?php if ($i['busca_em_casa']): ?>      <div class="ab-hrow">{{if:truck}}<div><b>Busca em casa</b><span>Combine pelo WhatsApp a retirada da doação.</span></div></div><?php endif; ?>
+      <div class="ab-hbtns">
+<?php if ($abWa): ?>        <a class="ab-hwa" href="https://wa.me/<?= e($abWa) ?>?text=<?= rawurlencode('Olá! Vi a ' . $i['nome'] . ' no site Amigos do Bem e quero doar.') ?>" target="_blank" rel="noopener" data-ab-wa="<?= e($i['slug']) ?>">{{if:whatsapp-logo}}Falar pelo WhatsApp</a>
+<?php elseif ($i['demo']): ?>        <span class="ab-hwa is-off" aria-disabled="true">{{if:whatsapp-logo}}WhatsApp (exemplo)</span>
+<?php endif; ?>
+        <div class="ab-hlinks">
+<?php if ($abTel && !$i['demo']): ?>          <a href="tel:+55<?= e($abTel) ?>">{{ib:phone}}<?= e(ab_phone_fmt($i['telefone'])) ?></a><?php endif; ?>
+<?php if ($abIg && !$i['demo']): ?>          <a href="https://www.instagram.com/<?= e($abIg) ?>/" target="_blank" rel="noopener">{{ib:instagram-logo}}@<?= e($abIg) ?></a><?php endif; ?>
+<?php if ($i['site'] && !$i['demo']): ?>          <a href="<?= e($i['site']) ?>" target="_blank" rel="noopener">{{ib:globe}}Site</a><?php endif; ?>
+<?php if ($i['email'] && !$i['demo']): ?>          <a href="mailto:<?= e($i['email']) ?>">{{ib:envelope-simple}}E-mail</a><?php endif; ?>
+        </div>
+      </div>
+<?php if ($i['pix_chave']): ?>
+      <div class="ab-pix">
+        <b>{{if:hand-coins}}PIX</b>
+        <div class="ab-pix-key"><code id="ab-pix"><?= e($i['demo'] ? 'chave de exemplo' : $i['pix_chave']) ?></code><?php if (!$i['demo']): ?><button type="button" class="ab-copy" data-copy="<?= e($i['pix_chave']) ?>">{{ib:copy}}<span>Copiar</span></button><?php endif; ?></div>
+        <small>Titular: <b><?= e($i['pix_titular'] ?: $i['nome']) ?></b>. Confira o nome no seu banco antes de confirmar.</small>
+      </div>
+<?php endif; ?>
+<?php if ($i['cnpj'] && $i['mostrar_cnpj']): ?>      <p class="ab-cnpj">CNPJ <?= e(ab_cnpj($i['cnpj'])) ?></p><?php endif; ?>
+<?php if ($i['verificada_em']): ?>      <p class="ab-verif">{{if:seal-check}}<?= e(ab_verificada($i['verificada_em'])) ?></p><?php endif; ?>
+    </div>
+    <button type="button" class="btn btn--line btn--sm ab-share" data-url="<?= e($abUrl) ?>" data-title="<?= e($i['nome'] . ' – Amigos do Bem') ?>"><span>Compartilhar</span><span class="btn-i">{{ib:share-network}}{{ib:share-network}}</span></button>
+  </aside>
+</div>
+
+<?php if ($abOutras): ?>
+<section class="sec sec--mist ab-more">
+  <div class="wrap">
+    <div class="sec-hd"><h2 class="h2">Outras instituições</h2></div>
+    <ul class="ab-mini">
+<?php foreach ($abOutras as $o): ?>
+      <li><a href="<?= e(url('/amigos-do-bem/' . $o['slug'] . '/')) ?>">
+        <?php if ($o['logo']): ?><img src="<?= e(ab_img($o['logo'])) ?>" alt="" width="52" height="52" loading="lazy"><?php endif; ?>
+        <div><b><?= e($o['nome']) ?></b><small><?= e(ab_causa($o['causa'])) ?> · <?= e($o['bairro'] ?: 'Nova Friburgo') ?></small></div>{{ib:arrow-right}}</a></li>
+<?php endforeach; ?>
+    </ul>
+    <p class="ab-more-all"><a class="btn btn--navy btn--sm" href="<?= e(url('/amigos-do-bem/')) ?>"><span>Ver todas</span><span class="btn-i">{{ib:arrow-right}}{{ib:arrow-right}}</span></a></p>
+  </div>
+</section>
+<?php endif; ?>
+<section class="ab-disclaimer">
+  <div class="wrap"><p>O gabinete do vereador Maicon Gonçalves apenas divulga as instituições. Nenhuma doação passa pelo gabinete: tudo é combinado e entregue direto à instituição.</p></div>
+</section>
+</main>
+<?php if ($i['lat'] !== null): ?><script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script><?php endif; ?>
+<script>
+(function () {
+  var base = document.documentElement.getAttribute('data-base') || '';
+  var el = document.getElementById('ab-imap');
+  if (el && window.L) {
+    var ll = [parseFloat(el.getAttribute('data-lat')), parseFloat(el.getAttribute('data-lng'))];
+    var m = L.map(el, { scrollWheelZoom: false, zoomControl: false, attributionControl: true }).setView(ll, 15);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(m);
+    L.marker(ll, { icon: L.divIcon({ className: 'ab-pin', html: '<span></span>', iconSize: [34, 34], iconAnchor: [17, 34] }) }).addTo(m);
+  }
+  [].forEach.call(document.querySelectorAll('.ab-copy'), function (b) {
+    b.addEventListener('click', function () {
+      var t = b.getAttribute('data-copy'), lab = b.querySelector('span');
+      var done = function () { lab.textContent = 'Copiado!'; setTimeout(function () { lab.textContent = 'Copiar'; }, 2000); };
+      if (navigator.clipboard) navigator.clipboard.writeText(t).then(done, done); else done();
+    });
+  });
+  [].forEach.call(document.querySelectorAll('.ab-share'), function (b) {
+    b.addEventListener('click', function () {
+      var u = b.getAttribute('data-url'), t = b.getAttribute('data-title');
+      if (navigator.share) navigator.share({ title: t, url: u }).catch(function () {});
+      else window.open('https://wa.me/?text=' + encodeURIComponent(t + ' ' + u), '_blank', 'noopener');
+    });
+  });
+  [].forEach.call(document.querySelectorAll('[data-ab-wa]'), function (a) {
+    a.addEventListener('click', function () { try { navigator.sendBeacon(base + '/api/amigos-clique.php', new Blob(['slug=' + encodeURIComponent(a.getAttribute('data-ab-wa'))], { type: 'application/x-www-form-urlencoded' })); } catch (e) {} });
+  });
+})();
+</script>

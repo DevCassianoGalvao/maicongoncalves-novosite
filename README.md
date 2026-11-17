@@ -103,3 +103,12 @@ Auditoria: tabela `mcp_log` (ferramenta, parâmetros sem texto do corpo, IP, res
 - Curadoria: compras entram como "nova"; só as "publicadas" aparecem. Itens corrigidos à mão não são sobrescritos pela coleta.
 - Referências: cadastradas no painel (com fonte e link) ou, para materiais, a mediana do mesmo item em outras compras da Prefeitura (sempre marcada para conferir).
 - Código: `app/fiscalize.php`, `admin/fiscalize*.php`, `site/src/fiscalize.html`, `api/fiscalize-erro.php`.
+
+## Amigos do Bem (instituições que recebem doações)
+
+- Páginas: `/amigos-do-bem/` (lista com filtro por tipo de doação, bairro e busca, pedidos urgentes e mapa) e `/amigos-do-bem/{slug}/` (página de cada instituição). Fora do menu e do sitemap; `noindex` até ligar "Aparecer no Google".
+- Painel: Amigos do Bem › Instituições (cadastro, fotos, tipos aceitos, pedidos urgentes, PIX, responsável, conferência a cada 90 dias), Tipos de doação, Importar planilha (CSV) e Configurações (link aberto/fechado, Google, apagar exemplos).
+- Cada instituição tem um link secreto `/amigos-do-bem/atualizar/{token}/` para atualizar pedidos urgentes, tipos e horários sem senha.
+- "Sua instituição quer participar?" cria um rascunho e um atendimento no painel. Cliques no WhatsApp são contados por instituição.
+- As 6 instituições de exemplo (fictícias, imagens em `img/amigos-exemplo/`) são criadas na primeira vez que as tabelas são criadas; apague em Configurações antes de lançar.
+- Código: `app/amigos.php`, `admin/amigos*.php`, `site/src/amigos*.html`, `api/amigos-*.php`.

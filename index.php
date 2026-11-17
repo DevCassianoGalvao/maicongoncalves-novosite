@@ -75,6 +75,57 @@ if ($slug === 'fiscalize-voce') {
         'robots' => $fvOpen ? '' : 'noindex, nofollow',
     ];
 }
+if ($slug === 'amigos-do-bem' || strpos($slug, 'amigos-do-bem/') === 0) {
+    // Amigos do Bem: link aberto conforme a configuração (painel); fora do menu; no Google só se "indexar" estiver ligado.
+    require_once ROOT . '/app/amigos.php';
+    require_once ROOT . '/app/auth.php';
+    $abOpen = ab_is_public();
+    $abIdx = $abOpen && ab_cfg('indexar') === '1';
+    $abLogged = db_or_null() && auth_user() !== null;
+    // link secreto da instituição para atualizar as necessidades (funciona mesmo com a página fechada)
+    if (preg_match('#^amigos-do-bem/atualizar/([a-f0-9]{32})$#', $slug, $m)) {
+        ab_tables();
+        $abRow = q('SELECT slug FROM ab_instituicoes WHERE token = ? AND demo = 0', [$m[1]])->fetch();
+        if (!$abRow) render_404();
+        $abInst = ab_get($abRow['slug'], true);
+        $abSaved = isset($_GET['ok']);
+        if (is_post() && hash_equals($m[1], (string) ($_POST['_t'] ?? ''))) {
+            if (!rate_ok('ab-upd', 30, 3600)) { http_response_code(429); exit('Muitas atualizações seguidas. Tente mais tarde.'); }
+            ab_save_from_token($abInst, $_POST);
+            redirect(url('/amigos-do-bem/atualizar/' . $m[1] . '/') . '?ok=1', 303);
+        }
+        header('Cache-Control: no-store');
+        header('X-Robots-Tag: noindex');
+        $meta = ['title' => 'Atualizar necessidades – ' . $abInst['nome'], 'robots' => 'noindex, nofollow'];
+        include ROOT . '/app/pages/amigos-atualizar.php';
+        exit;
+    }
+    if (!$abOpen && !$abLogged) render_404();
+    header('Cache-Control: ' . ($abOpen ? 'public, max-age=120' : 'no-store'));
+    if ($slug === 'amigos-do-bem') {
+        $meta = [
+            'title' => 'Amigos do Bem – onde doar em Nova Friburgo | Vereador Maicon Gonçalves',
+            'description' => 'Encontre instituições de Nova Friburgo que recebem doações: o que cada uma precisa, endereço, horários e contato. A doação é feita direto à instituição.',
+            'robots' => $abIdx ? '' : 'noindex, nofollow',
+        ];
+        include ROOT . '/app/pages/amigos.php';
+        exit;
+    }
+    if (preg_match('#^amigos-do-bem/([a-z0-9-]+)$#', $slug, $m)) {
+        $abInst = ab_get($m[1], $abLogged);
+        if (!$abInst) render_404();
+        $meta = [
+            'title' => $abInst['nome'] . ' – como doar | Amigos do Bem',
+            'description' => str_limit((string) ($abInst['resumo'] ?: $abInst['nome'] . ': veja o que a instituição precisa e como doar.'), 160),
+            'image' => $abInst['capa'] ? abs_url('/' . ltrim($abInst['capa'], '/')) : '',
+            'image_alt' => $abInst['nome'],
+            'robots' => ($abIdx && $abInst['status'] === 'publicada' && !$abInst['demo']) ? '' : 'noindex, nofollow',
+        ];
+        include ROOT . '/app/pages/amigos-inst.php';
+        exit;
+    }
+    render_404();
+}
 if (isset($pages[$slug])) {
     include ROOT . '/app/pages/' . $pages[$slug] . '.php';
     exit;

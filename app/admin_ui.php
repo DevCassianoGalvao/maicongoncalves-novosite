@@ -36,6 +36,9 @@ function admin_head(string $title, string $active = '', string $extraHead = ''):
             'tickets' => ['/admin/atendimentos.php', 'tray', 'Atendimentos'],
             'tnew' => ['/admin/demanda-nova.php', 'map-pin-plus', 'Cadastrar demanda'],
         ] + (is_admin($u) ? ['export' => ['/admin/exportar.php', 'download-simple', 'Exportar dados']] : []),
+        'Amigos do Bem' => [
+            'ab' => ['/admin/amigos.php', 'hand-heart', 'Instituições'],
+        ],
         'Fiscalize Você' => !is_admin($u) ? [] : [
             'fv' => ['/admin/fiscalize.php', 'currency-circle-dollar', 'Compras da Prefeitura'],
         ],
