@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Impostômetro de Nova Friburgo | Vereador M
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=3189ccbb">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=cfe18850">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -103,7 +103,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
 <?php if ($imAno): ?>
 <nav class="im-years" aria-label="Escolha o ano">
   <div class="wrap im-years-in">
-    <span>Ver o ano</span>
+    <span>Escolha o ano:</span>
     <div class="im-chips" role="tablist">
 <?php foreach (array_keys($imAnos) as $a): ?>      <button type="button" role="tab" class="im-chip<?= (int) $a === $imAno ? ' is-on' : '' ?>" data-year="<?= $a ?>" aria-selected="<?= (int) $a === $imAno ? 'true' : 'false' ?>"><?= $a ?></button>
 <?php endforeach; ?>
@@ -154,7 +154,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
       <p class="im-all-sum">Em <?= $a ?>, os impostos pagos pela população chegaram à Prefeitura com <b><?= $mi($todos, true) ?></b>: <b><?= $rs($todos / max(1, $pop)) ?> por morador</b>, contando só o que é cobrado pela Prefeitura e a parte do ICMS, do IPVA e do FPM que volta para a cidade.</p>
     </div>
     <div class="im-stack" role="img" aria-label="Divisão do dinheiro recebido pela Prefeitura em <?= $a ?>">
-<?php foreach ($grupos as $g): if ($g['v'] <= 0) continue; ?>      <i class="im-c-<?= $g['k'] ?>" style="flex-grow:<?= round($g['v'] / $T * 1000) ?>"><span><?= $pct($g['v'], $T) ?>%</span></i>
+<?php foreach ($grupos as $g): if ($g['v'] <= 0) continue; ?>      <i class="im-c-<?= $g['k'] ?><?= $g['v'] / $T < 0.12 ? ' is-thin' : '' ?>" style="flex-grow:<?= round($g['v'] / $T * 1000) ?>"><span><?= $pct($g['v'], $T) ?>%</span></i>
 <?php endforeach; ?>
     </div>
     <div class="im-groups">
@@ -220,19 +220,19 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
       <p class="lead">Total recebido pela Prefeitura e a parte paga direto pelos friburguenses, em valores da época (sem correção pela inflação).</p>
     </div>
 <?php $hist = array_reverse($imAnos, true); $maxH = max(array_map(function ($y) { return $y['receita']['total']; }, $hist)); ?>
-    <div class="im-hist">
+    <p class="im-legend"><span><i class="im-h-tot"></i>Total recebido</span><span><i class="im-h-prop"></i>Pago direto pelos friburguenses</span><span>Em R$ milhões, valores da época</span></p>
+    <div class="im-chart" role="img" aria-label="Total recebido pela Prefeitura e parte paga pelos friburguenses, por ano">
 <?php foreach ($hist as $a => $y): ?>
-      <div class="im-h-col">
-        <div class="im-h-bars">
-          <i class="im-h-tot" style="height:<?= round($y['receita']['total'] / $maxH * 100) ?>%"></i>
-          <i class="im-h-prop" style="height:<?= round($y['receita']['proprios_total'] / $maxH * 100) ?>%"></i>
+      <div class="im-col">
+        <b class="im-yr"><?= $a ?></b>
+        <div class="im-bars">
+<?php foreach ([['im-h-tot', 'Total', $y['receita']['total']], ['im-h-prop', 'Pago direto', $y['receita']['proprios_total']]] as [$cls, $nm, $v]): ?>          <div class="im-b"><i class="<?= $cls ?>" style="--v:<?= max(1, round($v / $maxH * 100)) ?>%"></i><span class="s"><?= number_format($v / 1e6, 0, ',', '.') ?></span><span class="l"><?= $nm ?>: <b><?= $mi($v) ?></b></span></div>
+<?php endforeach; ?>
         </div>
-        <b><?= $a ?></b>
-        <small class="im-h-v"><span class="t"><?= $mi($y['receita']['total']) ?></span><span class="p"><?= $mi($y['receita']['proprios_total']) ?></span></small>
       </div>
 <?php endforeach; ?>
     </div>
-    <p class="im-legend"><span><i class="im-h-tot"></i>Total recebido</span><span><i class="im-h-prop"></i>Pago direto pelos friburguenses</span></p>
+
   </div>
 </section>
 <?php endif; ?>
@@ -240,9 +240,9 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
 <?php if ($imAno):
 $imF = (int) array_key_last($imAnos); $imL = $imAno;
 $imSeries = [
-    'iptu' => ['n' => 'IPTU pago pelos friburguenses', 'c' => 'prop', 'f' => function ($y) { return $y['receita']['proprios']['iptu']; }],
-    'urb' => ['n' => 'Urbanismo (manutenção da cidade e obras urbanas)', 'c' => 'uni', 'f' => function ($y) { return $y['despesa']['areas']['15'] ?? 0; }],
-    'obras' => ['n' => 'Obras e equipamentos (todas as áreas)', 'c' => 'fun', 'f' => function ($y) { return $y['despesa']['tipo']['obras']; }],
+    'iptu' => ['n' => 'IPTU pago pelos friburguenses', 'curto' => 'IPTU', 'c' => 'prop', 'f' => function ($y) { return $y['receita']['proprios']['iptu']; }],
+    'urb' => ['n' => 'Urbanismo (manutenção da cidade e obras urbanas)', 'curto' => 'Urbanismo', 'c' => 'uni', 'f' => function ($y) { return $y['despesa']['areas']['15'] ?? 0; }],
+    'obras' => ['n' => 'Obras e equipamentos (todas as áreas)', 'curto' => 'Obras', 'c' => 'fun', 'f' => function ($y) { return $y['despesa']['tipo']['obras']; }],
 ];
 $imReal = [];
 foreach ($imSeries as $k => $s) foreach (array_reverse($imAnos, true) as $a => $y) $imReal[$k][(int) $a] = im_real($imD, (float) $s['f']($y), (int) $a, $imL);
@@ -266,18 +266,19 @@ $imDem = im_demandas();
       </div>
 <?php endforeach; ?>
     </div>
-    <div class="im-gb" role="img" aria-label="IPTU, urbanismo e obras por ano, corrigidos pela inflação">
+    <p class="im-legend"><?php foreach ($imSeries as $s): ?><span><i class="im-c-<?= $s['c'] ?>"></i><?= $s['n'] ?></span><?php endforeach; ?><span>Em R$ milhões de <?= $imL ?></span></p>
+    <div class="im-chart im-chart--3" role="img" aria-label="IPTU, urbanismo e obras por ano, corrigidos pela inflação">
 <?php foreach (array_keys($imReal['iptu']) as $a): ?>
-      <div class="im-gb-col">
-        <div class="im-gb-bars">
-<?php foreach ($imSeries as $k => $s): $v = $imReal[$k][$a]; ?>          <i class="im-c-<?= $s['c'] ?>" style="height:<?= max(1, round($v / $imMaxR * 100)) ?>%" title="<?= e($s['n']) ?>: <?= $mi($v) ?>"><span><?= number_format($v / 1e6, 0, ',', '.') ?></span></i>
+      <div class="im-col">
+        <b class="im-yr"><?= $a ?></b>
+        <div class="im-bars">
+<?php foreach ($imSeries as $k => $s): $v = $imReal[$k][$a]; ?>          <div class="im-b"><i class="im-c-<?= $s['c'] ?>" style="--v:<?= max(1, round($v / $imMaxR * 100)) ?>%"></i><span class="s"><?= number_format($v / 1e6, 0, ',', '.') ?></span><span class="l"><?= $s['curto'] ?>: <b><?= $mi($v) ?></b></span></div>
 <?php endforeach; ?>
         </div>
-        <b><?= $a ?></b>
       </div>
 <?php endforeach; ?>
     </div>
-    <p class="im-legend"><?php foreach ($imSeries as $s): ?><span><i class="im-c-<?= $s['c'] ?>"></i><?= $s['n'] ?></span><?php endforeach; ?><span>Valores em R$ milhões de <?= $imL ?></span></p>
+
     <p class="im-note"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/></svg><span>"Urbanismo" é como a Prefeitura classifica os gastos com manutenção da cidade e obras urbanas. Parte do gasto com ruas pode aparecer em outras áreas, como Transporte, ou ser feita pelo Estado. "Obras e equipamentos" soma as obras e as compras de equipamentos de todas as áreas: ruas, escolas, postos de saúde. Correção pelo IPCA médio de cada ano (IBGE).</span></p>
 
 <?php if ($imDem && ($imDem['abertas'] + $imDem['resolvidas']) > 0): ?>
@@ -352,9 +353,6 @@ $imDem = im_demandas();
 </script>
 <?php endif; ?>
 <script>
-(function () { // gráfico ano a ano: no celular, começa mostrando os anos mais recentes
-  document.querySelectorAll('.im-hist,.im-gb').forEach(function (h) { h.scrollLeft = h.scrollWidth; });
-})();
 (function () { // troca de ano
   var chips = document.querySelectorAll('.im-chip'), years = document.querySelectorAll('.im-year');
   chips.forEach(function (c) {
