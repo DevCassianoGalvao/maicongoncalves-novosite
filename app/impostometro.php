@@ -163,6 +163,48 @@ function im_populacao(array $atual): array
     return $p;
 }
 
+/** IPCA (IBGE): média do número-índice em cada ano completo. Serve para comparar anos em valores de hoje. */
+function im_ipca(array $atual): array
+{
+    $j = im_http('https://servicodados.ibge.gov.br/api/v3/agregados/1737/periodos/-120/variaveis/2266?localidades=N1[all]');
+    $serie = $j[0]['resultados'][0]['series'][0]['serie'] ?? null;
+    if (!is_array($serie)) return $atual;
+    $soma = []; $n = [];
+    foreach ($serie as $per => $v) { $a = substr((string) $per, 0, 4); if (is_numeric($v)) { $soma[$a] = ($soma[$a] ?? 0) + (float) $v; $n[$a] = ($n[$a] ?? 0) + 1; } }
+    $out = $atual;
+    foreach ($soma as $a => $s) if ($n[$a] === 12) $out[$a] = round($s / 12, 4);
+    ksort($out);
+    return $out;
+}
+/** Valor do ano $de em reais do ano $para (pelo IPCA médio). Sem índice, devolve o valor da época. */
+function im_real(array $d, float $v, int $de, int $para): float
+{
+    $i = $d['ipca'] ?? [];
+    return isset($i[(string) $de], $i[(string) $para]) && $i[(string) $de] > 0 ? $v * $i[(string) $para] / $i[(string) $de] : $v;
+}
+
+/** Demandas de rua e infraestrutura no Friburgo no Mapa (só as conferidas e enviadas à Prefeitura). */
+const IM_INFRA = ['buraco', 'pavimentacao', 'calcada', 'iluminacao', 'drenagem', 'encosta', 'sinalizacao', 'obras'];
+function im_demandas(): ?array
+{
+    if (!db_or_null()) return null;
+    try {
+        require_once ROOT . '/app/tickets.php';
+        db_migrate();
+        $in = implode(',', array_fill(0, count(IM_INFRA), '?'));
+        $rows = q("SELECT category, status, published_at, resolved_at FROM tickets WHERE status IN ('publicado','resolvido') AND published_at IS NOT NULL AND category IN ($in)", IM_INFRA)->fetchAll();
+    } catch (Throwable $ex) { return null; }
+    $ab = 0; $res = 0; $dias = 0; $cats = [];
+    foreach ($rows as $r) {
+        if ($r['status'] === 'publicado') { $ab++; $dias += max(0, (time() - strtotime($r['published_at'])) / 86400); $cats[$r['category']] = ($cats[$r['category']] ?? 0) + 1; }
+        else $res++;
+    }
+    arsort($cats);
+    $nomes = [];
+    foreach ($cats as $c => $q) $nomes[] = ['n' => cat_label($c), 'q' => $q];
+    return ['abertas' => $ab, 'resolvidas' => $res, 'media_dias' => $ab ? (int) round($dias / $ab) : 0, 'cats' => $nomes];
+}
+
 function im_cache_file(): string { return storage() . '/impostometro.json'; }
 
 /** Dados para a página: cache de até 3 dias; se mais velho, a página atualiza depois de responder. */
@@ -201,7 +243,7 @@ function im_refresh(bool $tudo = false): array
         if (count($novo) >= count($bim[(string) $a] ?? [])) $bim[(string) $a] = $novo;
     }
     $bim = array_intersect_key($bim, [(string) ($anoAtual - 1) => 1, (string) $anoAtual => 1]);
-    $data = ['atualizado' => date('c'), 'ibge' => IM_IBGE, 'anos' => $anos, 'bimestres' => $bim, 'populacao' => im_populacao($old['populacao'] ?? [])];
+    $data = ['atualizado' => date('c'), 'ibge' => IM_IBGE, 'anos' => $anos, 'bimestres' => $bim, 'populacao' => im_populacao($old['populacao'] ?? []), 'ipca' => im_ipca($old['ipca'] ?? [])];
     if (!$anos) { flock($lock, LOCK_UN); return ['ok' => false, 'msg' => 'Tesouro Nacional fora do ar ou sem dados.']; }
     file_put_contents(im_cache_file() . '.tmp', json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
     rename(im_cache_file() . '.tmp', im_cache_file());

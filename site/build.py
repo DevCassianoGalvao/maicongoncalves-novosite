@@ -111,7 +111,7 @@ page('noticias', 'Notícias – Vereador Maicon Gonçalves | Nova Friburgo', 'No
 page('noticia', T, '', read('noticia.html'), nav='news')
 page('radar', 'Friburgo no Mapa – envie sua demanda | Vereador Maicon Gonçalves', 'Envie sua demanda ao nosso gabinete. Nós conferimos, encaminhamos oficialmente à Prefeitura de Nova Friburgo e você acompanha tudo em tempo real no mapa.', read('radar.html').replace('{{bairros}}', bopts), nav='radar', ft_top="<?= !empty($dash) ? '' : 'on-white' ?>", kind='demandas')
 page('fiscalize', 'Fiscalize Você – compras da Prefeitura de Nova Friburgo | Vereador Maicon Gonçalves', 'Veja as compras da Prefeitura de Nova Friburgo, com o valor de cada unidade.', read('fiscalize.html'), ft_top='on-white', kind='fiscalize')
-page('impostometro', 'Impostômetro de Nova Friburgo | Vereador Maicon Gonçalves', 'Quanto Nova Friburgo pagou de impostos à Prefeitura e como o dinheiro foi usado, com dados oficiais do Tesouro Nacional.', read('impostometro.html'), ft_top='', kind='impostometro')
+page('impostometro', 'Impostômetro de Nova Friburgo | Vereador Maicon Gonçalves', 'Quanto Nova Friburgo pagou de impostos à Prefeitura e como o dinheiro foi usado, com dados oficiais do Tesouro Nacional.', read('impostometro.html'), ft_top='on-white', kind='impostometro')
 page('amigos', 'Amigos do Bem – onde doar em Nova Friburgo | Vereador Maicon Gonçalves', 'Instituições de Nova Friburgo que recebem doações.', read('amigos.html'), ft_top='on-white', kind='amigos')
 page('amigos-inst', 'Amigos do Bem | Vereador Maicon Gonçalves', '', read('amigos-inst.html'), ft_top='on-white', kind='amigos')
 page('amigos-atualizar', 'Amigos do Bem | Vereador Maicon Gonçalves', '', read('amigos-atualizar.html'), ft_top='on-white', kind='amigos')

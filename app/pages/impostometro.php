@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Impostômetro de Nova Friburgo | Vereador M
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=4b2255fa">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=3189ccbb">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -237,7 +237,71 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
 </section>
 <?php endif; ?>
 
-<section class="sec sec--mist im-sec" id="como-ler">
+<?php if ($imAno):
+$imF = (int) array_key_last($imAnos); $imL = $imAno;
+$imSeries = [
+    'iptu' => ['n' => 'IPTU pago pelos friburguenses', 'c' => 'prop', 'f' => function ($y) { return $y['receita']['proprios']['iptu']; }],
+    'urb' => ['n' => 'Urbanismo (manutenção da cidade e obras urbanas)', 'c' => 'uni', 'f' => function ($y) { return $y['despesa']['areas']['15'] ?? 0; }],
+    'obras' => ['n' => 'Obras e equipamentos (todas as áreas)', 'c' => 'fun', 'f' => function ($y) { return $y['despesa']['tipo']['obras']; }],
+];
+$imReal = [];
+foreach ($imSeries as $k => $s) foreach (array_reverse($imAnos, true) as $a => $y) $imReal[$k][(int) $a] = im_real($imD, (float) $s['f']($y), (int) $a, $imL);
+$imMaxR = max(array_map('max', $imReal));
+$imDem = im_demandas();
+?>
+<section class="sec sec--mist im-sec" id="ruas">
+  <div class="wrap">
+    <div class="im-hd">
+      <span class="im-eyb"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M204,88V192a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h75L55.51,72.48a12,12,0,0,1,17-17L180,163V88a12,12,0,0,1,24,0Z"/></svg>Ruas e obras</span>
+      <h2 class="h2">O que a cidade paga e o que vai para a rua</h2>
+      <p class="lead">O IPTU comparado ao que a Prefeitura declarou em urbanismo e em obras, de <?= $imF ?> a <?= $imL ?>. Tudo corrigido pela inflação, em reais de <?= $imL ?>, para mostrar o crescimento de verdade.</p>
+    </div>
+    <div class="im-cmp">
+<?php foreach ($imSeries as $k => $s): $v0 = $imReal[$k][$imF]; $v1 = $imReal[$k][$imL]; $ch = $v0 > 0 ? ($v1 / $v0 - 1) * 100 : 0; ?>
+      <div class="im-cmp-c im-cmp-<?= $k ?>">
+        <p class="im-cmp-k"><i class="im-dot im-c-<?= $s['c'] ?>"></i><?= $s['n'] ?></p>
+        <p class="im-cmp-v<?= $ch < 0 ? ' is-down' : '' ?>"><?= ($ch >= 0 ? '+' : '−') . number_format(abs($ch), 0, ',', '.') ?>%</p>
+        <p class="im-cmp-s">de <?= $imF ?> a <?= $imL ?>, já descontada a inflação</p>
+        <p class="im-cmp-r"><span><?= $imF ?>: <b><?= $mi($v0) ?></b></span><span><?= $imL ?>: <b><?= $mi($v1) ?></b></span></p>
+      </div>
+<?php endforeach; ?>
+    </div>
+    <div class="im-gb" role="img" aria-label="IPTU, urbanismo e obras por ano, corrigidos pela inflação">
+<?php foreach (array_keys($imReal['iptu']) as $a): ?>
+      <div class="im-gb-col">
+        <div class="im-gb-bars">
+<?php foreach ($imSeries as $k => $s): $v = $imReal[$k][$a]; ?>          <i class="im-c-<?= $s['c'] ?>" style="height:<?= max(1, round($v / $imMaxR * 100)) ?>%" title="<?= e($s['n']) ?>: <?= $mi($v) ?>"><span><?= number_format($v / 1e6, 0, ',', '.') ?></span></i>
+<?php endforeach; ?>
+        </div>
+        <b><?= $a ?></b>
+      </div>
+<?php endforeach; ?>
+    </div>
+    <p class="im-legend"><?php foreach ($imSeries as $s): ?><span><i class="im-c-<?= $s['c'] ?>"></i><?= $s['n'] ?></span><?php endforeach; ?><span>Valores em R$ milhões de <?= $imL ?></span></p>
+    <p class="im-note"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/></svg><span>"Urbanismo" é como a Prefeitura classifica os gastos com manutenção da cidade e obras urbanas. Parte do gasto com ruas pode aparecer em outras áreas, como Transporte, ou ser feita pelo Estado. "Obras e equipamentos" soma as obras e as compras de equipamentos de todas as áreas: ruas, escolas, postos de saúde. Correção pelo IPCA médio de cada ano (IBGE).</span></p>
+
+<?php if ($imDem && ($imDem['abertas'] + $imDem['resolvidas']) > 0): ?>
+    <div class="im-map">
+      <div class="im-map-hd">
+        <span class="im-eyb"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,60a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,60Zm0,64a20,20,0,1,1,20-20A20,20,0,0,1,128,124Zm0-112a92.1,92.1,0,0,0-92,92c0,77.36,81.64,135.4,85.12,137.83a12,12,0,0,0,13.76,0,259,259,0,0,0,42.18-39C205.15,170.57,220,136.37,220,104A92.1,92.1,0,0,0,128,12Zm31.3,174.71A249.35,249.35,0,0,1,128,216.89a249.35,249.35,0,0,1-31.3-30.18C80,167.37,60,137.31,60,104a68,68,0,0,1,136,0C196,137.31,176,167.37,159.3,186.71Z"/></svg>Friburgo no Mapa</span>
+        <h3>Na sua rua: o que os moradores registraram</h3>
+        <p>Pedidos de buraco, asfalto, calçada, iluminação, drenagem e encostas enviados pelos moradores, conferidos pelo gabinete e encaminhados oficialmente à Prefeitura.</p>
+      </div>
+      <div class="im-map-n">
+        <div><b><?= number_format($imDem['abertas'], 0, ',', '.') ?></b><span><?= $imDem['abertas'] === 1 ? 'pedido aguardando' : 'pedidos aguardando' ?> a Prefeitura</span></div>
+<?php if ($imDem['abertas']): ?>        <div><b><?= number_format($imDem['media_dias'], 0, ',', '.') ?></b><span><?= $imDem['media_dias'] === 1 ? 'dia' : 'dias' ?> de espera, em média</span></div>
+<?php endif; ?>        <div><b><?= number_format($imDem['resolvidas'], 0, ',', '.') ?></b><span><?= $imDem['resolvidas'] === 1 ? 'já resolvido' : 'já resolvidos' ?></span></div>
+      </div>
+<?php if ($imDem['cats']): ?>      <ul class="im-map-cats"><?php foreach (array_slice($imDem['cats'], 0, 6) as $c): ?><li><?= e($c['n']) ?> <b><?= $c['q'] ?></b></li><?php endforeach; ?></ul>
+<?php endif; ?>
+      <a class="btn btn--orange btn--sm" href="<?= B ?>/friburgo-no-mapa/"><span>Ver no mapa e enviar a sua</span><span class="btn-i"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></span></a>
+    </div>
+<?php endif; ?>
+  </div>
+</section>
+<?php endif; ?>
+
+<section class="sec im-sec" id="como-ler">
   <div class="wrap im-read">
     <div class="im-hd">
       <span class="im-eyb"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M204,88V192a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h75L55.51,72.48a12,12,0,0,1,17-17L180,163V88a12,12,0,0,1,24,0Z"/></svg>Transparência</span>
@@ -249,7 +313,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
       <li><strong class="q">Como funciona o contador?</strong> Ele parte do último número oficial do ano e segue o mesmo ritmo de arrecadação do ano anterior até hoje. É uma <b>estimativa</b>: quando o próximo relatório sai, o contador se ajusta ao número real.</li>
       <li><strong class="q">O que entra em "pago direto pelos friburguenses"?</strong> Os impostos e taxas que a Prefeitura cobra: IPTU, ISS, ITBI, taxas, contribuição de iluminação pública e o Imposto de Renda que ela retém de quem recebe dela (servidores e fornecedores), que por lei fica com a cidade. Impostos federais e estaduais aparecem só na parte que é repassada à cidade.</li>
       <li><strong class="q">"O que voltou" mede a qualidade dos serviços?</strong> Não. Mostra quanto foi gasto em cada área. Gastar mais ou menos não quer dizer, sozinho, que o serviço é melhor ou pior.</li>
-      <li><strong class="q">Os valores são corrigidos pela inflação?</strong> Não. Cada ano aparece com os valores da época.</li>
+      <li><strong class="q">Os valores são corrigidos pela inflação?</strong> Na parte "Ruas e obras", sim: usamos o IPCA (IBGE), a inflação oficial do país, para comparar os anos em reais de hoje. Nas outras partes, cada ano aparece com os valores da época.</li>
       <li><strong class="q">Viu algum número diferente?</strong> Os dados podem ser retificados pela Prefeitura. A página confere o Tesouro Nacional toda semana. Se encontrar algo estranho, <?php if ($imWa): ?><a href="https://wa.me/<?= e($imWa) ?>?text=<?= rawurlencode('Olá! Vi um número no Impostômetro de Nova Friburgo que gostaria de conferir:') ?>" target="_blank" rel="noopener">fale com o gabinete</a><?php else: ?>fale com o gabinete<?php endif; ?>.</li>
     </ul>
     <p class="im-src"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208,32H184V24a8,8,0,0,0-16,0v8H88V24a8,8,0,0,0-16,0v8H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32ZM72,48v8a8,8,0,0,0,16,0V48h80v8a8,8,0,0,0,16,0V48h24V80H48V48ZM208,208H48V96H208V208Z"/></svg><span>Dados conferidos em <?= $upd ?>. Fontes: <a href="https://siconfi.tesouro.gov.br/" target="_blank" rel="noopener">Tesouro Nacional – Siconfi</a> (Declaração de Contas Anuais e Relatório Resumido da Execução Orçamentária de Nova Friburgo) e <a href="https://www.ibge.gov.br/cidades-e-estados/rj/nova-friburgo.html" target="_blank" rel="noopener">IBGE</a>.</span></p>
@@ -289,7 +353,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
 <?php endif; ?>
 <script>
 (function () { // gráfico ano a ano: no celular, começa mostrando os anos mais recentes
-  var h = document.querySelector('.im-hist'); if (h) h.scrollLeft = h.scrollWidth;
+  document.querySelectorAll('.im-hist,.im-gb').forEach(function (h) { h.scrollLeft = h.scrollWidth; });
 })();
 (function () { // troca de ano
   var chips = document.querySelectorAll('.im-chip'), years = document.querySelectorAll('.im-year');
@@ -302,7 +366,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
 })();
 </script>
 
-<div class="ft-top " aria-hidden="true">
+<div class="ft-top on-white" aria-hidden="true">
   <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice">
     <circle class="mt-sun" cx="1080" cy="78" r="38" fill="url(#g-or)"/>
     <path d="M0 200V120l120-50 90 30 120-80 90 60 100-35 120 65 120-100 90 60 110-40 120 70 120-50 120 50 120-40v140z" fill="url(#g-m1)"/>

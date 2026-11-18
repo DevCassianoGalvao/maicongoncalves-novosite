@@ -134,4 +134,5 @@ Auditoria: tabela `mcp_log` (ferramenta, parâmetros sem texto do corpo, IP, res
   - população: estimativas do IBGE.
 - `app/impostometro.php` busca, confere (soma por área tem de bater com o total) e guarda o resumo em `storage/impostometro.json`. A página atualiza sozinha depois de responder quando o resumo passa de 3 dias; se a API cair, usa o último resumo ou o retrato em `app/data/impostometro-base.json`.
 - Contador: último número oficial do ano + ritmo do mesmo período do ano anterior (estimativa, ajusta quando sai o próximo bimestre).
+- Seção "Ruas e obras": IPTU × urbanismo (função 15) × obras e equipamentos (investimentos), do primeiro ao último ano fechado, corrigidos pelo IPCA médio anual (IBGE, tabela 1737). Abaixo, as demandas de infraestrutura do Friburgo no Mapa (só publicadas/resolvidas; categorias em `IM_INFRA`).
 - Cron opcional: `10 5 * * 1 /usr/local/bin/php /home/xdigcomb/maicongoncalves.com.br/tools/impostometro-coletar.php >/dev/null 2>&1` (`--tudo` rebusca todos os anos).
