@@ -76,14 +76,11 @@ if ($slug === 'fiscalize-voce') {
     ];
 }
 if ($slug === 'impostometro-nova-friburgo') {
-    // Link aberto, fora do menu e fora do Google até o gabinete decidir publicar.
     require_once ROOT . '/app/impostometro.php';
     header('Cache-Control: public, max-age=300');
-    header('X-Robots-Tag: noindex');
     $meta = [
         'title' => 'Impostômetro de Nova Friburgo | Vereador Maicon Gonçalves',
         'description' => 'Quanto Nova Friburgo pagou de impostos à Prefeitura e como o dinheiro foi usado, com dados oficiais do Tesouro Nacional.',
-        'robots' => 'noindex, nofollow',
     ];
     include ROOT . '/app/pages/impostometro.php';
     exit;

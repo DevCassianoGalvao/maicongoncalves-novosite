@@ -127,7 +127,7 @@ Auditoria: tabela `mcp_log` (ferramenta, parâmetros sem texto do corpo, IP, res
 
 ## Impostômetro de Nova Friburgo (`/impostometro-nova-friburgo/`)
 
-- Link aberto, **fora do menu, do sitemap e do Google** (noindex). Para publicar: incluir no menu (`site/src/_header.html`), no `app/sitemap.php` e tirar o `noindex` em `index.php`.
+- Publicado: no menu (antes do Friburgo no Mapa), no sitemap e liberado para o Google.
 - Dados: o que a Prefeitura declara ao Tesouro Nacional (API pública do Siconfi, IBGE 3303401):
   - ano fechado: DCA Anexos I-C (receitas), I-D (despesas por tipo) e I-E (despesas por área), valores **liquidados**;
   - ano corrente: RREO Anexo 01 (bimestral), usado no contador;

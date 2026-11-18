@@ -85,6 +85,9 @@ ul,ol{padding:0;list-style:none}
 .hd-nav a:hover{color:#fff}
 .hd-nav a:hover .ic{transform:translateY(-2px) rotate(-8deg)}
 .hd-nav a.is-on{color:#fff;background:rgba(255,255,255,.1);box-shadow:inset 0 -2px 0 var(--orange)}
+.hd-nav a{white-space:nowrap}
+@media (max-width:1260px){.hd-nav a{padding:9px 9px;gap:6px;font-size:13.5px}}
+@media (max-width:1160px){.hd-nav a .ic{display:none}.hd-nav a{padding:9px 10px}}
 .hd-cta{flex:none;white-space:nowrap}
 .hd-soc{display:flex;gap:2px}
 .hd-soc a{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:var(--on-dark-muted);transition:color .2s,background .2s,transform .3s var(--ease-out)}
