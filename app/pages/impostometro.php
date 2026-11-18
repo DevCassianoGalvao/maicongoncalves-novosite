@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Impostômetro de Nova Friburgo | Vereador M
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=1e0c12dc">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=19954e83">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -103,14 +103,22 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
 </section>
 
 <?php if ($imAno): ?>
-<nav class="im-years" aria-label="Escolha o ano">
+<div class="im-yw">
+<?php $imLista = array_keys($imAnos); ?>
+<nav class="im-years" aria-label="Escolha o ano dos dados">
   <div class="wrap im-years-in">
-    <span>Escolha o ano:</span>
-    <div class="im-chips" role="tablist">
-<?php foreach (array_keys($imAnos) as $a): ?>      <button type="button" role="tab" class="im-chip<?= (int) $a === $imAno ? ' is-on' : '' ?>" data-year="<?= $a ?>" aria-selected="<?= (int) $a === $imAno ? 'true' : 'false' ?>"><?= $a ?></button>
+    <button type="button" class="im-arr im-arr--prev" data-dir="1" aria-label="Ver o ano anterior"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M168.49,199.51a12,12,0,0,1-17,17l-80-80a12,12,0,0,1,0-17l80-80a12,12,0,0,1,17,17L97,128Z"/></svg><span>Ano anterior</span></button>
+    <div class="im-now">
+      <label for="im-sel">Você está vendo os dados de</label>
+      <span class="im-sel-w"><select id="im-sel" class="im-sel"><?php foreach ($imLista as $a): ?><option value="<?= $a ?>"<?= (int) $a === $imAno ? ' selected' : '' ?>><?= $a ?></option><?php endforeach; ?></select><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M216.49,104.49l-80,80a12,12,0,0,1-17,0l-80-80a12,12,0,0,1,17-17L128,159l71.51-71.52a12,12,0,0,1,17,17Z"/></svg></span>
+    </div>
+    <button type="button" class="im-arr im-arr--next" data-dir="-1" aria-label="Ver o ano seguinte"><span>Ano seguinte</span><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M184.49,136.49l-80,80a12,12,0,0,1-17-17L159,128,87.51,56.49a12,12,0,1,1,17-17l80,80A12,12,0,0,1,184.49,136.49Z"/></svg></button>
+    <div class="im-chips" role="tablist" aria-label="Todos os anos">
+<?php foreach (array_reverse($imLista) as $a): ?>      <button type="button" role="tab" class="im-chip<?= (int) $a === $imAno ? ' is-on' : '' ?>" data-year="<?= $a ?>" aria-selected="<?= (int) $a === $imAno ? 'true' : 'false' ?>"><?= $a ?></button>
 <?php endforeach; ?>
     </div>
   </div>
+  <p class="im-flash" id="im-flash" role="status" aria-live="polite"></p>
 </nav>
 
 <?php foreach ($imAnos as $a => $y):
@@ -135,7 +143,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
   <div class="wrap">
     <div class="im-hd">
       <span class="im-eyb"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M204,88V192a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h75L55.51,72.48a12,12,0,0,1,17-17L180,163V88a12,12,0,0,1,24,0Z"/></svg>Quanto entrou · <?= $a ?></span>
-      <h2 class="h2">De onde vem o dinheiro da Prefeitura</h2>
+      <h2 class="h2">De onde vem o dinheiro da Prefeitura em <span class="im-ytag"><?= $a ?></span></h2>
       <p class="lead">Em <?= $a ?>, a Prefeitura recebeu <b><?= $mi($T, true) ?></b>. De cada <b>R$ 100</b>, <b><?= $cem($r['proprios_total'], $T) ?></b> vieram de impostos e taxas pagos direto pelos friburguenses. O resto veio de repasses do Estado e da União e de outras receitas.</p>
     </div>
 <?php $todos = $r['proprios_total'] + $r['estado']['icms'] + $r['estado']['ipva'] + $r['uniao']['fpm']; ?>
@@ -178,7 +186,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
   <div class="wrap">
     <div class="im-hd">
       <span class="im-eyb"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M204,88V192a12,12,0,0,1-12,12H88a12,12,0,0,1,0-24h75L55.51,72.48a12,12,0,0,1,17-17L180,163V88a12,12,0,0,1,24,0Z"/></svg>Como foi usado · <?= $a ?></span>
-      <h2 class="h2">O que voltou para a cidade</h2>
+      <h2 class="h2">O que voltou para a cidade em <span class="im-ytag"><?= $a ?></span></h2>
       <p class="lead">Em <?= $a ?>, a Prefeitura gastou <b><?= $mi($DT, true) ?></b>. Dividido pelos <?= number_format($pop, 0, ',', '.') ?> moradores, dá <b><?= $rs($DT / max(1, $pop)) ?> por pessoa</b> no ano. Veja por área:</p>
     </div>
     <ol class="im-areas">
@@ -213,6 +221,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
 </section>
 </div>
 <?php endforeach; ?>
+</div>
 
 <section class="sec im-sec">
   <div class="wrap">
@@ -355,14 +364,40 @@ $imDem = im_demandas();
 </script>
 <?php endif; ?>
 <script>
-(function () { // troca de ano
-  var chips = document.querySelectorAll('.im-chip'), years = document.querySelectorAll('.im-year');
-  chips.forEach(function (c) {
-    c.addEventListener('click', function () {
-      chips.forEach(function (o) { var on = o === c; o.classList.toggle('is-on', on); o.setAttribute('aria-selected', on ? 'true' : 'false'); });
-      years.forEach(function (y) { y.hidden = y.getAttribute('data-year') !== c.getAttribute('data-year'); });
-    });
-  });
+(function () { // troca de ano: setas, lista e botões; deixa bem claro qual ano está na tela
+  var bar = document.querySelector('.im-years'); if (!bar) return;
+  var wrap = document.querySelector('.im-yw'), sel = document.getElementById('im-sel'), flash = document.getElementById('im-flash');
+  var chips = [].slice.call(document.querySelectorAll('.im-chip')), panels = [].slice.call(document.querySelectorAll('.im-year'));
+  var anos = [].slice.call(sel.options).map(function (o) { return o.value; }); // do mais novo para o mais antigo
+  var prev = bar.querySelector('.im-arr--prev'), next = bar.querySelector('.im-arr--next'), t;
+  var hd = document.getElementById('hd');
+  function topo() { var b = hd && hd.querySelector('.hd-bar'); var h = b ? Math.round(b.getBoundingClientRect().bottom) + 8 : 0; bar.style.top = h + 'px'; return h; }
+  topo(); addEventListener('resize', topo);
+  function estado(ano) {
+    var i = anos.indexOf(ano);
+    prev.disabled = i >= anos.length - 1; next.disabled = i <= 0;
+    prev.querySelector('span').textContent = prev.disabled ? 'Ano anterior' : 'Ver ' + anos[i + 1];
+    next.querySelector('span').textContent = next.disabled ? 'Ano seguinte' : 'Ver ' + anos[i - 1];
+  }
+  function mostra(ano, rolar) {
+    sel.value = ano;
+    chips.forEach(function (c) { var on = c.getAttribute('data-year') === ano; c.classList.toggle('is-on', on); c.setAttribute('aria-selected', on ? 'true' : 'false'); });
+    panels.forEach(function (p) { var on = p.getAttribute('data-year') === ano; p.hidden = !on; if (on) { p.classList.remove('is-in'); void p.offsetWidth; p.classList.add('is-in'); } });
+    estado(ano);
+    bar.classList.remove('is-changed'); void bar.offsetWidth; bar.classList.add('is-changed');
+    flash.textContent = 'Pronto! Agora a página mostra os números de ' + ano + '.';
+    flash.classList.add('is-on'); clearTimeout(t); t = setTimeout(function () { flash.classList.remove('is-on'); }, 3500);
+    if (rolar) { // volta para o começo do ano escolhido, logo abaixo da barra
+      var y = wrap.getBoundingClientRect().top + scrollY + bar.offsetHeight - topo() - bar.offsetHeight;
+      if (scrollY > y + 4) scrollTo({ top: y, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    }
+  }
+  chips.forEach(function (c) { c.addEventListener('click', function () { mostra(c.getAttribute('data-year'), true); }); });
+  sel.addEventListener('change', function () { mostra(sel.value, true); });
+  [prev, next].forEach(function (b) { b.addEventListener('click', function () { var i = anos.indexOf(sel.value) + Number(b.getAttribute('data-dir')); if (anos[i]) mostra(anos[i], true); }); });
+  estado(sel.value);
+  // sombra quando a barra está grudada no topo
+  addEventListener('scroll', function () { bar.classList.toggle('is-stuck', bar.getBoundingClientRect().top <= parseInt(bar.style.top || 0, 10) + 1 && wrap.getBoundingClientRect().top < 0); }, { passive: true });
 })();
 </script>
 
