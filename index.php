@@ -34,7 +34,7 @@ $legacy = [ // endereços antigos ou alternativos -> endereço oficial
     'index.html' => '/', 'index.php' => '/', 'home' => '/',
     'minha-historia.html' => '/minha-historia/', 'fl360.html' => '/fl360/',
     'peneira' => '/descobrindo-talentos/', 'peneira.html' => '/descobrindo-talentos/',
-    'contato' => '/friburgo-no-mapa/', 'contato.html' => '/friburgo-no-mapa/', 'demandas' => '/friburgo-no-mapa/', 'radarfriburgo' => '/friburgo-no-mapa/', 'radar' => '/friburgo-no-mapa/', 'friburgonomapa' => '/friburgo-no-mapa/', 'noticias.html' => '/noticias/', 'blog' => '/noticias/', 'feed' => '/noticias/',
+    'contato' => '/friburgo-no-mapa/', 'contato.html' => '/friburgo-no-mapa/', 'demandas' => '/friburgo-no-mapa/', 'radarfriburgo' => '/friburgo-no-mapa/', 'radar' => '/friburgo-no-mapa/', 'friburgonomapa' => '/friburgo-no-mapa/', 'impostometro' => '/impostometro-nova-friburgo/', 'noticias.html' => '/noticias/', 'blog' => '/noticias/', 'feed' => '/noticias/',
 ];
 
 if (isset($legacy[$slug])) redirect(url($legacy[$slug]) . $qs, 301);
@@ -74,6 +74,19 @@ if ($slug === 'fiscalize-voce') {
         'description' => 'Veja as compras da Prefeitura de Nova Friburgo, com o valor de cada unidade calculado a partir dos dados públicos do PNCP.',
         'robots' => $fvOpen ? '' : 'noindex, nofollow',
     ];
+}
+if ($slug === 'impostometro-nova-friburgo') {
+    // Link aberto, fora do menu e fora do Google até o gabinete decidir publicar.
+    require_once ROOT . '/app/impostometro.php';
+    header('Cache-Control: public, max-age=300');
+    header('X-Robots-Tag: noindex');
+    $meta = [
+        'title' => 'Impostômetro de Nova Friburgo | Vereador Maicon Gonçalves',
+        'description' => 'Quanto Nova Friburgo pagou de impostos à Prefeitura e como o dinheiro foi usado, com dados oficiais do Tesouro Nacional.',
+        'robots' => 'noindex, nofollow',
+    ];
+    include ROOT . '/app/pages/impostometro.php';
+    exit;
 }
 if ($slug === 'amigos-do-bem' || strpos($slug, 'amigos-do-bem/') === 0) {
     // Amigos do Bem: link aberto conforme a configuração (painel); fora do menu; no Google só se "indexar" estiver ligado.

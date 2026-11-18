@@ -124,3 +124,14 @@ Auditoria: tabela `mcp_log` (ferramenta, parâmetros sem texto do corpo, IP, res
   - envio para o Google Drive via OAuth (escopo `drive.file`), pasta "Backup – site vereador Maicon Gonçalves"; falha manda e-mail para o gabinete.
 - **Cron (cPanel):** `20 4 * * 0 /usr/local/bin/php /home/xdigcomb/maicongoncalves.com.br/tools/backup.php >/dev/null 2>&1`
 - **Restaurar:** importar o .sql do `banco-*.zip` mais recente no phpMyAdmin; extrair todos os `arquivos-*.zip` na pasta do site, do mais antigo para o mais novo; código vem do GitHub e o `.env` fica guardado à parte.
+
+## Impostômetro de Nova Friburgo (`/impostometro-nova-friburgo/`)
+
+- Link aberto, **fora do menu, do sitemap e do Google** (noindex). Para publicar: incluir no menu (`site/src/_header.html`), no `app/sitemap.php` e tirar o `noindex` em `index.php`.
+- Dados: o que a Prefeitura declara ao Tesouro Nacional (API pública do Siconfi, IBGE 3303401):
+  - ano fechado: DCA Anexos I-C (receitas), I-D (despesas por tipo) e I-E (despesas por área), valores **liquidados**;
+  - ano corrente: RREO Anexo 01 (bimestral), usado no contador;
+  - população: estimativas do IBGE.
+- `app/impostometro.php` busca, confere (soma por área tem de bater com o total) e guarda o resumo em `storage/impostometro.json`. A página atualiza sozinha depois de responder quando o resumo passa de 3 dias; se a API cair, usa o último resumo ou o retrato em `app/data/impostometro-base.json`.
+- Contador: último número oficial do ano + ritmo do mesmo período do ano anterior (estimativa, ajusta quando sai o próximo bimestre).
+- Cron opcional: `10 5 * * 1 /usr/local/bin/php /home/xdigcomb/maicongoncalves.com.br/tools/impostometro-coletar.php >/dev/null 2>&1` (`--tudo` rebusca todos os anos).
