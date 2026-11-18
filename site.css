@@ -1336,7 +1336,7 @@ ul,ol{padding:0;list-style:none}
 .im-stack i{display:flex;align-items:center;justify-content:center;min-width:0;color:#fff;font-style:normal;font-weight:800;font-size:clamp(12px,1.2vw,15px);overflow:hidden}
 .im-stack i span{white-space:nowrap}
 .im-stack .im-c-out{color:var(--navy)}
-.im-groups{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px;margin-top:18px}
+.im-groups{display:grid;align-items:start;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:14px;margin-top:18px}
 .im-g{background:#fff;border-radius:var(--r-m);padding:20px;box-shadow:inset 0 0 0 1px var(--mist-2);display:grid;gap:8px;align-content:start}
 .im-g header{display:flex;align-items:center;gap:10px}
 .im-g h3{font-size:15.5px;font-weight:800;line-height:1.25}
@@ -1400,3 +1400,19 @@ ul,ol{padding:0;list-style:none}
   .im-a-v b{font-size:17px}
   .im-h-bars{height:200px}
 }
+.im-all{margin:6px 0 34px;border-radius:var(--r-l);padding:clamp(22px,3.4vw,40px);background:var(--grad-blue);color:#fff;position:relative;overflow:hidden;
+  box-shadow:0 30px 70px -40px rgba(4,28,75,.7)}
+.im-all::after{content:"";position:absolute;right:-120px;top:-120px;width:320px;height:320px;border-radius:50%;background:var(--orange);filter:blur(90px);opacity:.35;pointer-events:none}
+.im-all-hd{position:relative;display:grid;gap:10px;max-width:720px}
+.im-all-hd .im-eyb{color:var(--orange-hi)}
+.im-all-hd h3{font-family:var(--display);font-size:clamp(24px,2.8vw,36px);font-weight:800;letter-spacing:-.03em;line-height:1.08;text-wrap:balance}
+.im-all-hd p{color:var(--on-dark-muted);font-size:clamp(15px,1.2vw,17px)}
+.im-all-list{position:relative;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:24px}
+.im-all-list li{display:grid;gap:6px;align-content:start;padding:16px 18px;border-radius:var(--r-m);background:rgba(255,255,255,.07);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)}
+.im-all-list b{font-size:17px;font-weight:800}
+.im-all-list span{font-size:14px;line-height:1.5;color:#D3DDF2}
+.im-all-list em{font-style:normal;font-weight:800;font-size:14px;color:var(--orange-hi);margin-top:4px}
+.im-all-sum{position:relative;margin-top:22px;padding:16px 18px;border-radius:var(--r-m);background:#fff;color:var(--navy);font-size:clamp(15px,1.25vw,17px);line-height:1.55}
+.im-all-sum b{color:#D45400}
+@media (max-width:900px){.im-all-list{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.im-all-list{grid-template-columns:1fr}}

@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Impostômetro de Nova Friburgo | Vereador M
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=14d26984">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=4b2255fa">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -136,6 +136,23 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
       <h2 class="h2">De onde vem o dinheiro da Prefeitura</h2>
       <p class="lead">Em <?= $a ?>, a Prefeitura recebeu <b><?= $mi($T, true) ?></b>. De cada <b>R$ 100</b>, <b><?= $cem($r['proprios_total'], $T) ?></b> vieram de impostos e taxas pagos direto pelos friburguenses. O resto veio de repasses do Estado e da União e de outras receitas.</p>
     </div>
+<?php $todos = $r['proprios_total'] + $r['estado']['icms'] + $r['estado']['ipva'] + $r['uniao']['fpm']; ?>
+    <div class="im-all">
+      <div class="im-all-hd">
+        <span class="im-eyb"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M164.38,181.1a52,52,0,1,0-72.76,0,75.89,75.89,0,0,0-30,28.89,12,12,0,0,0,20.78,12,53,53,0,0,1,91.22,0,12,12,0,1,0,20.78-12A75.89,75.89,0,0,0,164.38,181.1ZM100,144a28,28,0,1,1,28,28A28,28,0,0,1,100,144Zm147.21,9.59a12,12,0,0,1-16.81-2.39c-8.33-11.09-19.85-19.59-29.33-21.64a12,12,0,0,1-1.82-22.91,20,20,0,1,0-24.78-28.3,12,12,0,1,1-21-11.6,44,44,0,1,1,73.28,48.35,92.18,92.18,0,0,1,22.85,21.69A12,12,0,0,1,247.21,153.59Zm-192.28-24c-9.48,2.05-21,10.55-29.33,21.65A12,12,0,0,1,6.41,136.79,92.37,92.37,0,0,1,29.26,115.1a44,44,0,1,1,73.28-48.35,12,12,0,1,1-21,11.6,20,20,0,1,0-24.78,28.3,12,12,0,0,1-1.82,22.91Z"/></svg>Todo mundo paga</span>
+        <h3>Todo friburguense paga imposto, mesmo sem perceber</h3>
+        <p>Não é só quem tem casa ou empresa. Está no preço do supermercado, na conta de luz, no combustível, no salário. E uma parte desse dinheiro volta para a Prefeitura.</p>
+      </div>
+      <ul class="im-all-list">
+        <li><b>ICMS</b><span>Está no preço de quase tudo: comida, conta de luz, gasolina, celular. Um quarto do ICMS do estado é dividido entre as cidades.</span><em><?= $mi($r['estado']['icms']) ?> para Friburgo em <?= $a ?></em></li>
+        <li><b>IPVA</b><span>Quem tem carro ou moto paga todo ano. Metade fica com a cidade onde o veículo está registrado.</span><em><?= $mi($r['estado']['ipva']) ?> em <?= $a ?></em></li>
+        <li><b>IPTU</b><span>Imposto da casa e do terreno. Quem mora de aluguel muitas vezes paga junto com o aluguel.</span><em><?= $mi($r['proprios']['iptu']) ?> em <?= $a ?></em></li>
+        <li><b>ISS</b><span>Está no preço dos serviços: oficina, salão, academia, escola particular.</span><em><?= $mi($r['proprios']['iss']) ?> em <?= $a ?></em></li>
+        <li><b>Imposto de Renda e IPI</b><span>Parte do IR descontado do salário e do IPI dos produtos volta para a cidade pelo FPM.</span><em><?= $mi($r['uniao']['fpm']) ?> em <?= $a ?></em></li>
+        <li><b>Taxas e iluminação pública</b><span>Vêm nas guias da Prefeitura e na conta de luz.</span><em><?= $mi($r['proprios']['taxas'] + $r['proprios']['luz']) ?> em <?= $a ?></em></li>
+      </ul>
+      <p class="im-all-sum">Em <?= $a ?>, os impostos pagos pela população chegaram à Prefeitura com <b><?= $mi($todos, true) ?></b>: <b><?= $rs($todos / max(1, $pop)) ?> por morador</b>, contando só o que é cobrado pela Prefeitura e a parte do ICMS, do IPVA e do FPM que volta para a cidade.</p>
+    </div>
     <div class="im-stack" role="img" aria-label="Divisão do dinheiro recebido pela Prefeitura em <?= $a ?>">
 <?php foreach ($grupos as $g): if ($g['v'] <= 0) continue; ?>      <i class="im-c-<?= $g['k'] ?>" style="flex-grow:<?= round($g['v'] / $T * 1000) ?>"><span><?= $pct($g['v'], $T) ?>%</span></i>
 <?php endforeach; ?>
@@ -151,7 +168,7 @@ $upd = !empty($imD['atualizado']) ? date('d/m/Y', strtotime($imD['atualizado']))
       </article>
 <?php endforeach; ?>
     </div>
-    <p class="im-note"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/></svg><span>ICMS, IPVA e FPM também são impostos pagos por todos, inclusive pelos friburguenses, mas quem cobra é o Estado ou a União, que repassam uma parte para a cidade. Aqui aparece só a parte que chegou à Prefeitura. Os valores já descontam a parte que a cidade é obrigada a enviar ao FUNDEB.</span></p>
+    <p class="im-note"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm16-40a8,8,0,0,1-8,8,16,16,0,0,1-16-16V128a8,8,0,0,1,0-16,16,16,0,0,1,16,16v40A8,8,0,0,1,144,176ZM112,84a12,12,0,1,1,12,12A12,12,0,0,1,112,84Z"/></svg><span>A parte dos impostos estaduais e federais que fica com o Estado e com a União não aparece aqui. Os valores já descontam o que a cidade é obrigada a enviar ao FUNDEB, o fundo da educação.</span></p>
   </div>
 </section>
 
