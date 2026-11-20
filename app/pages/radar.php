@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Friburgo no Mapa – envie sua demanda | Ve
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=9aa9e0b9">
+<link rel="stylesheet" href="site.css?v=<?= @filemtime(ROOT . '/site.css') ?>">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -286,7 +286,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script>window.RD_ITEMS = <?= json_encode($items, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP) ?>;</script>
-<script src="<?= B ?>/radar.js?v=2a0f8f39096b" defer></script>
+<script src="radar.js?v=<?= @filemtime(ROOT . '/radar.js') ?>" defer></script>
 
 <div class="ft-top <?= !empty($dash) ? '' : 'on-white' ?>" aria-hidden="true">
   <svg viewBox="0 0 1440 200" preserveAspectRatio="xMidYMax slice">
@@ -335,7 +335,7 @@ $avg = $solved ? (int) round(array_sum(array_column($solved, 'days')) / count($s
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="<?= B ?>/site.js?v=01a3b9d2"></script>
+<script src="site.js?v=<?= @filemtime(ROOT . '/site.js') ?>"></script>
 
 </body>
 </html>
