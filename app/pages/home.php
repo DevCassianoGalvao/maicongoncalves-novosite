@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Vereador Maicon Gonçalves | Nova Friburgo 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="<?= B ?>/site.css?v=19954e83">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=9aa9e0b9">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&true&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -93,6 +93,140 @@ if(!skip&&true&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.class
     </div>
   </div>
 </section>
+
+<?php
+// Destaques: Friburgo no Mapa (números e últimas demandas) e Impostômetro (contador ao vivo)
+require_once ROOT . '/app/tickets.php';
+require_once ROOT . '/app/impostometro.php';
+$hmMapa = ['total' => 0, 'resolvidas' => 0, 'bairros' => 0, 'ultimas' => []];
+if (db_or_null()) {
+    try {
+        db_migrate();
+        $r = q("SELECT COUNT(*) total, SUM(status = 'resolvido') resolvidas, COUNT(DISTINCT NULLIF(neighborhood, '')) bairros FROM tickets WHERE status IN ('publicado','resolvido') AND published_at IS NOT NULL")->fetch();
+        $hmMapa = ['total' => (int) $r['total'], 'resolvidas' => (int) $r['resolvidas'], 'bairros' => (int) $r['bairros'], 'ultimas' => []];
+        foreach (q("SELECT id, category, neighborhood AS bairro, status, published_at, resolved_at, photos, after_photo FROM tickets WHERE status IN ('publicado','resolvido') AND published_at IS NOT NULL AND photos IS NOT NULL AND photos <> '[]' ORDER BY COALESCE(resolved_at, published_at) DESC LIMIT 3")->fetchAll() as $t) {
+            $ph = json_decode((string) $t['photos'], true) ?: [];
+            $af = json_decode((string) $t['after_photo'], true);
+            $src = $t['status'] === 'resolvido' && $af ? $af['src'] : ($ph[0]['src'] ?? null);
+            if (!$src) continue;
+            $quando = strtotime($t['status'] === 'resolvido' && $t['resolved_at'] ? $t['resolved_at'] : $t['published_at']);
+            $dias = (int) floor((time() - $quando) / 86400);
+            $hmMapa['ultimas'][] = ['img' => ticket_photo_url((int) $t['id'], $src) . '&s=m', 'cat' => cat_label($t['category']), 'bairro' => $t['bairro'], 'ok' => $t['status'] === 'resolvido',
+                'quando' => $dias <= 0 ? 'hoje' : ($dias === 1 ? 'ontem' : 'há ' . $dias . ' dias')];
+        }
+    } catch (Throwable $ex) {}
+}
+$hmIm = im_data();
+if (!empty($hmIm['_velho'])) im_refresh_later();
+$hmCont = im_contador($hmIm);
+$hmAnos = $hmIm['anos'] ?? [];
+$hmFatos = [];
+if (count($hmAnos) >= 2) {
+    $hmL = (int) array_key_first($hmAnos); $hmF = (int) array_key_last($hmAnos);
+    foreach ([['IPTU pago pelos friburguenses', function ($y) { return $y['receita']['proprios']['iptu']; }],
+              ['Urbanismo: manutenção da cidade e obras urbanas', function ($y) { return $y['despesa']['areas']['15'] ?? 0; }],
+              ['Obras e equipamentos, em todas as áreas', function ($y) { return $y['despesa']['tipo']['obras']; }]] as [$n, $f]) {
+        $v0 = im_real($hmIm, (float) $f($hmAnos[(string) $hmF]), $hmF, $hmL); $v1 = (float) $f($hmAnos[(string) $hmL]);
+        if ($v0 > 0) $hmFatos[] = ['n' => $n, 'p' => ($v1 / $v0 - 1) * 100];
+    }
+}
+?>
+<section class="sec hm-mapa" id="friburgo-no-mapa">
+  <div class="wrap hm-mapa-in">
+    <div class="hm-mapa-tx">
+      <span class="eyebrow"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M231.38,46.54a12,12,0,0,0-10.29-2.18L161.4,59.28l-60-30a12,12,0,0,0-8.28-.91l-64,16A12,12,0,0,0,20,56V200a12,12,0,0,0,14.91,11.64L94.6,196.72l60,30a12,12,0,0,0,8.28.91l64-16A12,12,0,0,0,236,200V56A12,12,0,0,0,231.38,46.54ZM108,59.42l40,20V196.58l-40-20Zm-64,6,40-10V174.63l-40,10ZM212,190.63l-40,10V81.37l40-10Z"/></svg>Friburgo no Mapa</span>
+      <h2 class="h2" data-split>Viu um problema na sua rua? Mande para a gente.</h2>
+      <p class="lead">Buraco, poste apagado, calçada quebrada, bueiro entupido. Você envia com foto, o gabinete confere e cobra a Prefeitura por ofício. E você acompanha no mapa até resolver.</p>
+      <ol class="hm-steps">
+        <li><span>1</span><div><b>Você envia</b>Pelo celular, com foto e o local no mapa.</div></li>
+        <li><span>2</span><div><b>A gente confere e cobra</b>Encaminhamos oficialmente à Prefeitura.</div></li>
+        <li><span>3</span><div><b>Você acompanha</b>No mapa e por e-mail, até ficar pronto.</div></li>
+      </ol>
+      <div class="hm-cta">
+        <a class="btn btn--orange" href="<?= B ?>/friburgo-no-mapa/#registrar" data-mag><span>Enviar uma demanda</span><span class="btn-i"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.14,25.86a20,20,0,0,0-19.57-5.11l-.22.07L18.44,79a20,20,0,0,0-3.06,37.25L99,157l40.71,83.65a19.81,19.81,0,0,0,18,11.38c.57,0,1.15,0,1.73-.07A19.82,19.82,0,0,0,177,237.56L235.18,45.65a1.42,1.42,0,0,0,.07-.22A20,20,0,0,0,230.14,25.86ZM156.91,221.07l-34.37-70.64,46-45.95a12,12,0,0,0-17-17l-46,46L34.93,99.09,210,46Z"/></svg><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M230.14,25.86a20,20,0,0,0-19.57-5.11l-.22.07L18.44,79a20,20,0,0,0-3.06,37.25L99,157l40.71,83.65a19.81,19.81,0,0,0,18,11.38c.57,0,1.15,0,1.73-.07A19.82,19.82,0,0,0,177,237.56L235.18,45.65a1.42,1.42,0,0,0,.07-.22A20,20,0,0,0,230.14,25.86ZM156.91,221.07l-34.37-70.64,46-45.95a12,12,0,0,0-17-17l-46,46L34.93,99.09,210,46Z"/></svg></span></a>
+        <a class="btn btn--navy" href="<?= B ?>/friburgo-no-mapa/#mapa" data-mag><span>Ver o mapa</span><span class="btn-i"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></span></a>
+      </div>
+    </div>
+    <div class="hm-mapa-vis">
+      <a class="hm-map" href="<?= B ?>/friburgo-no-mapa/#mapa" aria-label="Abrir o mapa das demandas">
+        <svg viewBox="0 0 520 260" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+          <rect width="520" height="260" fill="#E6ECF6"/>
+          <path d="M-20 196C70 170 120 214 210 188S360 120 540 150" fill="none" stroke="#BFD9EE" stroke-width="18" stroke-linecap="round"/>
+          <g fill="#fff">
+            <rect x="18" y="16" width="112" height="64" rx="10"/><rect x="146" y="16" width="86" height="64" rx="10"/><rect x="248" y="16" width="120" height="64" rx="10"/><rect x="384" y="16" width="120" height="64" rx="10"/>
+            <rect x="18" y="96" width="70" height="62" rx="10"/><rect x="104" y="96" width="128" height="62" rx="10"/><rect x="248" y="96" width="64" height="40" rx="10"/><rect x="328" y="96" width="176" height="40" rx="10"/>
+            <rect x="18" y="214" width="150" height="40" rx="10"/><rect x="248" y="206" width="120" height="48" rx="10"/><rect x="384" y="176" width="120" height="78" rx="10"/>
+          </g>
+          <g fill="#D6E8D2"><rect x="104" y="112" width="40" height="30" rx="8"/><rect x="420" y="190" width="60" height="44" rx="10"/></g>
+          <path d="M138 0V260M240 0V200M376 0V260M0 88H520" stroke="#F7F9FD" stroke-width="10"/>
+          <g class="hm-pins">
+            <g transform="translate(196 74)"><circle cy="-25" r="16" fill="#FE6500" opacity=".18" class="hm-pulse"/><path d="M0 0c-9-11-14-18-14-25a14 14 0 0 1 28 0c0 7-5 14-14 25z" fill="#FE6500"/><circle cy="-25" r="5" fill="#fff"/></g>
+            <g transform="translate(312 154)"><path d="M0 0c-9-11-14-18-14-25a14 14 0 0 1 28 0c0 7-5 14-14 25z" fill="#16A34A"/><path d="M-5 -26l4 4 7-8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+            <g transform="translate(84 200)"><path d="M0 0c-9-11-14-18-14-25a14 14 0 0 1 28 0c0 7-5 14-14 25z" fill="#FE6500"/><circle cy="-25" r="5" fill="#fff"/></g>
+            <g transform="translate(446 112)"><path d="M0 0c-9-11-14-18-14-25a14 14 0 0 1 28 0c0 7-5 14-14 25z" fill="#16A34A"/><path d="M-5 -26l4 4 7-8" stroke="#fff" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></g>
+            <g transform="translate(410 236)"><path d="M0 0c-9-11-14-18-14-25a14 14 0 0 1 28 0c0 7-5 14-14 25z" fill="#FE6500"/><circle cy="-25" r="5" fill="#fff"/></g>
+          </g>
+        </svg>
+        <span class="hm-map-leg"><i class="o"></i>Na Prefeitura<i class="g"></i>Resolvida</span>
+      </a>
+<?php if ($hmMapa['total'] > 0): ?>
+      <div class="hm-nums">
+        <div><b><?= number_format($hmMapa['total'], 0, ',', '.') ?></b><span><?= $hmMapa['total'] === 1 ? 'demanda no mapa' : 'demandas no mapa' ?></span></div>
+<?php if ($hmMapa['resolvidas']): ?>        <div><b><?= number_format($hmMapa['resolvidas'], 0, ',', '.') ?></b><span><?= $hmMapa['resolvidas'] === 1 ? 'já resolvida' : 'já resolvidas' ?></span></div>
+<?php endif; if ($hmMapa['bairros']): ?>        <div><b><?= number_format($hmMapa['bairros'], 0, ',', '.') ?></b><span><?= $hmMapa['bairros'] === 1 ? 'bairro' : 'bairros' ?></span></div>
+<?php endif; ?>
+      </div>
+<?php endif; ?>
+<?php if ($hmMapa['ultimas']): ?>
+      <p class="hm-last-k">Últimas no mapa</p>
+      <ul class="hm-last">
+<?php foreach ($hmMapa['ultimas'] as $u): ?>
+        <li><a href="<?= B ?>/friburgo-no-mapa/">
+          <img src="<?= e($u['img']) ?>" alt="Foto da demanda: <?= e($u['cat']) ?><?= $u['bairro'] ? ' em ' . e($u['bairro']) : '' ?>" loading="lazy" width="120" height="120">
+          <span class="hm-last-tx"><b><?= e($u['cat']) ?></b><?php if ($u['bairro']): ?><span><?= e($u['bairro']) ?></span><?php endif; ?></span>
+          <span class="hm-pill<?= $u['ok'] ? ' is-ok' : '' ?>"><?= $u['ok'] ? 'Resolvida ' . $u['quando'] : 'Na Prefeitura' ?></span>
+        </a></li>
+<?php endforeach; ?>
+      </ul>
+<?php endif; ?>
+    </div>
+  </div>
+</section>
+
+<?php if ($hmCont['ok']): ?>
+<section class="panel hm-im" id="impostometro">
+  <div class="wrap hm-im-in">
+    <div class="hm-im-tx">
+      <span class="eyebrow"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M200,20H56A20,20,0,0,0,36,40V216a20,20,0,0,0,20,20H200a20,20,0,0,0,20-20V40A20,20,0,0,0,200,20Zm-4,192H60V44H196ZM80,76A12,12,0,0,1,92,64h72a12,12,0,0,1,0,24H92A12,12,0,0,1,80,76Zm40,52a16,16,0,1,1-16-16A16,16,0,0,1,120,128Zm48,0a16,16,0,1,1-16-16A16,16,0,0,1,168,128Zm-48,48a16,16,0,1,1-16-16A16,16,0,0,1,120,176Zm48,0a16,16,0,1,1-16-16A16,16,0,0,1,168,176Z"/></svg>Impostômetro de Nova Friburgo</span>
+      <h2 class="h2" data-split>Quanto Friburgo paga de imposto e para onde vai o dinheiro</h2>
+      <p class="lead">Os números oficiais da Prefeitura, em linguagem simples: quanto a cidade paga, quanto volta em serviços e quanto vira obra.</p>
+      <a class="btn btn--orange" href="<?= B ?>/impostometro-nova-friburgo/" data-mag><span>Ver o Impostômetro</span><span class="btn-i"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224.49,136.49l-72,72a12,12,0,0,1-17-17L187,140H40a12,12,0,0,1,0-24H187L135.51,64.48a12,12,0,0,1,17-17l72,72A12,12,0,0,1,224.49,136.49Z"/></svg></span></a>
+    </div>
+    <div class="hm-im-box">
+      <p class="hm-im-k">Impostos e taxas pagos à Prefeitura em <?= $hmCont['ano'] ?></p>
+      <p class="hm-im-v" id="hm-im-v">R$ <?= number_format($hmCont['impostos']['base'], 0, ',', '.') ?></p>
+      <p class="hm-im-n">Estimativa em tempo real a partir dos dados que a Prefeitura entrega ao Tesouro Nacional<?= $hmCont['bimestre'] ? ' (último dado oficial: até ' . $hmCont['oficial_ate'] . ')' : '' ?>.</p>
+<?php if ($hmFatos): ?>
+      <ul class="hm-im-f">
+<?php foreach ($hmFatos as $f): ?>        <li><b class="<?= $f['p'] < 0 ? 'is-down' : '' ?>"><?= ($f['p'] >= 0 ? '+' : '−') . number_format(abs($f['p']), 0, ',', '.') ?>%</b><span><?= $f['n'] ?></span></li>
+<?php endforeach; ?>
+      </ul>
+      <p class="hm-im-n">De <?= $hmF ?> a <?= $hmL ?>, já descontada a inflação.</p>
+<?php endif; ?>
+    </div>
+  </div>
+</section>
+<script>
+(function () { // contador do Impostômetro (mesmo cálculo da página)
+  var D = <?= json_encode(['ano' => $hmCont['ano'], 'dia' => $hmCont['base_dia'], 'imp' => $hmCont['impostos']]) ?>, el = document.getElementById('hm-im-v');
+  if (!el) return;
+  function curva(p, d) { if (d <= 0) return 0; for (var i = 1; i < p.length; i++) if (d <= p[i][0]) { var a = p[i - 1], b = p[i]; return a[1] + (b[1] - a[1]) * (d - a[0]) / (b[0] - a[0]); } return p[p.length - 1][1]; }
+  function est(d) { var s = D.imp; if (!s.base) return curva(s.curva, d); var c0 = curva(s.curva, D.dia); return c0 > 0 ? s.base * curva(s.curva, Math.max(d, D.dia)) / c0 : s.base; }
+  var fmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
+  (function tick() { var d = Math.min(365, (new Date() - new Date(D.ano, 0, 1)) / 864e5); el.textContent = 'R$ ' + fmt.format(est(d)); setTimeout(tick, 100); })();
+})();
+</script>
+<?php endif; ?>
 
 <section class="sec pautas" id="pautas">
   <div class="wrap">
