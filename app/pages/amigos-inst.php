@@ -11,7 +11,7 @@ $meta = ($meta ?? []) + ['title' => 'Amigos do Bem | Vereador Maicon Gonçalves'
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700;800;900&display=swap">
-<link rel="stylesheet" href="site.css?v=<?= @filemtime(ROOT . '/site.css') ?>">
+<link rel="stylesheet" href="<?= B ?>/site.css?v=9aa9e0b9">
 <script>(function(){var d=document.documentElement,skip=false;d.classList.add('js');try{skip=sessionStorage.getItem('mgNav')==='1';sessionStorage.removeItem('mgNav')}catch(e){}
 if(!skip&&false&&!matchMedia('(prefers-reduced-motion: reduce)').matches){d.classList.add('has-intro');setTimeout(function(){d.classList.remove('has-intro')},6000)}})();</script>
 </head>
@@ -276,7 +276,7 @@ $abParas = array_filter(array_map('trim', preg_split('/\n\s*\n/', (string) $i['h
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-<script src="site.js?v=<?= @filemtime(ROOT . '/site.js') ?>"></script>
+<script src="<?= B ?>/site.js?v=01a3b9d2"></script>
 
 </body>
 </html>
